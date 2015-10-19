@@ -13,8 +13,8 @@ return [
     'controllerNamespace' => 'frontend\controllers',
     'components' => [
         'user' => [
-            'identityClass' => 'common\models\User',
-            'enableAutoLogin' => true,
+            'identityClass' => 'app\models\User',
+            'enableAutoLogin' => false,
         ],
         'log' => [
             'traceLevel' => YII_DEBUG ? 3 : 0,
@@ -29,5 +29,10 @@ return [
             'errorAction' => 'site/error',
         ]
     ],
+         'modules'=>array(
+        'gii'=>array(
+        'class'=>'system.gii.GiiModule',
+        'password'=>'admin',
+        )),
     'params' => $params,
 ];

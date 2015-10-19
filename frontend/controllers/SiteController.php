@@ -1,8 +1,9 @@
 <?php
 namespace frontend\controllers;
+use app\models\LoginForm;
 
 use Yii;
-use common\models\LoginForm;
+//use common\models\LoginForm;
 use frontend\models\PasswordResetRequestForm;
 use frontend\models\ResetPasswordForm;
 use frontend\models\SignupForm;
