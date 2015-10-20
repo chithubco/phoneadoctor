@@ -177,7 +177,7 @@ class SignupCest
         $verify_code=$this->check_step1($model,"08098305580");
 
 		//Test #11
-        $I->amGoingTo ('Sign up with no data (case 1, step 3)');
+        $I->amGoingTo ('Submit Signup step3 with no data (case 1, step 3)');
         $this->register_step3($signupPage,['email'=>'',
                                            'firstname'=>'',
                                            'lastname'=>'',
@@ -188,7 +188,7 @@ class SignupCest
 
 
         //Test #12
-        $I->amGoingTo ('Sign up with no firstname (case 2, step 3)');
+        $I->amGoingTo ('Submit Signup step3 with no firstname (case 2, step 3)');
         $this->register_step3($signupPage,['email'=>'',
                                            'firstname'=>'',
                                            'lastname'=>'Martins',
@@ -199,7 +199,7 @@ class SignupCest
 
 
         //Test #13
-        $I->amGoingTo ('Sign up with invalid firstname (case 3, step 3)');
+        $I->amGoingTo ('Submit Signup step3 with invalid firstname (case 3, step 3)');
         $this->register_step3($signupPage,['email'=>'',
                                            'firstname'=>'08097656354',
                                            'lastname'=>'Martins',
@@ -210,7 +210,7 @@ class SignupCest
 
 
         //Test #14
-        $I->amGoingTo ('Sign up with invalid firstname (case 4, step 3)');
+        $I->amGoingTo ('Submit Signup step3 with invalid firstname (case 4, step 3)');
         $this->register_step3($signupPage,['email'=>'',
                                            'firstname'=>'Anth98y',
                                            'lastname'=>'Martins',
@@ -221,7 +221,7 @@ class SignupCest
 
 
         //Test #15
-        $I->amGoingTo ('Sign up with invalid firstname (case 5, step 3)');
+        $I->amGoingTo ('Submit Signup step3 with invalid firstname (case 5, step 3)');
         $this->register_step3($signupPage,['email'=>'',
                                            'firstname'=>'#@$^&*&^%$#',
                                            'lastname'=>'Martins',
@@ -232,7 +232,7 @@ class SignupCest
 
 
         //Test #16
-        $I->amGoingTo ('Sign up with no lastname (case 6, step 3)');
+        $I->amGoingTo ('Submit Signup step3 with no lastname (case 6, step 3)');
         $this->register_step3($signupPage,['email'=>'',
                                            'firstname'=>'Ladell',
                                            'lastname'=>'',
@@ -244,7 +244,7 @@ class SignupCest
 
 
          //Test #17
-        $I->amGoingTo ('Sign up with invalid lastname (case 7, step 3)');
+        $I->amGoingTo ('Submit Signup step3 with invalid lastname (case 7, step 3)');
         $this->register_step3($signupPage,['email'=>'',
                                            'firstname'=>'Ladell',
                                            'lastname'=>'08097656354',
@@ -256,7 +256,7 @@ class SignupCest
 
 
          //Test #18
-        $I->amGoingTo ('Sign up with invalid lastname (case 8, step 3)');
+        $I->amGoingTo ('Submit Signup step3 with invalid lastname (case 8, step 3)');
         $this->register_step3($signupPage,['email'=>'',
                                            'firstname'=>'Ladell',
                                            'lastname'=>'Anth98y',
@@ -267,7 +267,7 @@ class SignupCest
 
 
         //Test #19
-        $I->amGoingTo ('Sign up with invalid lastname (case 9, step 3)');
+        $I->amGoingTo ('Submit Signup step3 with invalid lastname (case 9, step 3)');
         $this->register_step3($signupPage,['email'=>'',
                                            'firstname'=>'Ladell',
                                            'lastname'=>'#@$^&*&^%$#',
@@ -279,7 +279,7 @@ class SignupCest
 
 
         //Test #20
-        $I->amGoingTo ('Sign up with no DOB (case 10, step 3)');
+        $I->amGoingTo ('Submit Signup step3 with no DOB (case 10, step 3)');
         $this->register_step3($signupPage,['email'=>'',
                                            'firstname'=>'Ladell',
                                            'lastname'=>'Martins',
@@ -291,7 +291,7 @@ class SignupCest
 
 
         //Test #21
-        $I->amGoingTo ('Sign up with valid details with invalid email (case 11, step 3)');
+        $I->amGoingTo ('Submit Signup step3 with valid details with invalid email (case 11, step 3)');
         $this->register_step3($signupPage,['email'=>'aeyariegmail.com',
                                            'firstname'=>'Ladell',
                                            'lastname'=>'Martins',
@@ -302,7 +302,7 @@ class SignupCest
 
 
         //Test #22
-        $I->amGoingTo ('Sign up with valid details with invalid email (case 12, step 3)');
+        $I->amGoingTo ('Submit Signup step3 with valid details with invalid email (case 12, step 3)');
         $this->register_step3($signupPage,['email'=>'aeyarie@gmailcom',
                                            'firstname'=>'Ladell',
                                            'lastname'=>'Martins',
@@ -313,7 +313,7 @@ class SignupCest
 
 
         //Test #23
-        $I->amGoingTo ('Sign up with valid details with invalid email (case 13, step 3)');
+        $I->amGoingTo ('Submit Signup step3 with valid details with invalid email (case 13, step 3)');
         $this->register_step3($signupPage,['email'=>'aeyarie@123456',
                                            'firstname'=>'Ladell',
                                            'lastname'=>'Martins',
@@ -324,7 +324,7 @@ class SignupCest
 
 
         //Test #24
-        $I->amGoingTo ('Sign up with valid details with invalid email (case 14, step 3)');
+        $I->amGoingTo ('Submit Signup step3 with valid details with invalid email (case 14, step 3)');
         $this->register_step3($signupPage,['email'=>'aeyarieg!@#&^com',
                                            'firstname'=>'Ladell',
                                            'lastname'=>'Martins',
@@ -334,9 +334,49 @@ class SignupCest
         $I->see('Please enter a valid email', $this->error_class);
 
 
+
         //Test #25
-		$I->amGoingTo ('Sign up with valid details with valid email (case 15, step 3)');
-		$this->register_step3($signupPage,['email'=>'tizfreak2000@yahoo.com ',
+        $I->amGoingTo ('Submit Signup step3 with valid details without email, without selecting security question (case 15, step 3)');
+        $this->register_step3($signupPage,['email'=>'',
+                                           'firstname'=>'Ladell',
+                                           'lastname'=>'Martins',
+                                           'DOB'=>'29/04/00'
+                                           'Security_question'=>''
+                                           'Security_answer'=>'']);
+                
+        $I->expectTo('see validation errors');
+        $I->see('Please select a security question', $this->error_class);
+
+
+        //Test #26
+        $I->amGoingTo ('Submit Signup step3 with valid details without email and select a security question without an answer (case 16, step 3)');
+        $this->register_step3($signupPage,['email'=>'',
+                                           'firstname'=>'Ladell',
+                                           'lastname'=>'Martins',
+                                           'DOB'=>'29/04/00'
+                                           'Security_question'=>'My pets name'
+                                           'Security_answer'=>'']);
+                
+        $I->expectTo('see validation errors');
+        $I->see('Please provide an answer to the question', $this->error_class);
+
+
+        //Test #27
+        $I->amGoingTo ('Submit Signup step3 with valid details without email and select a security question and fill an answer  (case 17, step 3)');
+        $this->register_step3($signupPage,['email'=>'',
+                                           'firstname'=>'Ladell',
+                                           'lastname'=>'Martins',
+                                           'DOB'=>'29/04/00'
+                                           'Security_question'=>'My pets name'
+                                           'Security_answer'=>'Bingo']);
+                
+        $I->expectTo('see signup step 4');
+        $I->see($this->step4_text, $this->message_class);
+
+
+        //Test #28
+		$I->amGoingTo ('Submit Signup step3 with valid details and valid email (case 18, step 3)');
+		$this->register_step3($signupPage,['email'=>'tizfreak2000@yahoo.com',
                                            'firstname'=>'Ladell',
                                            'lastname'=>'Martins',
                                            'DOB'=>'29/04/00']);
@@ -344,7 +384,69 @@ class SignupCest
 		$I->expectTo('see signup step 4');
 		$I->see($this->step4_text, $this->message_class);
 		
-		
+
+        //Test #29
+        $I->amGoingTo ('Submit Signup step4 with no data (case 19, step 4)');
+        $this->register_step4($signupPage,['securepin'=>'',
+                                           'confirmpin'=>'']);
+                
+        $I->expectTo('see validation errors');
+        $I->see('Please input your 4-digit secure pin', $this->error_class);
+
+
+
+		//Test #30
+        $I->amGoingTo ('Submit Signup step4 with pin more than 4 digits (case 20, step 4)');
+        $this->register_step4($signupPage,['securepin'=>'54678',
+                                           'confirmpin'=>'']);
+                
+        $I->expectTo('only be able to type 4 digits');
+        $I->see('cursor off after 4 digits');
+
+
+        //Test #31
+        $I->amGoingTo ('Submit Signup step4 with pin combination of digits and alphabets (case 21, step 4)');
+        $this->register_step4($signupPage,['securepin'=>'5tt8',
+                                           'confirmpin'=>'']);
+                
+        $I->expectTo('only be able to type 4 digits');
+        $I->see('nothing when i type anything not a digit');
+
+
+        //Test #32
+        $I->amGoingTo ('Submit Signup step4 with pin combination of characters (case 22, step 4)');
+        $this->register_step4($signupPage,['securepin'=>'@#%',
+                                           'confirmpin'=>'']);
+                
+        $I->expectTo('only be able to type 4 digits');
+        $I->see('nothing when i type anything not a digit');
+
+
+        //Test #33
+        $I->amGoingTo ('Submit Signup step4 with pin 4 digits and without confirmpin (case 23, step 4)');
+        $this->register_step4($signupPage,['securepin'=>'1234',
+                                           'confirmpin'=>'']);
+                
+        $I->expectTo('see validation errors');
+        $I->see('Confirm pin cannot be blank', $this->error_class);
+
+
+        //Test #34
+        $I->amGoingTo ('Submit Signup step4 with pin 4 digits and invalid confirmpin (case 24, step 4)');
+        $this->register_step4($signupPage,['securepin'=>'1234',
+                                           'confirmpin'=>'4321']);
+                
+        $I->expectTo('see validation errors');
+        $I->see('Pins do not match', $this->error_class);
+
+
+        //Test #35
+        $I->amGoingTo ('Submit Signup step4 with pin 4 digits and valid confirmpin (case 25, step 4)');
+        $this->register_step4($signupPage,['securepin'=>'1234',
+                                           'confirmpin'=>'1234']);
+                
+        $I->expectTo('see that user is created');
+        $I->see('');
 
 
 
