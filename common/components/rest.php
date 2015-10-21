@@ -4,8 +4,12 @@
  * File : Rest.inc.php
  * Author : Arun Kumar Sekar
  */
+namespace common\components;
+ 
+use Yii;
+use yii\base\Component;
 
-class REST {
+class REST extends Component {
 
     public $_allow          = array();
     public $_content_type   = "application/xml";

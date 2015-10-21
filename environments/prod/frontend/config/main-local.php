@@ -18,6 +18,7 @@ return [
         'session' => [
             'name' => '_frontendSessionId', // unique for frontend
             'savePath' => __DIR__ . '/../runtime/sessions' // set it to correct path for frontend app.
-        ]
+        ],
+       
     ],
 ];
