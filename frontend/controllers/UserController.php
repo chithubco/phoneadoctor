@@ -222,12 +222,12 @@ class UserController extends Controller
      * Returns    : Send code to users phone
      */  
     public function sendVerificationCode($xmlUserDetails) {
-         if (!isset($xmlUserDetails['user']['phone']) || trim($xmlUserDetails['user']['phone']) == '') {
-            
+        
+         if (!isset($xmlUserDetails['user']['phone']) || trim($xmlUserDetails['user']['phone']) == '') {            
             $this->addLogEntry('user.sendCode', 'Failure', 9, 'Phone number missing.');
-            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Phone number missing.'), 'error', 400);
-            
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Phone number missing.'), 'error', 400);            
         }
+        
     }
      /*
      * API Method : user.verifyPhone
@@ -530,10 +530,9 @@ class UserController extends Controller
  
 public function generateJsonResponce($response){
     
-    \yii::$app->response->format = \yii\web\Response::FORMAT_JSON;  
-    print_r($response);
+    \yii::$app->response->format = \yii\web\Response::FORMAT_JSON; 
+    print_r(json_encode($response));
     exit;
-    
 }
 
    /*
