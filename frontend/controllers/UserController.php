@@ -97,8 +97,8 @@ class UserController extends Controller
                 case 'user.update':
                     $this->updateUser($xmlArray['request']);
                     break;
-                case 'user.changePassword':
-                    $this->updatePassword($xmlArray['request']);
+                case 'user.sendCode':
+                    $this->sendVerificationCode($xmlArray['request']);
                     break;                   
                 default:
                    $this->generateJsonResponce(array("response_code" => 999, "description" => 'Unknown method.'), 'error', 400);
@@ -216,7 +216,32 @@ class UserController extends Controller
             'model' => $model,
         ]);
     }
-    
+     /*
+     * API Method : user.sendCode
+     * Purpose    : Send verification code to user
+     * Returns    : Send code to users phone
+     */  
+    public function sendVerificationCode($xmlUserDetails) {
+         if (!isset($xmlUserDetails['user']['phone']) || trim($xmlUserDetails['user']['phone']) == '') {
+            
+            $this->addLogEntry('user.sendCode', 'Failure', 9, 'Phone number missing.');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Phone number missing.'), 'error', 400);
+            
+        }
+    }
+     /*
+     * API Method : user.verifyPhone
+     * Purpose    : Verify user phone before sign up
+     * Returns    : Result success or failed
+     */    
+    public function verifyPhone($xmlUserDetails) {
+        
+    }
+     /*
+     * API Method : user.create
+     * Purpose    : Create a user
+     * Returns    : Result of insert operation
+     */
        public function createUser($xmlUserDetails) {
 
       //check the mandatory fields
@@ -317,7 +342,7 @@ class UserController extends Controller
                 $model->firstname           = $userFirstName;
                 $model->lastname            = $userLastName;
                 $model->email               = $email;
-                $model->birth_date          = '3434';//$this->sanitizeXML($xmlUserDetails['user']['birth_date'], true);
+                $model->birth_date          = $this->sanitizeXML($xmlUserDetails['user']['birth_date'], true);
                 $model->location            = $this->sanitizeXML($xmlUserDetails['user']['location'], true);
                 $model->createtime          = (int) time();
                 $model->status              = 1;
@@ -342,38 +367,38 @@ class UserController extends Controller
         
         if (!isset($xmlUserDetails['user']['password']) || trim($xmlUserDetails['user']['password']) == '') {
             
-            $this->addLogEntry('user.create', 'Failure', 9, 'Password missing.');
+            $this->addLogEntry('user.update', 'Failure', 9, 'Password missing.');
             $this->generateJsonResponce(array("response_code" => 113, "description" => 'Password missing.'), 'error', 400);
             
         }else if (!isset($xmlUserDetails['user']['firstname']) || trim($xmlUserDetails['user']['firstname']) == '') {
             
-            $this->addLogEntry('user.create', 'Failure', 9, 'Firstname missing.');
+            $this->addLogEntry('user.update', 'Failure', 9, 'Firstname missing.');
             $this->generateJsonResponce(array("response_code" => 113, "description" => 'Firstname missing.'), 'error', 400);
             
         }else if (!isset($xmlUserDetails['user']['lastname']) || trim($xmlUserDetails['user']['lastname']) == '') {
             
-            $this->addLogEntry('user.create', 'Failure', 9, 'Lastname missing.');
+            $this->addLogEntry('user.update', 'Failure', 9, 'Lastname missing.');
             $this->generateJsonResponce(array("response_code" => 113, "description" => 'Lastname missing.'), 'error', 400);
             
         }else if (!isset($xmlUserDetails['user']['phone']) || trim($xmlUserDetails['user']['phone']) == '') {
             
-            $this->addLogEntry('user.create', 'Failure', 9, 'Phone missing.');
+            $this->addLogEntry('user.update', 'Failure', 9, 'Phone missing.');
             $this->generateJsonResponce(array("response_code" => 113, "description" => 'Phone missing.'), 'error', 400);
             
         } 
         else if (!isset($xmlUserDetails['user']['email']) || trim($xmlUserDetails['user']['email']) == '') {
             
-            $this->addLogEntry('user.create', 'Failure', 9, 'User email missing.');
+            $this->addLogEntry('user.update', 'Failure', 9, 'User email missing.');
             $this->generateJsonResponce(array("response_code" => 113, "description" => 'User email missing.'), 'error', 400);
             
         } else if((!isset($xmlUserDetails['user']['birth_date']) || trim($xmlUserDetails['user']['birth_date']) == '')) {
                 
-            $this->addLogEntry('user.create', 'Failure', 9, 'Date of birth missing.');
+            $this->addLogEntry('user.update', 'Failure', 9, 'Date of birth missing.');
             $this->generateJsonResponce(array("response_code" => 113, "description" => 'Date of birth missing.'), 'error', 400);
 
         } else if((!isset($xmlUserDetails['user']['location']) || trim($xmlUserDetails['user']['location']) == '')) {
                 
-            $this->addLogEntry('user.create', 'Failure', 9, 'Location missing.');
+            $this->addLogEntry('user.update', 'Failure', 9, 'Location missing.');
             $this->generateJsonResponce(array("response_code" => 113, "description" => 'Location missing.'), 'error', 400);
 
         } else {
@@ -418,22 +443,22 @@ class UserController extends Controller
             
             if(preg_match('/[^A-Za-z0-9]/', $userName)) {
                 
-                $this->addLogEntry('user.create', 'Failure', 9, 'Illegal characters in username.');
+                $this->addLogEntry('user.update', 'Failure', 9, 'Illegal characters in username.');
                 $this->generateJsonResponce(array("response_code" => 113, "description" => 'Illegal characters in username. Only alphanuerics allowed.'), 'error', 400);
                 
             } else if(!$this->validateEmail($this->sanitizeXML($xmlUserDetails['user']['email'], true))) {
                 
-                $this->addLogEntry('user.create', 'Failure', 9, 'Invalid email.');
+                $this->addLogEntry('user.update', 'Failure', 9, 'Invalid email.');
                 $this->generateJsonResponce(array("response_code" => 113, "description" => 'Invalid email.'), 'error', 400);
                 
             } else if($email_check_flag) {
                 
-                $this->addLogEntry('user.create', 'Failure', 9, 'Email [' . $this->sanitizeXML($xmlUserDetails['user']['email']) . '] already in use.');
+                $this->addLogEntry('user.update', 'Failure', 9, 'Email [' . $this->sanitizeXML($xmlUserDetails['user']['email']) . '] already in use.');
                 $this->generateJsonResponce(array("response_code" => 113, "description" => 'Email already in use.'), 'error', 400);
                 
             } else if($phone_check_flag) {
                 
-                $this->addLogEntry('user.create', 'Failure', 9, 'Phone [' . $userPhone . '] already in use.');
+                $this->addLogEntry('user.update', 'Failure', 9, 'Phone [' . $userPhone . '] already in use.');
                 $this->generateJsonResponce(array("response_code" => 113, "description" => 'Phone already in use.'), 'error', 400);
                 
             } else {
@@ -444,7 +469,7 @@ class UserController extends Controller
                 $model->firstname           = $userFirstName;
                 $model->lastname            = $userLastName;
                 $model->email               = $email;
-                $model->birth_date          = '3434';//$this->sanitizeXML($xmlUserDetails['user']['birth_date'], true);
+                $model->birth_date          = $this->sanitizeXML($xmlUserDetails['user']['birth_date'], true);
                 $model->location            = $this->sanitizeXML($xmlUserDetails['user']['location'], true);
                 $model->createtime          = (int) time();
                 $model->status              = 1;
@@ -452,8 +477,8 @@ class UserController extends Controller
    
                 $model->save();
                
-                $this->addLogEntry('user.create', 'Success', 3, 'User successfully created. Username :- ' . $model->username, $model->id);
-                $this->generateJsonResponce(array("response_code" => 100, "description" => 'User successfully created.'), 'ok', 200);               
+                $this->addLogEntry('user.update', 'Success', 3, 'User info successfully updated. Username :- ' . $model->username, $model->id);
+                $this->generateJsonResponce(array("response_code" => 100, "description" => 'User info successfully updated.'), 'ok', 200);               
                 exit;
             }
          }

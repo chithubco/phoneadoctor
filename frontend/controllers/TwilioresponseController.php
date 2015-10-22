@@ -1,8 +1,15 @@
 <?php
+use Yii;
+use app\models\User;
+use app\models\Settings;
+use app\models\ApiLog;
+use yii\web\Controller;
+use yii\web\NotFoundHttpException;
+use yii\filters\VerbFilter;
+use common\components\XmlDomConstruct;
 
-include_once("REST/rest.inc.php");
-include_once("REST/XmlDomConstruct.php");
-include_once("REST/xmlToArray.inc.php");
+include_once("common/components/xmlToArray.php");
+include_once("common/components/XmlDomConstruct.php");
 
 class TwilioresponseController extends Controller {
     
