@@ -377,6 +377,8 @@ class UserController extends Controller
             $this->generateJsonResponce(array("response_code" => 113, "description" => 'Location missing.'), 'error', 400);
 
         } else {
+            
+            $model          = $this->findModel($this->sanitizeXML($xmlUserDetails['user']['id']));            
             $userFullName   = $this->sanitizeXML($xmlUserDetails['user']['firstname']).$this->sanitizeXML($xmlUserDetails['user']['lastname']);
             $userPhone      = $this->sanitizeXML($xmlUserDetails['user']['phone']);
             $userFirstName  = $this->sanitizeXML($xmlUserDetails['user']['firstname']);
@@ -386,11 +388,18 @@ class UserController extends Controller
                 $userName = preg_replace('/\s+/', '', $userFullName); //remove any whitespaces
             } else {
                 $userName = $xmlUserDetails['user']['username'];
-            }            
+            }   
+            
+            
 
             //check if username is available
             $userFlag = true;
-            if($this->checkIfUserExists($userName)){
+            $user = User::find()
+                    ->where('username = "'.$userName.'"')
+                    ->all();  
+            $userNameUpdateFlag = count($user) >= 2 ? true : false;
+            
+            if($userNameUpdateFlag){
                 while($userFlag){
                     $userName .= rand(100, 999);
                     $userFlag = $this->checkIfUserExists($userName);
@@ -429,10 +438,6 @@ class UserController extends Controller
                 
             } else {
             
-                //create a new user account
-                $model                      = new User();
-                
-                //$activate_key               = time() . rand(1000, 9999);echo 1;
                 $model->username            = $userName;
                 $model->password            = md5($xmlUserDetails['user']['password']);
                 $model->phone               = $userPhone;
@@ -467,7 +472,7 @@ class UserController extends Controller
         $micro  = sprintf("%06d",($t - floor($t)) * 1000000);         
         $d      = new \DateTime( date('Y-m-d H:i:s.' . $micro, $t) );       
         $date   = $d->format("Y-m-d H:i:s.u");*/
-        $date   = '2323232';
+        $date   = date("Y-m-d H:i:s");
         
         $api_log = new ApiLog;
         $api_log->api_method_id             = 1;//$this->api_methods[$api_method];
