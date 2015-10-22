@@ -25,6 +25,9 @@ class UserController extends Controller
     public $homeURL;
     public $salt                = 'phoneDoctor';
     public $currencyLabel       = 'N';  
+    public $twilio_from_phone;
+    public $twilio_account_sid;
+    public $twilio_auth_token;
     
     
    public function beforeAction($action) { 
@@ -48,6 +51,19 @@ class UserController extends Controller
                 case 'configURL':
                     $this->configURL = $setting->value;
                     break;
+                
+                case 'twilio_auth_token':
+                    $this->twilio_auth_token = $setting->value;
+                    break;
+                
+                case 'twilio_account_sid':
+                    $this->twilio_account_sid = $setting->value;
+                    break;
+                
+                case 'twilio_from_phone':
+                    $this->twilio_from_phone = $setting->value;
+                    break;  
+                
                 default:
                     break;
             }
@@ -227,6 +243,21 @@ class UserController extends Controller
             $this->addLogEntry('user.sendCode', 'Failure', 9, 'Phone number missing.');
             $this->generateJsonResponce(array("response_code" => 113, "description" => 'Phone number missing.'), 'error', 400);            
         }
+        $code = rand(111111,999999);
+        $twilio_message = "Phone a doctor\nPlease use verification Code: " . $code . " to sign up." ;
+        //---------------------- TWILIO ----------------------//
+        
+        Yii::$app->twiliosms->twilio_from_phone = $this->twilio_from_phone;
+        Yii::$app->twiliosms->twilio_account_sid = $this->twilio_account_sid;
+        Yii::$app->twiliosms->twilio_auth_token = $this->twilio_auth_token;
+
+        Yii::$app->twiliosms->sendSMS($twilio_message, $xmlUserDetails['user']['phone']);  
+        $model                      = new VerifyPhone();
+        $model->phone_no            = $xmlUserDetails['user']['phone'];
+        $model->verification_code   = $code;
+        $model->verified            = 'NO';      
+        $model->save();
+        $this->generateJsonResponce(array("response_code" => 100, "description" => 'Verification code sent.'), 'ok', 200);               
         
     }
      /*

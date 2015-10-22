@@ -24,7 +24,7 @@
         "yiisoft/yii2-swiftmailer": "*",
 	   "yiisoft/yii2-date-picker-widget" : "~1.0",
          "yiisoft/yii2-jui": "~2.0.0",
-         "yiisoft/yii2-twilio": *"
+         "yiisoft/yii2-twilio": "*"
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",

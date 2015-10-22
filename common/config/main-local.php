@@ -21,6 +21,9 @@ return [
                   ],   
         'xmlDom' => [
              'class' => 'common\components\XmlDomConstructCustomizedForAPI'
-                  ],      
+                  ],  
+        'twiliosms' => [
+             'class' => 'common\components\twiliosms'
+                  ],
     ],
 ];
