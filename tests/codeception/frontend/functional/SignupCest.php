@@ -8,7 +8,6 @@ use common\models\User;
 class SignupCest
 {
 
-<<<<<<< HEAD
    
    public $error_class = ".help-block";
    public $message_class = ".help-block";
@@ -23,8 +22,6 @@ class SignupCest
    public $step4_url = Yii::$app->homeUrl."/step4";
    
 
-=======
->>>>>>> b203d8daaca56614d3198886704d852b2beb2f54
     /**
      * This method is called before each cest class test method
      * @param \Codeception\Event\TestEvent $event
@@ -54,7 +51,6 @@ class SignupCest
 
     }
 
-<<<<<<< HEAD
     public function register_step1($signupPage,$phone, $code='+234'){
         $signupPage->submit([
             'phone' => $phone,
@@ -99,8 +95,6 @@ class SignupCest
     }
 
 
-=======
->>>>>>> b203d8daaca56614d3198886704d852b2beb2f54
     /**
      *
      * @param \codeception_frontend\FunctionalTester $I
@@ -111,7 +105,6 @@ class SignupCest
         $I->wantTo('ensure that signup works');
 
         $signupPage = SignupPage::openBy($I);
-<<<<<<< HEAD
         //$I->see('Signup', 'h1');
         //$I->see('Please fill out the following fields to signup:');
         //Test #1
@@ -356,52 +349,17 @@ class SignupCest
 
 
         //$I->amGoingTo('Sign up with valid details and email');
-=======
-        $I->see('Signup', 'h1');
-        $I->see('Please fill out the following fields to signup:');
-
-        $I->amGoingTo('submit signup form with no data');
-
-        $signupPage->submit([]);
-
-        $I->expectTo('see validation errors');
-        $I->see('Username cannot be blank.', '.help-block');
-        $I->see('Email cannot be blank.', '.help-block');
-        $I->see('Password cannot be blank.', '.help-block');
-
-        $I->amGoingTo('submit signup form with not correct email');
-        $signupPage->submit([
-            'username' => 'tester',
-            'email' => 'tester.email',
-            'password' => 'tester_password',
-        ]);
-
-        $I->expectTo('see that email address is wrong');
-        $I->dontSee('Username cannot be blank.', '.help-block');
-        $I->dontSee('Password cannot be blank.', '.help-block');
-        $I->see('Email is not a valid email address.', '.help-block');
-
-        $I->amGoingTo('submit signup form with correct email');
->>>>>>> b203d8daaca56614d3198886704d852b2beb2f54
         $signupPage->submit([
             'username' => 'tester',
             'email' => 'tester.email@example.com',
             'password' => 'tester_password',
         ]);
-<<<<<<< HEAD
-=======
-
->>>>>>> b203d8daaca56614d3198886704d852b2beb2f54
         $I->expectTo('see that user is created');
         $I->seeRecord('common\models\User', [
             'username' => 'tester',
             'email' => 'tester.email@example.com',
         ]);
-<<<<<<< HEAD
 		
-=======
-
->>>>>>> b203d8daaca56614d3198886704d852b2beb2f54
         $I->expectTo('see that user logged in');
         $I->seeLink('Logout (tester)');
     }

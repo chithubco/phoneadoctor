@@ -17,7 +17,6 @@
         "source": "https://github.com/kartik-v/yii2-app-practical/"
     },
     "minimum-stability": "dev",
-<<<<<<< HEAD
     "require": { 
         "php": ">=5.4.0",
         "yiisoft/yii2": ">=2.0.5",
@@ -26,31 +25,16 @@
        "yiisoft/yii2-date-picker-widget" : "~1.0",
          "yiisoft/yii2-jui": "~2.0.0",
          "yiisoft/yii2-twilio": "*"
-=======
-    "require": {
-        "php": ">=5.4.0",
-        "yiisoft/yii2": ">=2.0.5",
-        "yiisoft/yii2-bootstrap": "*",
-        "yiisoft/yii2-swiftmailer": "*"
->>>>>>> b203d8daaca56614d3198886704d852b2beb2f54
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",
         "yiisoft/yii2-debug": "*",
-<<<<<<< HEAD
         "yiisoft/yii2-gii": "~2.0.6",
         "yiisoft/yii2-faker": "*",
         "codeception/codeception": " 1.8.*@dev",
         "codeception/specify": " *",
         "codeception/verify": " *", 
 
-=======
-        "yiisoft/yii2-gii": "*",
-        "yiisoft/yii2-faker": "*",
-        "codeception/codeception": " 1.8.*@dev",
-        "codeception/specify": " *",
-        "codeception/verify": " *"
->>>>>>> b203d8daaca56614d3198886704d852b2beb2f54
     },
     "config": {
         "process-timeout": 1800
@@ -61,8 +45,4 @@
             "bower-asset-library": "vendor/bower"
         }
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> b203d8daaca56614d3198886704d852b2beb2f54

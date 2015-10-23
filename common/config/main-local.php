@@ -16,5 +16,14 @@ return [
             // for the mailer to send real emails.
             'useFileTransport' => true,
         ],
+        'REST' => [
+             'class' => 'common\components\REST'
+                  ],   
+        'xmlDom' => [
+             'class' => 'common\components\XmlDomConstructCustomizedForAPI'
+                  ],  
+        'twiliosms' => [
+             'class' => 'common\components\twiliosms'
+                  ],
     ],
 ];
