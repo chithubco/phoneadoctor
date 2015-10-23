@@ -19,10 +19,15 @@ nbproject
 Thumbs.db
 
 # composer vendor dir
+<<<<<<< HEAD
+/vendor
+
+=======
 # /vendor
 
 # composer itself is not needed
 composer.phar
+>>>>>>> b203d8daaca56614d3198886704d852b2beb2f54
 
 # Mac DS_Store Files
 .DS_Store

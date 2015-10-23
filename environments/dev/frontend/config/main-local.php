@@ -19,7 +19,12 @@ $config = [
         'session' => [
             'name' => '_frontendSessionId', // unique for frontend
             'savePath' => __DIR__ . '/../runtime/sessions' // set it to correct path for frontend app.
+<<<<<<< HEAD
+        ],
+      
+=======
         ]
+>>>>>>> b203d8daaca56614d3198886704d852b2beb2f54
     ],
 ];
 
