@@ -2,6 +2,12 @@
 
 $config = [
     'components' => [
+    	'urlManager' => [
+            'enablePrettyUrl' => true,
+            'showScriptName' => false,
+            'enableStrictParsing' => false,
+            
+        ],
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
             'cookieValidationKey' => 'NaDbaS1vson8YJl8E-U1Vm0PU4g2UGub',
@@ -25,8 +31,8 @@ $config = [
 
 if (!YII_ENV_TEST) {
     // configuration adjustments for 'dev' environment
-    $config['bootstrap'][] = 'debug';
-    $config['modules']['debug'] = 'yii\debug\Module';
+    //$config['bootstrap'][] = 'debug';
+    //$config['modules']['debug'] = 'yii\debug\Module';
 
     $config['bootstrap'][] = 'gii';
     $config['modules']['gii'] = 'yii\gii\Module';

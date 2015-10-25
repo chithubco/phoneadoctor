@@ -3,7 +3,7 @@ return [
     'components' => [
         'db' => [
             'class' => 'yii\db\Connection',
-            'dsn' => 'mysql:host=localhost;dbname=phoneadoc',
+            'dsn' => 'mysql:host=localhost;dbname=gaiadb',
             'username' => 'root',
             'password' => 'letmein',
             'charset' => 'utf8',
