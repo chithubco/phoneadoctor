@@ -3,10 +3,10 @@
 namespace app\controllers;
 namespace frontend\controllers;
 
-
 use Yii;
 use app\models\User;
 use app\models\UserSearch;
+use app\models\VerifyPhone;
 use app\models\Settings;
 use app\models\ApiLog;
 use yii\web\Controller;
@@ -14,11 +14,14 @@ use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use common\components\XmlDomConstruct;
 
+
 include_once("common/components/xmlToArray.php");
 include_once("common/components/XmlDomConstruct.php");
+//include_once("common/components/darkunz/yii2sms/RecipientInterface.php");
+//include_once("common/components/twiliosms.php");
 
-class UserController extends Controller
-{
+class UserController extends Controller {
+
     public $administrator_email;
     public $base_currency_code;
     public $configURL;
@@ -115,7 +118,11 @@ class UserController extends Controller
                     break;
                 case 'user.sendCode':
                     $this->sendVerificationCode($xmlArray['request']);
-                    break;                   
+                    break;   
+                case 'user.verifyPhone':
+                    $this->verifyPhone($xmlArray['request']);
+                    break;                
+                
                 default:
                    $this->generateJsonResponce(array("response_code" => 999, "description" => 'Unknown method.'), 'error', 400);
                     break;
@@ -243,15 +250,15 @@ class UserController extends Controller
             $this->addLogEntry('user.sendCode', 'Failure', 9, 'Phone number missing.');
             $this->generateJsonResponce(array("response_code" => 113, "description" => 'Phone number missing.'), 'error', 400);            
         }
-        $code = rand(111111,999999);
+        $code = rand(111111,999999);        
         $twilio_message = "Phone a doctor\nPlease use verification Code: " . $code . " to sign up." ;
-        //---------------------- TWILIO ----------------------//
+        //---------------------- TWILIO ----------------------//         
+        $twillio = Yii::$app->Twillio;        
+        $message = $twillio->getClient()->account->messages->sendMessage($this->twilio_from_phone, // From a valid Twilio number
+            $xmlUserDetails['user']['phone'], // Text this number
+            $twilio_message
+        );
         
-        Yii::$app->twiliosms->twilio_from_phone = $this->twilio_from_phone;
-        Yii::$app->twiliosms->twilio_account_sid = $this->twilio_account_sid;
-        Yii::$app->twiliosms->twilio_auth_token = $this->twilio_auth_token;
-
-        Yii::$app->twiliosms->sendSMS($twilio_message, $xmlUserDetails['user']['phone']);  
         $model                      = new VerifyPhone();
         $model->phone_no            = $xmlUserDetails['user']['phone'];
         $model->verification_code   = $code;
@@ -266,7 +273,26 @@ class UserController extends Controller
      * Returns    : Result success or failed
      */    
     public function verifyPhone($xmlUserDetails) {
-        
+        if (!isset($xmlUserDetails['user']['phone']) || trim($xmlUserDetails['user']['phone']) == '') {            
+            $this->addLogEntry('user.sendCode', 'Failure', 9, 'Phone number missing.');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Phone number missing.'), 'error', 400);            
+        }else if (!isset($xmlUserDetails['user']['verification_code']) || trim($xmlUserDetails['user']['verification_code']) == '') {            
+            $this->addLogEntry('user.sendCode', 'Failure', 9, 'Phone number missing.');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Six digit code missing.'), 'error', 400);            
+        }
+        $userPhone = $xmlUserDetails['user']['phone'];
+        $code = $xmlUserDetails['user']['verification_code'];
+        //check if phone no. and code exist 
+        $code_exists = VerifyPhone::find()->where('phone_no LIKE "'.$userPhone.'" AND verification_code LIKE "'.$code.'"')->one();        
+        if($code_exists){
+            $id         = $code_exists->id;
+            $model      = VerifyPhone::findOne($id);  
+            $model->verified      = 'YES';      
+            $model->save();
+            $this->generateJsonResponce(array("response_code" => 100, "description" => 'Phone number verified.'), 'ok', 200);               
+        }
+        else
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Your code do not match.'), 'ok', 400);               
     }
      /*
      * API Method : user.create
