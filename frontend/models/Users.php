@@ -34,6 +34,7 @@ use Yii;
  * @property integer $calendar
  * @property integer $authorized
  * @property integer $active
+ * @property integer $auth_key
  */
 class Users extends \yii\db\ActiveRecord
 {
@@ -51,7 +52,7 @@ class Users extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['create_uid', 'update_uid', 'warehouse_id', 'facility_id', 'role_id', 'calendar', 'authorized', 'active'], 'integer'],
+            [['create_uid', 'update_uid', 'warehouse_id', 'facility_id', 'role_id', 'calendar', 'authorized', 'active', 'auth_key'], 'integer'],
             [['create_date', 'update_date'], 'safe'],
             [['password', 'pwd_history1', 'pwd_history2'], 'string'],
             [['username', 'title', 'fname', 'mname', 'lname', 'pin', 'npi', 'fedtaxid', 'feddrugid', 'notes', 'email', 'specialty', 'taxonomy'], 'string', 'max' => 255]
@@ -91,6 +92,7 @@ class Users extends \yii\db\ActiveRecord
             'calendar' => 'has calendar? 0=no 1=yes',
             'authorized' => 'Authorized',
             'active' => 'Active',
+            'auth_key' => 'Auth Key',
         ];
     }
 }
