@@ -1,0 +1,154 @@
+@import url(https://fonts.googleapis.com/css?family=Roboto:400,300,100,500,700,900);
+
+/*=================HEADER===================*/
+.navbar-inverse{background:#e42127;border-color:#e42127;}
+.navbar{min-height:72px;}
+.navbar-brand{padding:5px 15px; min-height:50px;}
+.nav.navbar-nav.navbar-right li{border-right:1px solid #f8393f; height:72px;}
+.nav.navbar-nav.navbar-right li:last-child{border-right:0;}
+
+/*===============SUBSCRIPTIONS PLANS==================*/
+/*------EDIT PROFILE---------*/
+.edit-profile{background:#fff; border:1px solid #d8d8d8; border-radius:5px; padding:18px 15px;}
+.edit-profile img{float:left; margin-right:25px;}
+.edit-profile p{font-family: 'Roboto', sans-serif; font-size:19px; color:#e42127; font-weight:normal;}
+.edit-profile h6{font-family: 'Roboto', sans-serif; font-size:12px; color:#606060; font-weight:normal;}
+
+/*------CURRENT/ACTIVE SUBSCRIPTION---------*/
+.current-sub{background:#6d9ce5; border:1px solid #d8d8d8; border-radius:5px; padding:18px 0 18px 15px; margin:15px 0;}
+.current-sub img{float:left; margin-top:18px;}
+.current-sub p{font-family: 'Roboto', sans-serif; font-size:14px; color:#fff; font-weight:normal; text-align:center;}
+.current-sub h4{font-family: 'Roboto', sans-serif; font-size:13px; color:#213e6c; font-weight:bold; text-transform:uppercase; text-align:center;}
+.current-sub h5{font-family: 'Roboto', sans-serif; font-size:12px; color:#e42127; font-weight:bold; text-transform:uppercase; text-align:center;}
+.current-sub a{font-family: 'Roboto', sans-serif; font-size:11px; color:#fff; font-weight:normal; text-decoration:none; text-align:center; display:block;}
+
+/*=======================LOGIN PAGE=========================*/
+.login-pg{max-width:601px; width:100%; margin:60px auto 0; border:1px solid #e8e8e8; border-radius:5px; background:#f9f9f9;}
+.login-pg .center-logo{padding:40px 0;}
+.login-pg .center-logo img{margin:0 auto;}
+
+.login-pg h2{text-align:center; margin:0 0 40px 0; font-family: 'Roboto', sans-serif; font-size:25px; color:#115dd6; font-weight:normal;}
+.login-pg .lgn-frm{max-width:354px; margin:0 auto; width:100%;}
+.login-pg .phn-no{background:url(../images/lgn-phn-icon.png) no-repeat 2px center; min-width:13px; min-height:14px;}
+.login-pg .pin-code{background:url(../images/lgn-pin-icon.png) no-repeat 2px center; min-width:13px; min-height:14px;}
+.login-pg .form-control{border:0; border-bottom:1px solid #bdc7c8; box-shadow:none; border-radius:0; padding-left:65px; margin-top:25px; font-family: 'Roboto', sans-serif; font-size:16px; color:#6d6d6d; font-weight:normal;}
+.login-pg .btn{background:#115dd6; border-color:#115dd6; max-width:324px; width:100%; margin:64px auto 82px; display:block; font-family: 'Roboto', sans-serif; font-size:18px; color:#fff; font-weight:normal;}
+
+
+/*==========================REGISTRATION FIRST PAGE=========================*/
+.reg-pg1-first .reg-hdr-bg{background:url(../images/registration1-bg.jpg) no-repeat center top; background-size:100% 100%; width:100%; min-height:474px; position:relative; background-size:cover;}
+.reg-pg1-first .logo{position:relative; }
+.reg-pg1-first .logo img{ margin:0 auto; position:relative; top:100px;}
+
+.reg-pg1-first h2{text-align:center; margin:40px 0 30px 0; font-family: 'Roboto', sans-serif; font-size:25px; color:#115dd6; font-weight:normal;}
+.reg-pg1-first h4{font-family: 'Roboto', sans-serif; font-size:21px; color:#222222; font-weight:normal; text-align:center;}
+.reg-pg1-first .form-group{max-width:270px; width:100%; margin:25px auto;}
+.reg-pg1-first .input-group-addon:first-child{background:none; padding:0; border:0;}
+.reg-pg1-first .sel-bx{height:32px;}
+.reg-pg1-first .reg-cnt{margin:0 auto; width:100%;}
+.reg-pg1-first .reg-cnt p{font-family: 'Roboto', sans-serif; font-size:14px; color:#222222; font-weight:normal; text-align:center; margin:0;}
+.reg-pg1-first .reg-cnt .btn{background:#115dd6; border-color:#115dd6; max-width:324px; width:100%; margin:40px auto 82px; display:block; font-family: 'Roboto', sans-serif; font-size:18px; color:#fff; font-weight:normal;}
+
+
+/*=======================REGISTRATION SECOND PAGE======================*/
+.reg-pg2{max-width:601px; width:100%; margin:0 auto;}
+.reg-pg2 h2{text-align:center; margin:40px 0 30px 0; font-family: 'Roboto', sans-serif; font-size:25px; color:#115dd6; font-weight:normal;}
+.reg-pg2 .reg2-cnt{background:#f9f9f9; padding:30px 0;}
+.reg-pg2 .reg2-cnt .verfied{background:#f9f9f9 url(../images/verified.png) no-repeat 80% center; min-width:13px; min-height:14px; height:41px; font-family: 'Roboto', sans-serif; font-size:16px; color:#6d6d6d; font-weight:normal; margin-top:15px;}
+.reg-pg2 .reg2-cnt .form-group{max-width:355px; width:100%; margin:0 auto;}
+.reg-pg2 .reg2-cnt h4{font-family: 'Roboto', sans-serif; font-size:21px; color:#222222; font-weight:normal; text-align:center;}
+.reg-pg2 .reg2-cnt p{font-family: 'Roboto', sans-serif; font-size:11px; color:#383838; font-weight:normal; text-align:center; margin-top:10px;}
+.reg-pg2 .reg2-cnt p > a {color:#115dd6; font-style:normal; text-decoration:none;}
+.reg-pg2 .reg2-cnt .or{display:block; font-family: 'Roboto', sans-serif; font-size:20px; color:#e42127; font-weight:normal; text-align:center; padding-top:30px;}
+.reg-pg2 .reg2-cnt .full-name{background:url(../images/user-icon.png) no-repeat 2px center; min-width:13px; min-height:14px;}
+.reg-pg2 .reg2-cnt .email-adr{background:url(../images/email-icon.png) no-repeat 2px center; min-width:13px; min-height:14px;}
+.reg-pg2 .reg2-cnt .sel-ques{background:url(../images/question-icon.png) no-repeat 10px center; min-width:13px; min-height:14px; padding-left:65px; margin-top:25px; font-family: 'Roboto', sans-serif; font-size:16px; color:#6d6d6d; font-weight:normal;}
+.reg-pg2 .reg2-cnt .age{background:url(../images/age-icon.png) no-repeat 2px center; min-width:13px; min-height:14px;}
+.reg-pg2 .reg2-cnt .gndr{background:url(../images/gender-icon.png) no-repeat 2px center; min-width:13px; min-height:14px;}
+.reg-pg2 .reg2-cnt .ans{background:#f9f9f9;}
+.reg-pg2 .reg2-cnt .bx{border:0; border-bottom:1px solid #bdc7c8; box-shadow:none; border-radius:0; padding-left:65px; margin-top:25px; font-family: 'Roboto', sans-serif; font-size:16px; color:#6d6d6d; font-weight:normal;}
+.reg-pg2 .reg2-cnt .fb-btn, .reg-pg2 .reg2-cnt .twitter-btn{background:#eff0f0; padding:8px 20px; display:block; text-align:left; max-width:306px; width:100%; margin:15px auto;}
+.reg-pg2 .reg2-cnt .desired-pin{border:0; border-bottom:1px solid #bdc7c8; box-shadow:none; border-radius:0; text-align:center; margin-top:25px; font-family: 'Roboto', sans-serif; font-size:16px; color:#6d6d6d; font-weight:normal; background:url(../images/lgn-pin-icon.png) no-repeat 35px center; min-width:13px; min-height:14px;}
+.reg-pg2 .reg2-cnt .btn{background:#115dd6; border-color:#115dd6; max-width:324px; width:100%; margin:40px auto 0; display:block; font-family: 'Roboto', sans-serif; font-size:18px; color:#fff; font-weight:normal;}
+
+
+@media only screen and (min-width:768px) and (max-width:3600px){
+	.sm-no-pad-lt{padding-left:0;}
+	.sm-no-pad-rt{padding-right:0;}
+	.sm-no-pad{padding:0;}	
+}
+
+
+body {
+ /* padding-top: 108px;
+  background-color: #f6f6f7;*/
+}
+footer {
+  padding-left: 15px;
+  padding-right: 15px;
+  background-color: #fff;
+}
+
+/*
+ * Off Canvas
+ * --------------------------------------------------
+ */
+@media screen and (max-width: 768px) {
+  .row-offcanvas {
+    position: relative;
+    -webkit-transition: all 0.25s ease-out;
+    -moz-transition: all 0.25s ease-out;
+    transition: all 0.25s ease-out;
+  }
+
+  .row-offcanvas-left
+  .sidebar-offcanvas {
+    left: -33%;
+  }
+
+  .row-offcanvas-left.active {
+    left: 33%;
+  }
+
+  .sidebar-offcanvas {
+    position: absolute;
+    top: 0;
+    width: 33%;
+    margin-left: 10px;
+  }
+}
+
+
+/* Sidebar navigation */
+.nav-sidebar {
+  background-color: #f5f5f5;
+  margin-right: -15px;
+  margin-bottom: 20px;
+  margin-left: -15px;
+}
+.nav-sidebar > li > a {
+  padding-right: 20px;
+  padding-left: 20px;
+}
+.nav-sidebar > .active > a {
+  color: #fff;
+  background-color: #428bca;
+}
+
+/*
+ * Main content
+ */
+
+.main {
+  padding: 20px;
+  background-color: #fff;
+}
+@media (min-width: 768px) {
+  .main {
+    padding-right: 40px;
+    padding-left: 40px;
+  }
+}
+.main .page-header {
+  margin-top: 0;
+}

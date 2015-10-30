@@ -10,26 +10,34 @@ use yii\bootstrap\ActiveForm;
 $this->title = 'Signup';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="site-signup">
-    <h1><?= Html::encode($this->title) ?></h1>
-
-    <p>Please fill out the following fields to signup:</p>
-
-    <div class="row">
-        <div class="col-lg-5">
-            <?php $form = ActiveForm::begin(['id' => 'form-signup']); ?>
-
-                <?= $form->field($model, 'username') ?>
-
-                <?= $form->field($model, 'email') ?>
-
-                <?= $form->field($model, 'password')->passwordInput() ?>
-
-                <div class="form-group">
-                    <?= Html::submitButton('Signup', ['class' => 'btn btn-primary', 'name' => 'signup-button']) ?>
-                </div>
-
-            <?php ActiveForm::end(); ?>
+<div class="reg-pg1-first">
+            <div class="reg-hdr-bg">
+                <div class="logo">
+                    <img src="http://localhost/phoneadoc/Login_files/registration-logo.png" alt="logo" class="img-responsive">
+                </div>  
+            </div>
+            
+            <div class="reg-cnt">
+                <h2>Sign Up</h2>
+                <h4>Enter phone Number and Pin Code</h4>
+                <?php $form = ActiveForm::begin(['id' => 'form-signup']); ?>
+            
+                
+                    <div class="form-group">
+                        <div class="input-group">
+                          <div class="input-group-addon">
+                           <select name="code" class="sel-bx">
+                            <option>+234</option>
+                           </select>
+                        </div>
+                         <input type="text" class="form-control" name="phone">      
+                        </div>                      
+                    </div>
+                   <p>A six digit code will be sent to you mobile phone</p>
+                   <p> please enter the the code for verification</p> 
+                    <?= Html::submitButton('Signup', ['class' => 'btn btn-default', 'name' => 'signup-button']) ?>
+                   
+                <?php ActiveForm::end(); ?>
+            </div>  
         </div>
-    </div>
-</div>
+

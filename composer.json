@@ -12,6 +12,12 @@
             "homepage": "http://www.krajee.com/"
         }
     ],
+    "repositories":[
+    {
+        "type": "git",
+        "url": "https://github.com/segpacto/yii2-httpfull"
+    }],
+
     "support": {
         "issues": "https://github.com/kartik-v/yii2-app-practical/issues?state=open",
         "source": "https://github.com/kartik-v/yii2-app-practical/"
@@ -25,6 +31,7 @@
        "yiisoft/yii2-date-picker-widget" : "~1.0",
          "yiisoft/yii2-jui": "~2.0.0",
          "yiisoft/yii2-twilio": "*"
+
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",
@@ -33,7 +40,7 @@
         "yiisoft/yii2-faker": "*",
         "codeception/codeception": " 1.8.*@dev",
         "codeception/specify": " *",
-        "codeception/verify": " *", 
+        "codeception/verify": " *"
 
     },
     "config": {
