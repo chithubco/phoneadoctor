@@ -7,7 +7,7 @@ namespace common\components;
  
 use Yii;
 use yii\base\Component;
-use app\models\Users;
+use app\models\User;
 
 class userAuthentication extends Component {
 
@@ -18,7 +18,7 @@ class userAuthentication extends Component {
     public function checkAuthKey() {
 
        //Authenticate auth key
-       $auth_key_exists = Users::find()->where('id = ' . $this->userId . ' AND auth_key LIKE "' . $this->auth_key . '"')->one();
+       $auth_key_exists = User::find()->where('id = ' . $this->userId . ' AND auth_key LIKE "' . $this->auth_key . '"')->one();
        return ($auth_key_exists)?true:false;
     }    
 

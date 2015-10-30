@@ -4,7 +4,7 @@ namespace app\controllers;
 namespace frontend\controllers;
 
 use Yii;
-use app\models\Users;
+use app\models\User;
 use app\models\UserSearch;
 use app\models\Patient;
 use app\models\VerifyPhone;
@@ -234,7 +234,7 @@ class UserController extends Controller {
      */
     protected function findModel($id)
     {
-        if (($model = Users::findOne($id)) !== null) {
+        if (($model = User::findOne($id)) !== null) {
             return $model;
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');
@@ -259,7 +259,7 @@ class UserController extends Controller {
      /*
      * API Method : user.sendCode
      * Purpose    : Send verification code to user - user signup step 1
-     * Returns    : Send code to users phone
+     * Returns    : Send code to User phone
      */  
     public function sendVerificationCode($xmlUserDetails) {
         
@@ -322,6 +322,7 @@ class UserController extends Controller {
      */
        public function createUser($xmlUserDetails) {
      
+           if($xmlUserDetails['user']['userinfo']){
             $userFullName   = $this->sanitizeXML($xmlUserDetails['user']['userinfo']['fname']).$this->sanitizeXML($xmlUserDetails['user']['userinfo']['lname']);
             $userPhone      = $this->sanitizeXML($xmlUserDetails['user']['patients']['mobile_phone']);
             $userFirstName  = $this->sanitizeXML($xmlUserDetails['user']['userinfo']['fname']);
@@ -384,20 +385,16 @@ class UserController extends Controller {
                 //create a new user account                      
                 
                if(is_array($xmlUserDetails['user']['userinfo'])){
-                        $model = new Users;
-                        $xmlUserDetails['user']['userinfo']['username'] = $userName; 
-                        $xmlUserDetails['user']['userinfo']['create_date'] = (int) time();
-                        $xmlUserDetails['user']['userinfo']['auth_key']   = rand(1000, 9999);
-                        //echo "<pre>";print_r($xmlUserDetails['user']['userinfo']);exit;
-                        $model->load($xmlUserDetails['user']['userinfo']);
-                        $model->validate();
-                        if($model->getErrors()){
-                            $this->addLogEntry('user.creaete', 'Failure', 9, 'Correct the validation errors.');
-                        $this->generateJsonResponce(array("response_code" => 113, "description" => 'Correct the validation errors.','errors'=>$model->getErrors()), 'error', 400);
-                        exit;
-                        }                        
-                        $model->save();
-                    }
+                        
+                $model                      = new User();                                
+                $model->username            = $userName;
+                $model->createtime          = (int) time();
+                $model->status              = 1;
+                $model->auth_key            = rand(1000, 9999);
+                $model->role                = 'PATIENT';   
+                $model->save();
+   
+                }
              
                 if(is_array($xmlUserDetails['user']['userinfo']) && $model->id != NULL){
                     //create a new patient
@@ -426,10 +423,10 @@ class UserController extends Controller {
                 }
                 
                 $this->addLogEntry('user.create', 'Success', 3, 'User successfully created. Username :- ' .$userName.',User Id:-'.$userId, $model->id);
-                $this->generateJsonResponce(array("response_code" => 100, "description" => 'User successfully created',"authkey"=>$xmlUserDetails['user']['userinfo']['auth_key']), 'ok', 200);               
+                $this->generateJsonResponce(array("response_code" => 100, "description" => 'User successfully created',"authkey"=>$model->auth_key), 'ok', 200);               
                 exit;
             }
-         //}
+         }
        }
        
     /*
@@ -452,7 +449,7 @@ class UserController extends Controller {
 
         } else {
             //Authenticate user before update
-            $user_exists = Users::find()->where('id = ' . $xmlUserDetails['user']['userinfo']['id'] . ' AND password LIKE "' . md5($xmlUserDetails['user']['userinfo']['password']) . '"')->one();
+            $user_exists = User::find()->where('id = ' . $xmlUserDetails['user']['userinfo']['id'] . ' AND password LIKE "' . md5($xmlUserDetails['user']['userinfo']['password']) . '"')->one();
             //Authenticate access key before update
             Yii::$app->AuthoriseUser->userId = $xmlUserDetails['user']['userinfo']['id'];
             Yii::$app->AuthoriseUser->auth_key = $xmlUserDetails['user']['userinfo']['auth_key'];
@@ -475,7 +472,7 @@ class UserController extends Controller {
 
                     //check if username is available
                     $userFlag = true;
-                    $user = Users::find()
+                    $user = User::find()
                             ->where('username = "' . $userName . '"')
                             ->all();
                     $userNameUpdateFlag = count($user) >= 2 ? true : false;
@@ -519,14 +516,7 @@ class UserController extends Controller {
                     } else {
                         
                if(is_array($xmlUserDetails['user']['userinfo'])){                        
-                        $xmlUserDetails['user']['userinfo']['username'] = $userName;                         
-                        $model->load($xmlUserDetails['user']['userinfo']);
-                        $model->validate();
-                        if($model->getErrors()){
-                            $this->addLogEntry('user.update', 'Failure', 9, 'Correct the validation errors.');
-                        $this->generateJsonResponce(array("response_code" => 113, "description" => 'Correct the validation errors.','errors'=>$model->getErrors()), 'error', 400);
-                        exit;
-                        }                        
+                        $model->username = $userName;
                         $model->save();
                     }                        
                         
@@ -566,7 +556,7 @@ class UserController extends Controller {
             $this->addLogEntry('user.create password', 'Failure', 9, 'Pin missing.');
             $this->generateJsonResponce(array("response_code" => 113, "description" => 'Pin missing.'), 'error', 400);            
         }      
-        $user_exists = Users::find()->where('id = ' . $xmlUserDetails['user']['id'])->one();
+        $user_exists = User::find()->where('id = ' . $xmlUserDetails['user']['id'])->one();
         if($user_exists!=NULL){
             $model = $this->findModel($this->sanitizeXML($xmlUserDetails['user']['id']));
             $model->password  = md5($this->sanitizeXML($xmlUserDetails['user']['pin']));                         
@@ -615,18 +605,18 @@ class UserController extends Controller {
         $patient_exists = Patient::find()->where('mobile_phone = '.$user_phone)->one(); 
         //print_r($patient_exists);exit;
         if(($patient_exists) && ($patient_exists->update_uid !=NULL))
-        $user_exists = Users::find()->where('id = '.$patient_exists->update_uid.' AND password LIKE "'.md5($user_pass).'"')->one();        
+        $user_exists = User::find()->where('id = '.$patient_exists->update_uid.' AND password LIKE "'.md5($user_pass).'"')->one();        
         if($user_exists){
             $id         = $user_exists->id;            
-            $model      = Users::findOne($id);         
+            $model      = User::findOne($id);         
             $model->auth_key = rand(1000,9999);
             $model->save();     
             $userDetails = array('id'=>$id,'username'=>$user_exists->username,'auth_key'=>$model->auth_key);
-            $this->addLogEntry('user.changePin', 'Success', 9, 'User logged in sucesssfully, User Id : '.$id );
+            $this->addLogEntry('user.Login', 'Success', 9, 'User logged in sucesssfully, User Id : '.$id );
             $this->generateJsonResponce(array("response_code" => 100, "description" => $userDetails), 'ok', 200);               
         }
         else{
-            $this->addLogEntry('user.changePin', 'Success', 9, 'Failed login attempt with phone:'.$user_phone);
+            $this->addLogEntry('user.Login', 'Success', 9, 'Failed login attempt with phone:'.$user_phone);
             $this->generateJsonResponce(array("response_code" => 113, "description" => 'Login failed, please check your credentials.'), 'error', 400);               
         }     
     }
@@ -669,10 +659,10 @@ class UserController extends Controller {
             }
 
             //check if user exist 
-            $user_exists = Users::find()->where('id = ' . $xmlUserDetails['user']['user_id'] . ' AND password LIKE "' . md5($xmlUserDetails['user']['old_pin']) . '"')->one();
+            $user_exists = User::find()->where('id = ' . $xmlUserDetails['user']['user_id'] . ' AND password LIKE "' . md5($xmlUserDetails['user']['old_pin']) . '"')->one();
             if ($user_exists) {
                 $id = $user_exists->id;
-                $model = Users::findOne($id);
+                $model = User::findOne($id);
                 $model->password = md5($xmlUserDetails['user']['new_pin']);
                 $model->save();
                 $this->addLogEntry('user.changePin', 'Success', 9, 'User pin changed sucesssfully for user:' . $xmlUserDetails['user']['user_id']);
@@ -743,13 +733,28 @@ class UserController extends Controller {
                     $this->addLogEntry('user.logout', 'Failure', 9, 'Auth key missing.');
                     $this->generateJsonResponce(array("response_code" => 113, "description" => 'Auth key missing.'), 'error', 400);
           }       
-          
-            $model = $this->findModel($this->sanitizeXML($xmlUserDetails['user']['id']));
-            $model->auth_key  = NULL;
-            $model->save();     
+            //Authenticate access key before update
+            Yii::$app->AuthoriseUser->userId = $xmlUserDetails['user']['id'];
+            Yii::$app->AuthoriseUser->auth_key = $xmlUserDetails['user']['auth_key'];
+            $accessAuthorised =  Yii::$app->AuthoriseUser->checkAuthKey();
+            if($accessAuthorised){           
+            
+            $model = User::findOne($this->sanitizeXML($xmlUserDetails['user']['id']));
+            if($model!=NULL){
+                $model->auth_key  = NULL;
+                $model->save();   
+            }else{
+                $this->addLogEntry('user.logout', 'Success', 9, 'Invalid User Id : '.$xmlUserDetails['user']['id'] );
+                $this->generateJsonResponce(array("response_code" => 100, "description" => 'Invalid User Id'), 'ok', 200);                 
+            }
             
             $this->addLogEntry('user.logout', 'Success', 9, 'User logged out sucesssfully, User Id : '.$xmlUserDetails['user']['id'] );
-            $this->generateJsonResponce(array("response_code" => 100, "description" => 'Logged out'), 'ok', 200);  
+            $this->generateJsonResponce(array("response_code" => 100, "description" => 'Logged out'), 'ok', 200); 
+            }else{
+                $this->addLogEntry('user.logout', 'Success', 9, 'Un-authorised attempt to logout by UserId '.$xmlUserDetails['user']['id'] );
+                $this->generateJsonResponce(array("response_code" => 100, "description" => 'Un-authorised attempt to logout'), 'ok', 200);                 
+            }
+            
         
     }    
 
@@ -834,9 +839,8 @@ public function generateJsonResponce($response){
     }
 
     public function checkIfUserExists($uname) {
-        
-        //$user = Users::findByAttributes(array('username' => $uname));       
-        $user = Users::find()
+                
+        $user = User::find()
             ->where('username = "'.$uname.'"')
             ->one();
         return $user ? true : false; 
