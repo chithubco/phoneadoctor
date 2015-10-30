@@ -26,6 +26,9 @@ return [
             'class' => 'common\components\Twillio',
             'sid' => 'AC5046ffa9fb660692f30caca6d085c6c3',
             'token' => '86b9ea83d02fa841c4a09865bc56beac',            
-        ]
+            ],
+        'AuthoriseUser' => [
+            'class' => 'common\components\userAuthentication'
+            ],  
     ],
 ];

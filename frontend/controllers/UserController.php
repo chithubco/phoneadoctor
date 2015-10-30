@@ -454,8 +454,10 @@ class UserController extends Controller {
             //Authenticate user before update
             $user_exists = Users::find()->where('id = ' . $xmlUserDetails['user']['userinfo']['id'] . ' AND password LIKE "' . md5($xmlUserDetails['user']['userinfo']['password']) . '"')->one();
             //Authenticate access key before update
-            $access_code_exists = Users::find()->where('id = ' . $xmlUserDetails['user']['userinfo']['id'] . ' AND auth_key LIKE "' . $xmlUserDetails['user']['userinfo']['auth_key'] . '"')->one();
-            if ($access_code_exists) {
+            Yii::$app->AuthoriseUser->userId = $xmlUserDetails['user']['userinfo']['id'];
+            Yii::$app->AuthoriseUser->auth_key = $xmlUserDetails['user']['userinfo']['auth_key'];
+            $accessAuthorised =  Yii::$app->AuthoriseUser->checkAuthKey();
+            if($accessAuthorised){            
                 if ($user_exists) {
 
                     $model = $this->findModel($this->sanitizeXML($xmlUserDetails['user']['userinfo']['id']));
@@ -636,6 +638,9 @@ class UserController extends Controller {
      */    
     public function changePin($xmlUserDetails) {
         
+        Yii::$app->AuthoriseUser->userId   = $xmlUserDetails['user']['user_id'];
+        Yii::$app->AuthoriseUser->auth_key = $xmlUserDetails['user']['auth_key'];
+        
         if (!isset($xmlUserDetails['user']['old_pin']) || trim($xmlUserDetails['user']['old_pin']) == '') {            
             $this->addLogEntry('user.changePin', 'Failure', 9, 'Old pin missing.');
             $this->generateJsonResponce(array("response_code" => 113, "description" => 'Old pin missing.'), 'error', 400);            
@@ -653,10 +658,11 @@ class UserController extends Controller {
             $this->generateJsonResponce(array("response_code" => 113, "description" => 'Auth key missing.'), 'error', 400);
         }
         
-        //Authenticate access key before update
-        $access_code_exists = Users::find()->where('id = ' . $xmlUserDetails['user']['user_id'] . ' AND auth_key LIKE "' . $xmlUserDetails['user']['auth_key'] . '"')->one();
         
-        if ($access_code_exists) {
+        //Authenticate access key before update
+        $accessAuthorised =  Yii::$app->AuthoriseUser->checkAuthKey();
+        
+        if($accessAuthorised){        
             if ($xmlUserDetails['user']['new_pin'] != $xmlUserDetails['user']['confirm_pin']) {
                 $this->addLogEntry('user.changePin', 'Failure', 9, 'New pin and confirmed pin does not match.');
                 $this->generateJsonResponce(array("response_code" => 113, "description" => 'New pin and confirmed pin does not match.'), 'error', 400);
@@ -713,7 +719,13 @@ class UserController extends Controller {
 
             default:
                 break;
-        }      
+        }
+        
+       /* Yii::$app->AuthoriseUser->userId = 2;
+        Yii::$app->AuthoriseUser->auth_key = 6301;
+        $accessAuthorised =  Yii::$app->AuthoriseUser->checkAuthKey();
+        if($accessAuthorised)*/
+           
         
     }  
     
