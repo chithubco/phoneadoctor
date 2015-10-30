@@ -5,12 +5,11 @@ namespace frontend\controllers;
 
 
 use Yii;
-use common\models\Patient;
 use common\models\Users;
 use app\models\Settings;
 use app\models\ApiLog;
-use common\models\CalendarEvents;
-use common\models\Consultations;
+use common\models\Transactions;
+use common\models\PaymentAttempts;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -19,7 +18,7 @@ use common\components\XmlDomConstruct;
 include_once("common/components/xmlToArray.php");
 include_once("common/components/XmlDomConstruct.php");
 
-class ConsultationController extends Controller
+class DocumentController extends Controller
 {
     public $administrator_email;
     public $base_currency_code;
@@ -30,6 +29,8 @@ class ConsultationController extends Controller
     public $twilio_from_phone;
     public $twilio_account_sid;
     public $twilio_auth_token;
+    public $folder = "../gaiaehr/sites/default/patients";
+
     
     
    public function beforeAction($action) { 
@@ -91,14 +92,15 @@ class ConsultationController extends Controller
     public function actionApi(){
         
         $requestMethod =  Yii::$app->REST->get_request_method();
-        $connectionType = Yii::$app->REST->get_connection_type();                
+        $connectionType = Yii::$app->REST->get_connection_type();      
+        //var_dump($_REQUEST);          
        
         //use php://input to get the raw $_POST results
         $xmlInput = file_get_contents('php://input');
 
         //parse the incoming XML to array
-        $xmlArray = xml2array($xmlInput);
-        //echo'<pre>';print_r($xmlArray);echo'</pre>';
+        $xmlArray = $_POST;
+        //echo'<pre>';print_r($xmlInput);echo'</pre>';
 
         if (!isset($xmlArray['request']) || !isset($xmlArray['request_attr'])) {
             $this->generateJsonResponce(array("response_code" => 112, "description" => 'Invalid request, please check your input.'), 'error', 400);
@@ -108,13 +110,10 @@ class ConsultationController extends Controller
             $this->generateJsonResponce(array("response_code" => 111, "description" => 'Insecure connection.'), 'error', 406);
         }*/ else {  
             //determine the method
-            switch ($xmlArray['request_attr']['method']) {
-                case 'consultation.create':
-                    $this->createConsultation($xmlArray['request']);
+            switch ($xmlArray['method']) {
+                case 'document.create':
+                    $this->upload($xmlArray,$_FILES);
                     break;
-                case 'consultation.update':
-                    $this->updateConsultation($xmlArray['request']);
-                    break;                  
                 default:
                    $this->generateJsonResponce(array("response_code" => 999, "description" => 'Unknown method.'), 'error', 400);
                     break;
@@ -142,128 +141,71 @@ class ConsultationController extends Controller
             throw new NotFoundHttpException('The requested page does not exist.');
         }
     }
-
-
-    protected function findDoctors()
-    {
-        $model = Users::findAll("role_id = 2 AND online = 1");
-        return $model;
-        
-    }
-
-
-
-    protected function findfreeDoctor()
-    {
-                //Check for doctor with empty calendar
-                $command = Yii::$app->db->createCommand("SELECT users.id FROM users LEFT OUTER JOIN calendar_events ON 
-                    users.id=calendar_events.user_id WHERE calendar_events.user_id IS NULL AND users.role_id = 2 AND users.online = 1");
-                $result1= $command->queryAll();
-                
-                //if no doctor has empty calendar, look for one with the lest amount of schedule
-                if(empty($result1[0])){
-                $command = Yii::$app->db->createCommand("SELECT MIN(cnt) as cnt FROM (SELECT COUNT(*) cnt FROM calendar_events GROUP BY user_id) t;");
-                $result= $command->queryAll();
-
-                $command = Yii::$app->db->createCommand("SELECT * FROM calendar_events t1
-                            JOIN (SELECT user_id FROM calendar_events GROUP BY user_id HAVING COUNT(*) = {$result[0]['cnt']}) t2
-                            ON t1.user_id = t2.user_id;");
-                $result2= $command->queryAll();
-                return $result2[0]['user_id'];
-                
-                }else{
-                return $result1[0]['id'];
-                }
-        
-    }
-
-    protected function getSlot($doc)
-    {
-        //get doctor's calendar for the day
-            $calendar = CalendarEvents::find()->where("user_id = '$doc' and `start` >  '".date("Y-m-d H:i:s")."'
-            AND  `end` <  '".date("Y-m-d")."  23:59:00'")->one();
-            return $calendar;
-        //
-        
-    }
-
-    protected function getNearestSlot(){
-
-        $current_time = time();
-
-        $frac = 900;
-        $r = $current_time % $frac;
-        
-        $new_time = $current_time + ($frac-$r);
-        $new_date = date('Y-m-d H:i:s', $new_time);
-        return $new_date;
-    }
    
      /*
      * API Method : user.create
      * Purpose    : Create a user
      * Returns    : Result of insert operation
      */
-       public function createConsultation($xmlconsultationDetails) {
+       public function upload($xmldocumentDetails,$file) {
 
       //check the mandatory fields
  
-        if (!isset($xmlconsultationDetails['consultation']['note']) || trim($xmlconsultationDetails['consultation']['note']) == '') {
+        if (!isset($xmldocumentDetails['uid']) || trim($xmldocumentDetails['uid']) == '') {
             
-            $this->addLogEntry('consultation.create', 'Failure', 9, 'Consultation details missing.');
-            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Consultation details missing.'), 'error', 400);
+            $this->addLogEntry('document.create', 'Failure', 9, 'document user id missing.');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'document user id missing.'), 'error', 400);
             
-        }else if (!isset($xmlconsultationDetails['consultation']['user_id']) || trim($xmlconsultationDetails['consultation']['user_id']) == '') {
+        }else if (!isset($xmldocumentDetails['authkey']) || trim($xmldocumentDetails['authkey']) == '') {
             
-            $this->addLogEntry('consultation.create', 'Failure', 9, 'User missing.');
-            $this->generateJsonResponce(array("response_code" => 113, "description" => 'User missing.'), 'error', 400);
+            $this->addLogEntry('document.create', 'Failure', 9, 'Auth key missing.');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Auth key missing.'), 'error', 400);
             
-        } else {
-            $note      = $this->sanitizeXML($xmlconsultationDetails['consultation']['note']);
-            $user_id  = $this->sanitizeXML($xmlconsultationDetails['consultation']['user_id']);
-                
-                
-                //create a new Consultation
-                $model = new CalendarEvents();
-                $cons = new Consultations();
-                $user = Patient::find()->where("pubpid = '$user_id'")->one();
-               
-                $name = $user->fname." ".$user->mname." ".$user->lname;
-                //Select a doctor
-                $doc = $this->findfreeDoctor();
-                $calendar = $this->getSlot($doc);
-                if($calendar == NULL){
-                    //$current_date = date('d-M-Y g:i:s A');
-                
-                    $new_date = $this->getNearestSlot();
-                    $start = $new_date;
-                    $end = date("Y-m-d H:i:s",(strtotime($new_date) + (60*15)));
-                }else{
-                    $start = $calendar->end;
-                    $end = date("Y-m-d H:i:s",(strtotime($calendar->end) + (60*15)));
-                }
+        }else if (!isset($file['name']) || trim($file['name']) == '') {
+            
+            $this->addLogEntry('document.create', 'Failure', 9, 'File title missing.');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'File title missing.'), 'error', 400);
+            
+        }else {
+            $postdata = fopen( $_FILES[ 'data' ][ 'tmp_name' ], "r" );
+        /* Get file extension */
+        $title = $_FILES[ 'data' ][ 'name' ];
+        $extension = substr( $_FILES[ 'data' ][ 'name' ], strrpos( $_FILES[ 'data' ][ 'name' ], '.' ) );
+        if(!is_dir($this->folder."/".$xmldocumentDetails['uid']))
+            mkdir($this->folder."/".$xmldocumentDetails['uid']);
+        if(!is_dir($this->folder."/".$xmldocumentDetails['uid']."/uploaddoc"))
+            mkdir($this->folder."/".$xmldocumentDetails['uid']."/uploaddoc");
+        /* Generate unique name */
+        $filename = $this->folder."/".$xmldocumentDetails['uid']."/uploaddoc/".$title. uniqid() . $extension;
 
-                //$activate_key               = time() . rand(1000, 9999);echo 1;
-                $model->notes               = $note;
-                $model->user_id             = $doc;
-                $model->patient_id           = $user->pid;
-                $model->title               = $name;
-                $model->category            = 2;
-                $model->facility            = 1;
-                $model->billing_facillity   = 1;
-                $model->status              = '*';
-                $model->start            = $start;
-                $model->end   = $end;
-                
-   
-                $model->save(false);
+        /* Open a file for writing */
+        $fp = fopen( $filename, "w" );
 
-                $cons->details               = $note;
-                $cons->user_id             = $user_id;
-                $cons->save(false);
+        /* Read the data 1 KB at a time
+          and write to the file */
+        while( $data = fread( $postdata, 1024 ) )
+            fwrite( $fp, $data );
+
+        /* Close the streams */
+        fclose( $fp );
+        fclose( $postdata );
+
+        /* the result object that is sent to client*/
+        $model = new PatientDocuments;
+                        $model->load($xmlUserDetails);
+                        $model->title = $title;
+                        $model->validate();
+                        if($model->getErrors()){
+                            $this->addLogEntry('user.medicals', 'Failure', 9, 'Correct the validation errors.');
+                        $this->generateJsonResponce(array("response_code" => 113, "description" => 'Correct the validation errors.','errors'=>$model->getErrors()), 'error', 400);
+                        exit;
+                        }
+                        
+                        $model->save();
+        
                
-                $this->addLogEntry('consultation.create', 'Success', 3, 'consultation successfully created. Username :- ' . $name, $model->id);
-                $this->generateJsonResponce(array("response_code" => 100, "description" => 'Consultation successfully created.'), 'ok', 200);               
+                $this->addLogEntry('payment.create', 'Success', 3, 'payment successfully created. Username :- ' . $name, $model->id);
+                $this->generateJsonResponce(array("response_code" => 100, "description" => 'payment successfully created.'), 'ok', 200);               
                 exit;
             
          }
