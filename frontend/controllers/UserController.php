@@ -137,7 +137,10 @@ class UserController extends Controller {
                     break;                 
                 case 'user.logout':
                     $this->userLogout($xmlArray['request']);
-                    break;                
+                    break;                              
+                case 'user.getSecurityQues':
+                    $this->userLogout($xmlArray['request']);
+                    break;                 
                 
                 
                 default:
@@ -757,6 +760,7 @@ class UserController extends Controller {
             
         
     }    
+  
 
    public function addLogEntry($api_method, $type, $log_description, $notes = '', $user_id = 0, $trans_id = 0) {
         if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
