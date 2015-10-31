@@ -11,6 +11,7 @@ use Yii;
  * @property integer $user_id
  * @property integer $que_id
  * @property string $user_value
+ * @property string $custom_question
  */
 class UserSecurityQueValues extends \yii\db\ActiveRecord
 {
@@ -29,7 +30,8 @@ class UserSecurityQueValues extends \yii\db\ActiveRecord
     {
         return [
             [['user_id', 'que_id'], 'integer'],
-            [['user_value'], 'string', 'max' => 150]
+            [['user_value'], 'string', 'max' => 150],
+            [['custom_question'], 'string', 'max' => 200]
         ];
     }
 
@@ -43,6 +45,7 @@ class UserSecurityQueValues extends \yii\db\ActiveRecord
             'user_id' => 'User ID',
             'que_id' => 'Que ID',
             'user_value' => 'User Value',
+            'custom_question' => 'Custom Question',
         ];
     }
 }

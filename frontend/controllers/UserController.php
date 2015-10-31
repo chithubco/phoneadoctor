@@ -137,11 +137,7 @@ class UserController extends Controller {
                     break;                 
                 case 'user.logout':
                     $this->userLogout($xmlArray['request']);
-                    break;                              
-                case 'user.getSecurityQues':
-                    $this->userLogout($xmlArray['request']);
-                    break;                 
-                
+                    break;   
                 
                 default:
                    $this->generateJsonResponce(array("response_code" => 999, "description" => 'Unknown method.'), 'error', 400);
@@ -420,13 +416,17 @@ class UserController extends Controller {
                     // Record security que value
                     $model_security_que = new UserSecurityQueValues();
                     $model_security_que->user_id = $userId;
-                    $model_security_que->que_id = 1;
+                    if($xmlUserDetails['user']['patients']['security_que_id']!=NULL)
+                        $model_security_que->que_id = $xmlUserDetails['user']['patients']['security_que_id'];
+                    else
+                        $model_security_que->custom_question = $xmlUserDetails['user']['patients']['custom_question'];
+                    
                     $model_security_que->user_value = $this->sanitizeXML($xmlUserDetails['user']['patients']['security_que_value'], true); 
                     $model_security_que->save();   
                 }
                 
                 $this->addLogEntry('user.create', 'Success', 3, 'User successfully created. Username :- ' .$userName.',User Id:-'.$userId, $model->id);
-                $this->generateJsonResponce(array("response_code" => 100, "description" => 'User successfully created',"authkey"=>$model->auth_key), 'ok', 200);               
+                $this->generateJsonResponce(array("response_code" => 100, "description" => 'User successfully created',"user_id"=>$userId,"authkey"=>$model->auth_key), 'ok', 200);               
                 exit;
             }
          }
