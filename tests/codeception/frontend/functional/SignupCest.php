@@ -87,8 +87,7 @@ class SignupCest
         $signupPage->submit([
             'pin_code' => $pin_code,
             'verify_pin' => $verify_pin
-            
-        ]);
+            ]);
 
         return true;
 
