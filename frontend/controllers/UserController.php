@@ -403,14 +403,14 @@ class UserController extends Controller {
                     $xmlUserDetails['user']['patients']['create_date']  = (int) time();                                                 
                     $xmlUserDetails['user']['patients']['fname']        = $userFirstName;
                     $xmlUserDetails['user']['patients']['lname']        = $userLastName;
-                    $model_patients->load($xmlUserDetails['user']['patients']);
+                    $model_patients->setAttributes($xmlUserDetails['user']['patients']);
                     $model_patients->validate();
                     if($model_patients->getErrors()){
                         $this->addLogEntry('user.create', 'Failure', 9, 'Correct the validation errors.');
                     $this->generateJsonResponce(array("response_code" => 113, "description" => 'Correct the validation errors.','errors'=>$model->getErrors()), 'error', 400);
                     exit;
                     }                        
-                    $model_patients->save();                                
+                    $model_patients->save(false);                            
                 }
                 if($security_flag==1){
                     // Record security que value
