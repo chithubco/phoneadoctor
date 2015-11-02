@@ -20,6 +20,7 @@ use common\components\XmlDomConstruct;
 
 include_once("common/components/xmlToArray.php");
 include_once("common/components/XmlDomConstruct.php");
+include_once("common/components/services/Twilio.php");
 
 class UserController extends Controller {
 
@@ -270,7 +271,7 @@ class UserController extends Controller {
         $twilio_message = "Phone a doctor\nPlease use verification Code: " . $code . " to sign up." ;
         //---------------------- TWILIO ----------------------//         
         $twillio = Yii::$app->Twillio;        
-        $message = $twillio->getClient()->account->messages->sendMessage($this->twilio_from_phone, // From a valid Twilio number
+        $message = $twillio->getClient()->account->sms_messages->create($this->twilio_from_phone, // From a valid Twilio number
             $xmlUserDetails['user']['phone'], // Text this number
             $twilio_message
         );
@@ -523,13 +524,18 @@ class UserController extends Controller {
                         $model->save();
                     }                        
                         
-                        $patient_exists = Patient::find()->where('update_uid = ' . $xmlUserDetails['user']['userinfo']['id'])->one();
+                        $patient_exists = Patient::find()->where('create_uid = ' . $xmlUserDetails['user']['userinfo']['id'])->one();
                         if($patient_exists){
                         $model_patients = Patient::findOne($patient_exists->pid);
                         $xmlUserDetails['user']['patients']['fname']        = $userFirstName;
-                        $xmlUserDetails['user']['patients']['lname']        = $userLastName;                        
-                    
-                        $model_patients->save();
+                        $xmlUserDetails['user']['patients']['lname']        = $userLastName;
+                        $model_patients->setAttributes($xmlUserDetails['user']['patients']);                        
+                        if($model_patients->getErrors()){
+                            $this->addLogEntry('user.update', 'Failure', 9, 'Correct the validation errors.');
+                            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Correct the validation errors.','errors'=>$model->getErrors()), 'error', 400);
+                            exit;
+                        }                        
+                        $model_patients->save(false);                
                         }
                         $this->addLogEntry('user.update', 'Success', 3, 'User info successfully updated. Username :- ' . $model->username, $model->id);
                         $this->generateJsonResponce(array("response_code" => 100, "description" => 'User info successfully updated.'), 'ok', 200);
