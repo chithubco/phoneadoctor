@@ -586,7 +586,7 @@ class UserController extends Controller {
                 $mail_title     = $mail_content->title;
                 $mail_tmp_body  = $mail_content->content;
                 $mail_body      = str_replace(array('{DATE}', '{PHONE}', '{PASSWORD}', '{USER}'),
-                                              array(date('m-d-Y'), $user_exists->phone, $this->sanitizeXML($xmlUserDetails['user']['pin']), $patient_exists->firstname." ".$patient_exists->lastname),
+                                              array(date('m-d-Y'), $patient_exists->mobile_phone, $this->sanitizeXML($xmlUserDetails['user']['pin']), $patient_exists->fname." ".$patient_exists->lname),
                                               $mail_tmp_body);											 
                 
                 $this->sendSystemEmail($mail_body, $mail_title, $email);                    
@@ -876,13 +876,19 @@ public function generateJsonResponce($response){
     
     public function sendSystemEmail($message, $subject, $to, $cc = array()) {
         error_reporting(0);
-
-        $email = Yii::app()->email;
+        /*$email = Yii::app()->email;
         $email->to  = $to;
         $email->bcc = (!empty($cc)) ? $cc : null;
         $email->subject = $subject;
         $email->message = $message;
-        $email->send();
+        $email->send();*/
+        Yii::$app->mailer->compose()
+        ->setFrom($this->administrator_email)
+        ->setTo($to)
+        ->setSubject($subject)
+        ->setTextBody('Plain text content')
+        ->setHtmlBody($message)
+        ->send();
     }    
        
 }
