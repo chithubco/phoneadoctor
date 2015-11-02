@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 namespace frontend\controllers;
+//namespace api\modules\v1\controllers;
 
 use Yii;
 use app\models\User;
@@ -558,6 +559,7 @@ class UserController extends Controller {
      * Returns    : Result success or failed
      */      
     public function createPassword($xmlUserDetails){
+       $email='';
        if (!isset($xmlUserDetails['user']['id']) || trim($xmlUserDetails['user']['id']) == '') {            
             $this->addLogEntry('user.create password', 'Failure', 9, 'User ID missing.');
             $this->generateJsonResponce(array("response_code" => 113, "description" => 'User ID missing.'), 'error', 400);            
@@ -571,8 +573,13 @@ class UserController extends Controller {
             $model->password  = md5($this->sanitizeXML($xmlUserDetails['user']['pin']));                         
             $model->save(); 
             //Send mail to registered user
-            $patient_exists = Patient::find()->where('update_uid = ' . $xmlUserDetails['user']['id'])->one();
-            $email = $patient_exists->email;
+            $patient_exists = Patient::find()->where('create_uid = ' . $xmlUserDetails['user']['id'])->one();            
+            if($patient_exists!=NULL){
+                $email = $patient_exists->email;   
+            }else{            
+                $this->addLogEntry('user.create password', 'Failure', 9, 'user creation failed.');
+                $this->generateJsonResponce(array("response_code" => 113, "description" => 'user creation: step 3 failed.'), 'error', 400);            
+            } 
            
             if($email != NULL){
                 $mail_content   = Cms::find()->where('name LIKE "patient_signup"')->one();
@@ -613,8 +620,8 @@ class UserController extends Controller {
         //check if user exist 
         $patient_exists = Patient::find()->where('mobile_phone = '.$user_phone)->one(); 
         //print_r($patient_exists);exit;
-        if(($patient_exists) && ($patient_exists->update_uid !=NULL))
-        $user_exists = User::find()->where('id = '.$patient_exists->update_uid.' AND password LIKE "'.md5($user_pass).'"')->one();        
+        if(($patient_exists) && ($patient_exists->create_uid !=NULL))
+        $user_exists = User::find()->where('id = '.$patient_exists->create_uid.' AND password LIKE "'.md5($user_pass).'"')->one();        
         if($user_exists){
             $id         = $user_exists->id;            
             $model      = User::findOne($id);         
