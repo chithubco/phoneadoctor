@@ -13,7 +13,9 @@ use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
+use yii\helpers\Url;
 
+require_once("common/components/Send.php");
 /**
  * Site controller
  */
@@ -22,6 +24,10 @@ class SiteController extends Controller
     /**
      * @inheritdoc
      */
+    public $session;
+
+    
+
     public function behaviors()
     {
         return [
@@ -83,19 +89,56 @@ class SiteController extends Controller
      */
     public function actionLogin()
     {
+        
         if (!\Yii::$app->user->isGuest) {
-            return $this->goHome();
+            //return $this->goHome();
         }
+        $resp = '';
+        if($_POST){
+            if($this->login($_POST['phone'],$_POST['pin']))
+                return $this->redirect(Url::toRoute('/consultation/index'));
+        
+        $resp = $response->body->description;
+        }
+            //var_dump($response->body);
 
-        $model = new LoginForm();
-        if ($model->load(Yii::$app->request->post()) && $model->login()) {
-            return $this->goBack();
-        } else {
-            return $this->render('login', [
-                'model' => $model,
-            ]);
+        
+        return $this->render('login', [
+            'model' => $model,
+            'response'=>$resp
+        ]);
+    
+    }
+
+    public function login($phone,$pin){
+        $response = pull('user/api','
+            <request method="user.login">
+          <user>
+          <phone>'.$phone.'</phone>    
+          <pin>'.$pin.'</pin>    
+          </user>
+        </request>');
+        if($response->body->response_code==100){
+            $session = Yii::$app->session;
+            // close a session
+            $session->close();
+
+            // destroys all data registered to a session.
+            $session->destroy();
+
+            $session->open();
+            $session['id'] = $response->body->description->id;
+            $session['authkey'] = $response->body->description->auth_key;
+            $session['username'] = $response->body->description->username;
+            return true;
+        }else{
+            return false;
         }
     }
+
+
+
+    
 
     /**
      * Logs out the current user.
@@ -149,18 +192,156 @@ class SiteController extends Controller
      */
     public function actionSignup()
     {
-        var_dump($_POST);
+        
         $model = new SignupForm();
-        if ($model->load(Yii::$app->request->post())) {
-            if ($user = $model->signup()) {
-                if (Yii::$app->getUser()->login($user)) {
-                    return $this->goHome();
-                }
-            }
+        
+        
+        
+           
+        if($_POST['phone']){
+            //if (!$this->session->isActive)
+            // open a session
+            //$this->session->open();
+            /*$response = pull('user/api','<request method="user.sendCode">
+              <user>
+              <phone>'.$_POST['phone'].'</phone>   
+              </user>
+            </request>');*/
+            $session = Yii::$app->session;
+            $session->set('phone',$_POST['phone']);
+            //$_SESSION['phone'] = $_POST['phone'];
+            
+            return $this->redirect('signup2');
+
         }
 
         return $this->render('signup', [
             'model' => $model,
+        ]);
+    }
+
+    public function actionSignup2()
+    {
+        
+        $model = new SignupForm();
+        $session = Yii::$app->session;
+        $resp='';
+        if($_POST['verify']){
+            
+            $response = pull('user/api','
+                <request method="user.verifyPhone">
+                  <user>
+                  <phone>'.$session['phone'].'</phone>    
+                  <verification_code>'.$_POST['verify'].'</verification_code>    
+                  </user>
+                </request>
+                ');
+            if($response->body->response_code==100){
+            
+
+            // check if a session is already open
+            
+            return $this->redirect('signup3');
+            }
+            $resp = $response->body->description;
+            //$session['phone'] = $_POST['phone'];
+            
+            //return $this->redirect('signup3');
+
+        }
+        //var_dump($session['phone']);
+        return $this->render('signup2', [
+            'model' => $model,
+            'phone'=>$session['phone'],
+            'response'=>$resp
+        ]);
+    }
+
+    public function actionSignup3()
+    {
+        
+        $model = new SignupForm();
+        $session = Yii::$app->session;
+        $resp='';
+        if($_POST){
+            
+            $response = pull('user/api','
+                <request method="user.create">
+                  <user>
+                  <userinfo>
+                  <fname>'.$_POST['firstname'].'</fname>    
+                  <lname>'.$_POST['lastname'].'</lname>
+                  <password>123456</password>
+                  </userinfo>
+                  <patients>
+                  <mobile_phone>'.$session['phone'].'</mobile_phone>    
+                  <email>'.$_POST['email'].'</email>
+                  <security_que_value>'.$_POST['question'].'</security_que_value>
+                  <DOB>'.$_POST['age'].'</DOB>
+                  <address></address>    
+                  <sex>'.$_POST['sex'].'</sex>
+                  </patients>
+                  </user>
+                </request>
+               
+                ');
+            
+            if($response->body->response_code==100){
+            $session->set('id',$response->body->user_id);
+            $session->set('authkey',$response->body->authkey);
+            
+            return $this->redirect('signup4');
+            }
+            $resp = $response->body->description;
+            //$session['phone'] = $_POST['phone'];
+            
+            //return $this->redirect('signup3');
+
+        }
+        //var_dump($session['phone']);
+        return $this->render('signup3', [
+            'model' => $model,
+            'phone'=>$session['phone'],
+            'response'=>$resp
+        ]);
+    }
+
+    public function actionSignup4()
+    {
+        
+        $model = new SignupForm();
+        $session = Yii::$app->session;
+        $resp='';
+        if($_POST['pin']){
+            
+            $response = pull('user/api','
+                <request method="user.createPassword">
+                  <user>
+                  <id>'.$session['id'].'</id>    
+                  <pin>'.$_POST['pin'].'</pin>    
+                  </user>
+                </request>
+                ');
+            if($response->body->response_code==100){
+            
+
+            // check if a session is already open
+            
+            if($this->login($session['id'],$_POST['pin']))
+                return $this->redirect(Url::toRoute('/consultation/index'));
+
+            }
+            $resp = $response->body->description;
+            //$session['phone'] = $_POST['phone'];
+            
+            //return $this->redirect('signup3');
+
+        }
+        //var_dump($session['phone']);
+        return $this->render('signup4', [
+            'model' => $model,
+            'phone'=>$session['phone'],
+            'response'=>$resp
         ]);
     }
 

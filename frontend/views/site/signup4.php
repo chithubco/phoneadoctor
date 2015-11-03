@@ -15,18 +15,13 @@ $this->params['breadcrumbs'][] = $this->title;
             
             <div class="reg-cnt">
                 <h2>Sign Up</h2>
-                <h4>Enter phone Number and Pin Code</h4>
+                <h4>Enter Pin Code</h4>
                 <?php $form = ActiveForm::begin(['id' => 'form-signup']); ?>
             
                 
                     <div class="form-group">
                         <div class="input-group">
-                          <div class="input-group-addon">
-                           <select name="code" class="sel-bx">
-                            <option>+234</option>
-                           </select>
-                        </div>
-                         <input type="text" class="form-control" name="phone">      
+                         <input type="password" class="form-control" name="pin">      
                         </div>                      
                     </div>
                    <p>A six digit code will be sent to you mobile phone</p>
@@ -36,4 +31,3 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?php ActiveForm::end(); ?>
             </div>  
         </div>
-

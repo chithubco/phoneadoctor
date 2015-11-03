@@ -20,10 +20,10 @@ AppAsset::register($this);
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <?= Html::csrfMetaTags() ?>
     <title><?= Html::encode($this->title) ?></title>
-    <link href="http://localhost/phoneadoc/Login_files/bootstrap.min.css" rel="stylesheet">
-    <link href="http://localhost/phoneadoc/Login_files/font-awesome.min.css" rel="stylesheet">
+    <link href="<?php echo \Yii::getAlias('@web') ?>/css/bootstrap.min.css" rel="stylesheet">
+    <link href="<?php echo \Yii::getAlias('@web') ?>/css/font-awesome.min.css" rel="stylesheet">
     
-    <link href="http://localhost/phoneadoc/Login_files/style.css" rel="stylesheet">
+    <link href="<?php echo \Yii::getAlias('@web') ?>/css/style.css" rel="stylesheet">
     <?php $this->head() ?>
 </head>
 <body>
@@ -36,9 +36,10 @@ AppAsset::register($this);
     </div>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="Login_files/jquery.min.js"></script>
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="Login_files/bootstrap.min.js"></script>
+    <script src="<?php echo \Yii::getAlias('@web') ?>/js/bootstrap.min.js"></script>
   <?php $this->endBody() ?>
 </body>
 

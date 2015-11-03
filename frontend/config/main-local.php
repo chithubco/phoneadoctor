@@ -4,7 +4,7 @@ $config = [
     'components' => [
     	'urlManager' => [
             'enablePrettyUrl' => true,
-            'showScriptName' => false,
+            'showScriptName' => true,
             'enableStrictParsing' => false,
             
         ],

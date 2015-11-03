@@ -15,22 +15,18 @@ $this->params['breadcrumbs'][] = $this->title;
             
             <div class="reg-cnt">
                 <h2>Sign Up</h2>
-                <h4>Enter phone Number and Pin Code</h4>
+                <h4>Enter the verification code</h4>
+                <?php echo $phone ?><br />
+                <?php echo $response ?>
                 <?php $form = ActiveForm::begin(['id' => 'form-signup']); ?>
             
                 
                     <div class="form-group">
                         <div class="input-group">
-                          <div class="input-group-addon">
-                           <select name="code" class="sel-bx">
-                            <option>+234</option>
-                           </select>
+                          <div class="form-group">
+                            <input class="form-control verfied" type="password" name="verify" placeholder="verfied">
                         </div>
-                         <input type="text" class="form-control" name="phone">      
-                        </div>                      
-                    </div>
-                   <p>A six digit code will be sent to you mobile phone</p>
-                   <p> please enter the the code for verification</p> 
+                        <p> *  please enter the 6 digit verification code received on your mobile phone. <a href="#">Resend Verification</a></p>
                     <?= Html::submitButton('Next', ['class' => 'btn btn-default', 'name' => 'signup-button']) ?>
                    
                 <?php ActiveForm::end(); ?>

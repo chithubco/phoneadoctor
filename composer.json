@@ -28,9 +28,10 @@
         "yiisoft/yii2": ">=2.0.5",
         "yiisoft/yii2-bootstrap": "*",
         "yiisoft/yii2-swiftmailer": "*",
-       "yiisoft/yii2-date-picker-widget" : "~1.0",
          "yiisoft/yii2-jui": "~2.0.0",
-         "yiisoft/yii2-twilio": "*"
+        "linslin/yii2-curl": "*",
+        "segpacto/yii2-httpfull": "*",
+        "bryglen/yii2-twillio": "dev-master"
 
     },
     "require-dev": {

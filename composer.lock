@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "71bf7a5e48e822167d82afc7910322ea",
-    "content-hash": "96c86ec10da786e925858a9b2791520c",
+    "hash": "21e5b0b074c7297c77958973f971c957",
+    "content-hash": "f71fa38325e1489b2eabfd66d1122eef",
     "packages": [
         {
             "name": "bower-asset/bootstrap",
@@ -99,6 +99,31 @@
                 "jquery",
                 "library"
             ]
+        },
+        {
+            "name": "bower-asset/jquery-ui",
+            "version": "1.11.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/components/jqueryui.git",
+                "reference": "c34f8dbf3ba57b3784b93f26119f436c0e8288e1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/components/jqueryui/zipball/c34f8dbf3ba57b3784b93f26119f436c0e8288e1",
+                "reference": "c34f8dbf3ba57b3784b93f26119f436c0e8288e1",
+                "shasum": ""
+            },
+            "require": {
+                "bower-asset/jquery": ">=1.6"
+            },
+            "type": "bower-asset-library",
+            "extra": {
+                "bower-asset-main": [
+                    "jquery-ui.js"
+                ],
+                "bower-asset-ignore": []
+            }
         },
         {
             "name": "bower-asset/jquery.inputmask",
@@ -228,6 +253,49 @@
             "time": "2015-03-08 21:03:11"
         },
         {
+            "name": "bryglen/yii2-twillio",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/bryglen/yii2-twillio.git",
+                "reference": "b39a6c0b36ab1d0b6f71db860e0ed31322a0746e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/bryglen/yii2-twillio/zipball/b39a6c0b36ab1d0b6f71db860e0ed31322a0746e",
+                "reference": "b39a6c0b36ab1d0b6f71db860e0ed31322a0746e",
+                "shasum": ""
+            },
+            "require": {
+                "twilio/sdk": "5.2.x-dev",
+                "yiisoft/yii2": "*"
+            },
+            "type": "yii2-extension",
+            "autoload": {
+                "psr-4": {
+                    "bryglen\\twillio\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Bryan Tan",
+                    "email": "bryantan16@gmail.com"
+                }
+            ],
+            "description": "yii 2 twillio integration",
+            "keywords": [
+                " extension",
+                " php",
+                "twillio",
+                "yii2"
+            ],
+            "time": "2015-08-05 12:05:19"
+        },
+        {
             "name": "cebe/markdown",
             "version": "dev-master",
             "source": {
@@ -332,18 +400,55 @@
             "time": "2013-11-30 08:25:19"
         },
         {
-            "name": "iqria/extdirect",
+            "name": "linslin/yii2-curl",
             "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "https://github.com/IQ-RIA/extdirect.git",
-                "reference": "2510487a488c57c705035deac8e2cd18b7ab2161"
+                "url": "https://github.com/linslin/Yii2-Curl.git",
+                "reference": "c5b574fa4a3c685642e0f67ac02a9f089abd5f30"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/IQ-RIA/extdirect/zipball/2510487a488c57c705035deac8e2cd18b7ab2161",
-                "reference": "2510487a488c57c705035deac8e2cd18b7ab2161",
+                "url": "https://api.github.com/repos/linslin/Yii2-Curl/zipball/c5b574fa4a3c685642e0f67ac02a9f089abd5f30",
+                "reference": "c5b574fa4a3c685642e0f67ac02a9f089abd5f30",
                 "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "yiisoft/yii2": "*"
+            },
+            "type": "yii2-extension",
+            "autoload": {
+                "psr-4": {
+                    "linslin\\yii2\\curl\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Nils Gajsek",
+                    "email": "info@linslin.org"
+                }
+            ],
+            "description": "Easy and nice cURL extension with RESTful support for Yii2",
+            "keywords": [
+                " curl",
+                "extension",
+                "restful",
+                "yii2"
+            ],
+            "time": "2015-10-27 12:02:48"
+        },
+        {
+            "name": "segpacto/yii2-httpfull",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/segpacto/yii2-httpfull",
+                "reference": "acc6e10f7910a4140b60682fd4fb2bce652727b3"
             },
             "require": {
                 "yiisoft/yii2": "*"
@@ -351,29 +456,26 @@
             "type": "yii2-extension",
             "autoload": {
                 "psr-4": {
-                    "iqria\\extdirect\\": ""
+                    "HttpFull\\": ""
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
             "license": [
-                "BSD"
+                "MIT"
             ],
             "authors": [
                 {
-                    "name": "Stanislav Hudkov",
-                    "email": "stanislav.hudkov@iqria.com",
-                    "role": "Creator"
+                    "name": "Ivan Martinez",
+                    "email": "segpacto@yahoo.es"
                 }
             ],
-            "description": "Yii2 Ext.Direct implementation.",
-            "homepage": "http://iqria.com/",
+            "description": "Extension conversion of 'Httpful' to yii2 extension",
             "keywords": [
-                "ext-direct",
-                "extjs",
-                "yii2",
-                "yii2-extjs"
+                " curl",
+                " httpfull",
+                "extension",
+                "yii2"
             ],
-            "time": "2015-09-18 07:23:28"
+            "time": "2015-10-24 18:57:26"
         },
         {
             "name": "swiftmailer/swiftmailer",
@@ -429,6 +531,56 @@
             "time": "2015-09-04 05:47:20"
         },
         {
+            "name": "twilio/sdk",
+            "version": "5.2.x-dev",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/twilio/twilio-php.git",
+                "reference": "398b2e88cb7294d567b90a85caef830c54c5490c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/twilio/twilio-php/zipball/398b2e88cb7294d567b90a85caef830c54c5490c",
+                "reference": "398b2e88cb7294d567b90a85caef830c54c5490c",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2.1"
+            },
+            "require-dev": {
+                "mockery/mockery": ">=0.7.2",
+                "phpunit/phpunit": "3.7.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Services_Twilio": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Kevin Burke",
+                    "email": "kevin@twilio.com"
+                },
+                {
+                    "name": "Kyle Conroy",
+                    "email": "kyle+pear@twilio.com"
+                }
+            ],
+            "description": "A PHP wrapper for Twilio's API",
+            "homepage": "http://github.com/twilio/twilio-php",
+            "keywords": [
+                "api",
+                "sms",
+                "twilio"
+            ],
+            "time": "2014-01-31 09:37:11"
+        },
+        {
             "name": "yiisoft/yii2",
             "version": "dev-master",
             "source": {
@@ -438,7 +590,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/yiisoft/yii2-framework/zipball/16e71b7b2359e2feb76d58d3a7223bbf4dc78b45",
+                "url": "https://api.github.com/repos/yiisoft/yii2-framework/zipball/dc867577cec3d397ed1a8ced1c2584857261329f",
                 "reference": "16e71b7b2359e2feb76d58d3a7223bbf4dc78b45",
                 "shasum": ""
             },
@@ -527,7 +679,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/yiisoft/yii2-bootstrap/zipball/7c6b244d9cfd58a5a10cad9853edc090ffd479b1",
+                "url": "https://api.github.com/repos/yiisoft/yii2-bootstrap/zipball/09a5bfe72c0141ad26281848f1ae9c3f42541f20",
                 "reference": "7c6b244d9cfd58a5a10cad9853edc090ffd479b1",
                 "shasum": ""
             },
@@ -613,6 +765,56 @@
                 "yii2"
             ],
             "time": "2015-09-25 10:48:24"
+        },
+        {
+            "name": "yiisoft/yii2-jui",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/yiisoft/yii2-jui.git",
+                "reference": "022637087b4f8b0d321e697cc0a01b09cd2d7345"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/yiisoft/yii2-jui/zipball/022637087b4f8b0d321e697cc0a01b09cd2d7345",
+                "reference": "022637087b4f8b0d321e697cc0a01b09cd2d7345",
+                "shasum": ""
+            },
+            "require": {
+                "bower-asset/jquery-ui": "1.11.*@stable",
+                "yiisoft/yii2": ">=2.0.4"
+            },
+            "type": "yii2-extension",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.0.x-dev"
+                },
+                "asset-installer-paths": {
+                    "npm-asset-library": "vendor/npm",
+                    "bower-asset-library": "vendor/bower"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "yii\\jui\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Qiang Xue",
+                    "email": "qiang.xue@gmail.com"
+                }
+            ],
+            "description": "The Jquery UI extension for the Yii framework",
+            "keywords": [
+                "jQuery UI",
+                "yii2"
+            ],
+            "time": "2015-09-29 10:49:11"
         },
         {
             "name": "yiisoft/yii2-swiftmailer",
@@ -1156,7 +1358,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/fzaninotto/Faker/zipball/f6b2ebd8c462494083bfea6c087f79da36503930",
+                "url": "https://api.github.com/repos/fzaninotto/Faker/zipball/4dd192e778f283bd1f86b89e7dd79c7ee41809d6",
                 "reference": "f6b2ebd8c462494083bfea6c087f79da36503930",
                 "shasum": ""
             },
@@ -1457,6 +1659,50 @@
             "time": "2013-10-04 15:03:51"
         },
         {
+            "name": "iqria/extdirect",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/IQ-RIA/extdirect.git",
+                "reference": "2510487a488c57c705035deac8e2cd18b7ab2161"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/IQ-RIA/extdirect/zipball/2510487a488c57c705035deac8e2cd18b7ab2161",
+                "reference": "2510487a488c57c705035deac8e2cd18b7ab2161",
+                "shasum": ""
+            },
+            "require": {
+                "yiisoft/yii2": "*"
+            },
+            "type": "yii2-extension",
+            "autoload": {
+                "psr-4": {
+                    "iqria\\extdirect\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD"
+            ],
+            "authors": [
+                {
+                    "name": "Stanislav Hudkov",
+                    "email": "stanislav.hudkov@iqria.com",
+                    "role": "Creator"
+                }
+            ],
+            "description": "Yii2 Ext.Direct implementation.",
+            "homepage": "http://iqria.com/",
+            "keywords": [
+                "ext-direct",
+                "extjs",
+                "yii2",
+                "yii2-extjs"
+            ],
+            "time": "2015-09-18 07:23:28"
+        },
+        {
             "name": "monolog/monolog",
             "version": "dev-master",
             "source": {
@@ -1466,7 +1712,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Seldaek/monolog/zipball/fa74e171dc0de177452bb3e311853c35c148dbb8",
+                "url": "https://api.github.com/repos/Seldaek/monolog/zipball/35932023f135f97cbe84bef1b290555c4ccdb804",
                 "reference": "fa74e171dc0de177452bb3e311853c35c148dbb8",
                 "shasum": ""
             },
@@ -2035,7 +2281,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/browser-kit/zipball/35bde11fc81eecb2409eb60c5f7920659ad7e00a",
+                "url": "https://api.github.com/repos/symfony/browser-kit/zipball/3cd50e89af7f8c7c5b57c2ac95938576bfe39bb5",
                 "reference": "35bde11fc81eecb2409eb60c5f7920659ad7e00a",
                 "shasum": ""
             },
@@ -2089,7 +2335,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/console/zipball/89a795226477f66745e8ea10415e769304114920",
+                "url": "https://api.github.com/repos/symfony/console/zipball/34038aba56a9c2aacc166fb9d5c402fd10843c4f",
                 "reference": "89a795226477f66745e8ea10415e769304114920",
                 "shasum": ""
             },
@@ -2195,7 +2441,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/dom-crawler/zipball/93bfc2cc94cdfc16c728c663658117a25acd1aa5",
+                "url": "https://api.github.com/repos/symfony/dom-crawler/zipball/0aa83d9bd840c2e3d02b3ad3a440ce9f7c1cb917",
                 "reference": "93bfc2cc94cdfc16c728c663658117a25acd1aa5",
                 "shasum": ""
             },
@@ -2247,7 +2493,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/event-dispatcher/zipball/41899a21d196332ab23e40f76e1276f2b7aa4d0d",
+                "url": "https://api.github.com/repos/symfony/event-dispatcher/zipball/22db6ac518817c5459e704dbd21727777a764f32",
                 "reference": "41899a21d196332ab23e40f76e1276f2b7aa4d0d",
                 "shasum": ""
             },
@@ -2350,7 +2596,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/process/zipball/82fb0fce303439d147a20a7426326876407a41de",
+                "url": "https://api.github.com/repos/symfony/process/zipball/7881472d4b374a3b48988ca8621f15245a667f95",
                 "reference": "82fb0fce303439d147a20a7426326876407a41de",
                 "shasum": ""
             },
@@ -2396,7 +2642,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/yaml/zipball/ff7f886a33f5b7a26a94d62f6e14bb9cf0e3bf5d",
+                "url": "https://api.github.com/repos/symfony/yaml/zipball/d542bb62d3d1c2337ab8c35b179c28f7f55e97e6",
                 "reference": "ff7f886a33f5b7a26a94d62f6e14bb9cf0e3bf5d",
                 "shasum": ""
             },
@@ -2442,7 +2688,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/yiisoft/yii2-codeception/zipball/d2c91b5a5dbde172f9adbbde10b0a523d1bfc388",
+                "url": "https://api.github.com/repos/yiisoft/yii2-codeception/zipball/22e981b8c93d9882ccd333ba001767a6b99aa9a1",
                 "reference": "d2c91b5a5dbde172f9adbbde10b0a523d1bfc388",
                 "shasum": ""
             },
@@ -2487,7 +2733,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/yiisoft/yii2-debug/zipball/a8eba1bb9a7163df5120fb07c0c000e298a8bcf0",
+                "url": "https://api.github.com/repos/yiisoft/yii2-debug/zipball/7ba01f0049f691bd76259e10bdede0709323ffc2",
                 "reference": "a8eba1bb9a7163df5120fb07c0c000e298a8bcf0",
                 "shasum": ""
             },
@@ -2628,7 +2874,7 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "iqria/extdirect": 20,
+        "bryglen/yii2-twillio": 20,
         "codeception/codeception": 20
     },
     "prefer-stable": false,
