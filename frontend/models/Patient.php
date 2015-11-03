@@ -10,6 +10,7 @@ use Yii;
  * @property string $pid
  * @property integer $create_uid
  * @property integer $update_uid
+ * @property integer $user_id
  * @property string $create_date
  * @property string $update_date
  * @property string $title
@@ -77,7 +78,7 @@ class Patient extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['create_uid', 'update_uid', 'allow_leave_msg', 'allow_voice_msg', 'allow_mail_msg', 'allow_sms', 'allow_email', 'allow_immunization_registry', 'allow_immunization_info_sharing', 'allow_health_info_exchange', 'allow_patient_web_portal', 'rating'], 'integer'],
+            [['create_uid', 'update_uid', 'user_id', 'allow_leave_msg', 'allow_voice_msg', 'allow_mail_msg', 'allow_sms', 'allow_email', 'allow_immunization_registry', 'allow_immunization_info_sharing', 'allow_health_info_exchange', 'allow_patient_web_portal', 'rating'], 'integer'],
             [['create_date', 'update_date', 'DOB'], 'safe'],
             [['image', 'qrcode'], 'string'],
             [['title', 'sex', 'zipcode', 'language', 'employer_postal_code'], 'string', 'max' => 10],
@@ -97,6 +98,7 @@ class Patient extends \yii\db\ActiveRecord
             'pid' => 'Pid',
             'create_uid' => 'create user ID',
             'update_uid' => 'update user ID',
+            'user_id' => 'User ID',
             'create_date' => 'create date',
             'update_date' => 'last update date',
             'title' => 'Title Mr. Sr.',
