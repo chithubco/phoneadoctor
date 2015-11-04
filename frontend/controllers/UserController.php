@@ -395,7 +395,7 @@ class UserController extends Controller {
                 } else if ($email_exists && $security_flag == 0) {
 
                     $this->addLogEntry('user.create', 'Failure', 9, 'Email [' . $email . '] already in use.');
-                    $this->generateJsonResponce(array("response_code" => 113, "description" => 'Email already in use.'), 'error', 400);
+                    $this->generateJsonResponce(array("response_code" => 113, "description" => 'Email [' . $email . '] already in use.'), 'error', 400);
                 } else if ($phone_exists) {
 
                     $this->addLogEntry('user.create', 'Failure', 9, 'Phone [' . $userPhone . '] already in use.');
@@ -451,7 +451,7 @@ class UserController extends Controller {
                 }
             } else {
                 $this->addLogEntry('user.create', 'Failure', 9, 'Mobile number not verified for phone:' . $userPhone);
-                $this->generateJsonResponce(array("response_code" => 113, "description" => 'Step 2 failed, Your mobile number is not yet verified, please verify.'), 'error', 400);
+                $this->generateJsonResponce(array("response_code" => 113, "description" => 'Step 2 failed, Your mobile number is not yet verified, redirect:user.verifyphone'), 'error', 400);
             }
         }
     }
@@ -637,13 +637,14 @@ class UserController extends Controller {
         }   
             
         $user_exists = User::find()->where('id = ' . $xmlUserDetails['user']['id'])->one();
-        //Check if pin is already set
-        if ($user_exists->password != NULL) {
-            $this->addLogEntry('user.create password', 'Failure', 9, 'Pin already set.');
-            $this->generateJsonResponce(array("response_code" => 113, "description" => 'You have already set your pin, please login to change the same.'), 'error', 400);
-        }
         
-        if($user_exists!=NULL){          
+        if($user_exists!=NULL){
+            
+            //Check if pin is already set
+            if ($user_exists->password != NULL) {
+                $this->addLogEntry('user.create password', 'Failure', 9, 'Pin already set.');
+                $this->generateJsonResponce(array("response_code" => 113, "description" => 'You have already set your pin, please login to change the same.'), 'error', 400);
+            }            
             
             $model = $this->findModel($this->sanitizeXML($xmlUserDetails['user']['id']));
             $model->password  = md5($this->sanitizeXML($xmlUserDetails['user']['pin']));                         
@@ -670,8 +671,8 @@ class UserController extends Controller {
             $this->addLogEntry('user.create password', 'Success', 3, 'User sign up completed for ' . $model->username, $model->id);
             $this->generateJsonResponce(array("response_code" => 100, "description" => 'User sign up completed for ' . $model->username), 'ok', 200);        
         }else{
-            $this->addLogEntry('user.create password', 'Failure', 9, 'User does not exist.');
-            $this->generateJsonResponce(array("response_code" => 113, "description" => 'User creation failed'), 'error', 400); 
+            $this->addLogEntry('user.create password', 'Failure', 9, 'User does not exist. redirect:user.verifyphone');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'User does not exist.redirect:user.verifyphone'), 'error', 400); 
         }
     }
 
