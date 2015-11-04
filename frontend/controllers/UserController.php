@@ -683,7 +683,7 @@ class UserController extends Controller {
             $this->generateJsonResponce(array("response_code" => 100, "description" => $userDetails), 'ok', 200);               
         }
         else{
-            $this->addLogEntry('user.Login', 'Success', 9, 'Failed login attempt with phone:'.$user_phone);
+            $this->addLogEntry('user.Login', 'Failure', 9, 'Failed login attempt with phone:'.$user_phone);
             $this->generateJsonResponce(array("response_code" => 113, "description" => 'Login failed, please check your credentials.'), 'error', 400);               
         }     
     }
@@ -735,11 +735,11 @@ class UserController extends Controller {
                 $this->addLogEntry('user.changePin', 'Success', 9, 'User pin changed sucesssfully for user:' . $xmlUserDetails['user']['user_id']);
                 $this->generateJsonResponce(array("response_code" => 100, "description" => 'User pin changed sucesssfully.'), 'ok', 200);
             } else {
-                $this->addLogEntry('user.changePin', 'Success', 9, 'User pin change failed for user:' . $xmlUserDetails['user']['user_id']);
+                $this->addLogEntry('user.changePin', 'Failure', 9, 'User pin change failed for user:' . $xmlUserDetails['user']['user_id']);
                 $this->generateJsonResponce(array("response_code" => 113, "description" => 'Your old pin is incorrect.'), 'error', 400);
             }
         } else {
-            $this->addLogEntry('user.changePin', 'Success', 9, 'Change user pin access key authentication failed ');
+            $this->addLogEntry('user.changePin', 'Failure', 9, 'Change user pin access key authentication failed ');
             $this->generateJsonResponce(array("response_code" => 113, "description" => 'Your access key is invalid.'), 'error', 400);
         }
     }
@@ -884,7 +884,7 @@ class UserController extends Controller {
             $this->addLogEntry('user.logout', 'Success', 9, 'User logged out sucesssfully, User Id : '.$xmlUserDetails['user']['id'] );
             $this->generateJsonResponce(array("response_code" => 100, "description" => 'Logged out'), 'ok', 200); 
             }else{
-                $this->addLogEntry('user.logout', 'Success', 9, 'Un-authorised attempt to logout by UserId '.$xmlUserDetails['user']['id'] );
+                $this->addLogEntry('user.logout', 'Failure', 9, 'Un-authorised attempt to logout by UserId '.$xmlUserDetails['user']['id'] );
                 $this->generateJsonResponce(array("response_code" => 100, "description" => 'Un-authorised attempt to logout'), 'ok', 200);                 
             }
             
@@ -900,15 +900,11 @@ class UserController extends Controller {
         } else {
             $remote_ip = $_SERVER['REMOTE_ADDR'];
         }        
-       
-        /*$t      = microtime(true);
-        $micro  = sprintf("%06d",($t - floor($t)) * 1000000);         
-        $d      = new \DateTime( date('Y-m-d H:i:s.' . $micro, $t) );       
-        $date   = $d->format("Y-m-d H:i:s.u");*/
+
         $date   = date("Y-m-d H:i:s");
         
         $api_log = new ApiLog;
-        $api_log->api_method_id             = 1;//$this->api_methods[$api_method];
+        $api_log->api_method                = $api_method;//$this->api_methods[$api_method];
         $api_log->type                      = $type;
         $api_log->api_log_description_id    = $log_description;
         $api_log->notes                     = $notes;
@@ -993,12 +989,7 @@ public function generateJsonResponce($response){
     
     public function sendSystemEmail($message, $subject, $to, $cc = array()) {
         error_reporting(0);
-        /*$email = Yii::app()->email;
-        $email->to  = $to;
-        $email->bcc = (!empty($cc)) ? $cc : null;
-        $email->subject = $subject;
-        $email->message = $message;
-        $email->send();*/
+        
         Yii::$app->mailer->compose()
         ->setFrom($this->administrator_email)
         ->setTo($to)
