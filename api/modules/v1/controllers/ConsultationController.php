@@ -211,7 +211,7 @@ class ConsultationController extends Controller
      * Purpose    : Create a user
      * Returns    : Result of insert operation
      */
-       public function createConsultation($xmlconsultationDetails) {
+public function createConsultation($xmlconsultationDetails) {
 
       //check the mandatory fields
  
@@ -229,12 +229,16 @@ class ConsultationController extends Controller
             $note      = $this->sanitizeXML($xmlconsultationDetails['consultation']['note']);
             $user_id  = $this->sanitizeXML($xmlconsultationDetails['consultation']['user_id']);
                 
-                
+            //Authenticate access key before update
+            Yii::$app->AuthoriseUser->userId    = $xmlconsultationDetails['consultation']['user_id'];
+            Yii::$app->AuthoriseUser->auth_key  = $xmlconsultationDetails['consultation']['auth_key'];
+            $accessAuthorised =  Yii::$app->AuthoriseUser->checkAuthKey();
+            if($accessAuthorised){                
+            
                 //create a new Consultation
                 $model = new CalendarEvents();
                 $cons = new Consultations();
-                $user = Patient::find()->where("user_id = '$user_id'")->one();
-
+                $user = Patient::find()->where("pubpid = '$user_id'")->one();
                
                 $name = $user->fname." ".$user->mname." ".$user->lname;
                 //Select a doctor
@@ -269,16 +273,14 @@ class ConsultationController extends Controller
                 $cons->details               = $note;
                 $cons->user_id             = $user_id;
                 $cons->save(false);
-                $doctor = Users::find()->where("id = '$doc'")->one();
                
                 $this->addLogEntry('consultation.create', 'Success', 3, 'consultation successfully created. Username :- ' . $name, $model->id);
-                $this->generateJsonResponce(array("response_code" => 100, "description" => 'Consultation successfully created.',"data"=>array(
-                        "doctor"=>$doctor->title." ".$doctor->fname." ".$doctor->lname,
-                        "start"=>$start,
-                        "end"=>$end
-                    )), 'ok', 200);               
+                $this->generateJsonResponce(array("response_code" => 100, "description" => 'Consultation successfully created.'), 'ok', 200);               
                 exit;
-            
+            } else {
+                $this->addLogEntry('consultation.create', 'Failure', 9, 'Create consultation auth key authentication failed for user :' .$user_id);
+                $this->generateJsonResponce(array("response_code" => 113, "description" => 'Your auth key is invalid.'), 'error', 400);
+            }            
          }
        }
        
