@@ -30,8 +30,9 @@ class ConsultationController extends \yii\web\Controller
             $response = pull('consultation/api','
             	<request method="consultation.create">
 				  <consultation>
-				  <note>'.$_POST['question'].'</note>    
-				  <user_id>32</user_id>  
+				  <note>'.$_POST['question'].'</note>  
+                  <user_id>'.$session['id'].'</user_id>    
+                  <auth_key>'.$session['authkey'].'</auth_key>       
 				  </consultation>
 				</request>
                 ');

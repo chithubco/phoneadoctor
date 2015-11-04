@@ -17,7 +17,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 <h2>Sign Up</h2>
                 <h4>Enter phone Number and Pin Code</h4>
                 <?php $form = ActiveForm::begin(['id' => 'form-signup']); ?>
-            
+            <?php echo $response ?>
                 
                     <div class="form-group">
                         <div class="input-group">

@@ -7,6 +7,7 @@ use yii\bootstrap\NavBar;
 use yii\widgets\Breadcrumbs;
 use frontend\assets\AppAsset;
 use common\widgets\Alert;
+use yii\helpers\Url;
 AppAsset::register($this);
 ?>
 <?php $this->beginPage() ?>
@@ -46,7 +47,7 @@ AppAsset::register($this);
                         </div>
                         <div class="navbar-collapse collapse">
                             <ul class="nav navbar-nav navbar-right">
-                                <li><a href="index.php/consultation/create" title="Consult a Doctor"><img src="<?php echo \Yii::getAlias('@web') ?>/images/consult-a-doctor-top.png" alt="consult a doctor"></a></li>
+                                <li><a href="<?php echo Url::toRoute('/consultation/create') ?>" title="Consult a Doctor"><img src="<?php echo \Yii::getAlias('@web') ?>/images/consult-a-doctor-top.png" alt="consult a doctor"></a></li>
                                 <!--
                                 <li><a href="#" title="Search a Doctor"><img src="<?php echo \Yii::getAlias('@web') ?>/images/search-a-doctor-top.png" alt="search a doctor"></a></li> -->
                                 <li><a href="#" title="Manage Medical History"><img src="<?php echo \Yii::getAlias('@web') ?>/images/manage-medical-history-top.png" alt="manage medical history"></a></li>
@@ -87,7 +88,7 @@ AppAsset::register($this);
                     
                     
                     <div class="accordion">
-                        <div class="accordion-head col-xs-12 active"><span><img src="<?php echo \Yii::getAlias('@web') ?>/images/consult-a-doctor.png" alt="consult a doctor"></span><a href="index.php/consultation/create">Consult a doctor</a></div>
+                        <div class="accordion-head col-xs-12 active"><span><img src="<?php echo \Yii::getAlias('@web') ?>/images/consult-a-doctor.png" alt="consult a doctor"></span><a href="<?php echo Url::toRoute('/consultation/create') ?>">Consult a doctor</a></div>
                         <div class="accordion-head col-xs-12"><span><img src="<?php echo \Yii::getAlias('@web') ?>/images/search-a-doctor.png" alt="search a doctor"></span><a href="#">Search a doctor</a></div>
                         <div class="accordion-head col-xs-12"><span><img src="<?php echo \Yii::getAlias('@web') ?>/images/manage-medical-history.png" alt="manage medical history"></span><a href="#">Manage Medical History</a></div>
                         <div class="accordion-head col-xs-12"><span><img src="<?php echo \Yii::getAlias('@web') ?>/images/make-payment.png" alt="make payment"></span><a href="#">Make Payment</a></div>

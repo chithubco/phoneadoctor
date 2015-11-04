@@ -18,14 +18,19 @@ $this->params['breadcrumbs'][] = $this->title;
                 <h4>Enter Pin Code</h4>
                 <?php $form = ActiveForm::begin(['id' => 'form-signup']); ?>
             
-                
+                Pin:
                     <div class="form-group">
                         <div class="input-group">
                          <input type="password" class="form-control" name="pin">      
                         </div>                      
                     </div>
-                   <p>A six digit code will be sent to you mobile phone</p>
-                   <p> please enter the the code for verification</p> 
+                    Confirm Pin:
+                    <div class="form-group">
+                        <div class="input-group">
+                         <input type="password" class="form-control" name="confirm_pin">      
+                        </div>                      
+                    </div>
+                  
                     <?= Html::submitButton('Next', ['class' => 'btn btn-default', 'name' => 'signup-button']) ?>
                    
                 <?php ActiveForm::end(); ?>

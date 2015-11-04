@@ -29,6 +29,7 @@ class ConsultationController extends Controller
     public $twilio_from_phone;
     public $twilio_account_sid;
     public $twilio_auth_token;
+    public $close_time = "17:00:00";
     
     
    public function beforeAction($action) { 
@@ -64,6 +65,10 @@ class ConsultationController extends Controller
                 case 'twilio_from_phone':
                     $this->twilio_from_phone = $setting->value;
                     break;  
+
+                case 'close_time':
+                    $this->close_time = $setting->value;
+                    break; 
                 
                 default:
                     break;
@@ -155,24 +160,27 @@ class ConsultationController extends Controller
     protected function findfreeDoctor()
     {
                 //Check for doctor with empty calendar
-                $command = Yii::$app->db->createCommand("SELECT users.id FROM users LEFT OUTER JOIN calendar_events ON 
-                    users.id=calendar_events.user_id WHERE calendar_events.user_id IS NULL AND users.role_id = 2 AND users.online = 1");
+                $command = Yii::$app->db->createCommand("SELECT users.id FROM users WHERE id NOT IN (SELECT user_id FROM calendar_events  
+                    WHERE calendar_events.user_id IS NULL and (calendar_events.start >  '".date("Y-m-d H:i:s")."'
+            AND  calendar_events.end <  '".date("Y-m-d")." ".$this->close_time."') )  AND users.role_id = 2 AND users.online = 1 ");
                 $result1= $command->queryAll();
+                //var_dump($result1);
                 
                 //if no doctor has empty calendar, look for one with the lest amount of schedule
                 if(empty($result1[0])){
-                $command = Yii::$app->db->createCommand("SELECT MIN(cnt) as cnt FROM (SELECT COUNT(*) cnt FROM calendar_events GROUP BY user_id) t;");
+                $command = Yii::$app->db->createCommand("SELECT MIN(cnt) as cnt, user_id FROM (SELECT COUNT(*) cnt, user_id FROM calendar_events
+                 WHERE (calendar_events.start >  '".date("Y-m-d")." 09:00:00'
+            AND  calendar_events.end <  '".date("Y-m-d")." ".$this->close_time."') GROUP BY user_id) t;");
                 $result= $command->queryAll();
 
-                $command = Yii::$app->db->createCommand("SELECT * FROM calendar_events t1
-                            JOIN (SELECT user_id FROM calendar_events GROUP BY user_id HAVING COUNT(*) = {$result[0]['cnt']}) t2
-                            ON t1.user_id = t2.user_id;");
-                $result2= $command->queryAll();
-                return $result2[0]['user_id'];
+                
+                return $result[0]['user_id'];
                 
                 }else{
                 return $result1[0]['id'];
+                
                 }
+               //exit;
         
     }
 
@@ -180,7 +188,7 @@ class ConsultationController extends Controller
     {
         //get doctor's calendar for the day
             $calendar = CalendarEvents::find()->where("user_id = '$doc' and `start` >  '".date("Y-m-d H:i:s")."'
-            AND  `end` <  '".date("Y-m-d")."  23:59:00'")->one();
+            AND  `end` <  '".date("Y-m-d")."  ".$this->close_time."'")->one();
             return $calendar;
         //
         
@@ -225,7 +233,8 @@ class ConsultationController extends Controller
                 //create a new Consultation
                 $model = new CalendarEvents();
                 $cons = new Consultations();
-                $user = Patient::find()->where("pubpid = '$user_id'")->one();
+                $user = Patient::find()->where("user_id = '$user_id'")->one();
+
                
                 $name = $user->fname." ".$user->mname." ".$user->lname;
                 //Select a doctor
@@ -260,9 +269,14 @@ class ConsultationController extends Controller
                 $cons->details               = $note;
                 $cons->user_id             = $user_id;
                 $cons->save(false);
+                $doctor = Users::find()->where("id = '$doc'")->one();
                
                 $this->addLogEntry('consultation.create', 'Success', 3, 'consultation successfully created. Username :- ' . $name, $model->id);
-                $this->generateJsonResponce(array("response_code" => 100, "description" => 'Consultation successfully created.'), 'ok', 200);               
+                $this->generateJsonResponce(array("response_code" => 100, "description" => 'Consultation successfully created.',"data"=>array(
+                        "doctor"=>$doctor->title." ".$doctor->fname." ".$doctor->lname,
+                        "start"=>$start,
+                        "end"=>$end
+                    )), 'ok', 200);               
                 exit;
             
          }

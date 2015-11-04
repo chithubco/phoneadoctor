@@ -16,6 +16,7 @@ use yii\filters\AccessControl;
 use yii\helpers\Url;
 
 require_once("common/components/Send.php");
+require_once("common/components/checkLogin.php");
 /**
  * Site controller
  */
@@ -193,36 +194,43 @@ class SiteController extends Controller
     public function actionSignup()
     {
         
+        if(check())
+            return $this->redirect(Url::toRoute('/consultation/index'));
         $model = new SignupForm();
         
         
-        
+         $resp='';
            
         if($_POST['phone']){
             //if (!$this->session->isActive)
             // open a session
             //$this->session->open();
-            /*$response = pull('user/api','<request method="user.sendCode">
+            $response = pull('user/api','<request method="user.sendCode">
               <user>
-              <phone>'.$_POST['phone'].'</phone>   
+              <phone>'.$_POST['code'].$_POST['phone'].'</phone>   
               </user>
-            </request>');*/
+            </request>');
             $session = Yii::$app->session;
-            $session->set('phone',$_POST['phone']);
+            $session->set('phone',$_POST['code'].$_POST['phone']);
             //$_SESSION['phone'] = $_POST['phone'];
+            if($response->body->response_code==100){
             
             return $this->redirect('signup2');
+            }
+            $resp = $response->body->description;
 
         }
 
         return $this->render('signup', [
             'model' => $model,
+            'response'=>$resp
         ]);
     }
 
     public function actionSignup2()
     {
-        
+        if(check())
+            return $this->redirect(Url::toRoute('/consultation/index'));
         $model = new SignupForm();
         $session = Yii::$app->session;
         $resp='';
@@ -236,6 +244,7 @@ class SiteController extends Controller
                   </user>
                 </request>
                 ');
+
             if($response->body->response_code==100){
             
 
@@ -259,7 +268,8 @@ class SiteController extends Controller
 
     public function actionSignup3()
     {
-        
+        if(check())
+            return $this->redirect(Url::toRoute('/consultation/index'));
         $model = new SignupForm();
         $session = Yii::$app->session;
         $resp='';
@@ -308,7 +318,8 @@ class SiteController extends Controller
 
     public function actionSignup4()
     {
-        
+        if(check())
+            return $this->redirect(Url::toRoute('/consultation/index'));
         $model = new SignupForm();
         $session = Yii::$app->session;
         $resp='';
@@ -318,7 +329,8 @@ class SiteController extends Controller
                 <request method="user.createPassword">
                   <user>
                   <id>'.$session['id'].'</id>    
-                  <pin>'.$_POST['pin'].'</pin>    
+                  <pin>'.$_POST['pin'].'</pin> 
+                   <confirm_pin>'.$_POST['confirm_pin'].'</confirm_pin>   
                   </user>
                 </request>
                 ');
@@ -327,7 +339,7 @@ class SiteController extends Controller
 
             // check if a session is already open
             
-            if($this->login($session['id'],$_POST['pin']))
+            if($this->login($session['phone'],$_POST['pin']))
                 return $this->redirect(Url::toRoute('/consultation/index'));
 
             }

@@ -1,4 +1,4 @@
-<?php
+<?php        
 return [
     'components' => [
         'db' => [
@@ -22,8 +22,13 @@ return [
         'xmlDom' => [
              'class' => 'common\components\XmlDomConstructCustomizedForAPI'
                   ],  
-        'twiliosms' => [
-             'class' => 'common\components\twiliosms'
-                  ],
+        'Twillio' => [
+            'class' => 'common\components\Twillio',
+            'sid' => 'AC5046ffa9fb660692f30caca6d085c6c3',
+            'token' => '86b9ea83d02fa841c4a09865bc56beac',            
+            ],
+        'AuthoriseUser' => [
+            'class' => 'common\components\userAuthentication'
+            ],  
     ],
 ];
