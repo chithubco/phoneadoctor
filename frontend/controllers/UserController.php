@@ -5,6 +5,7 @@ namespace frontend\controllers;
 //namespace api\modules\v1\controllers;
 
 use Yii;
+use yii\db\Query;
 use app\models\User;
 use app\models\UserSearch;
 use app\models\Patient;
@@ -17,7 +18,6 @@ use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use common\components\XmlDomConstruct;
-
 
 include_once("common/components/xmlToArray.php");
 include_once("common/components/XmlDomConstruct.php");
@@ -136,7 +136,7 @@ class UserController extends Controller {
                     break;  
                 case 'user.recoverPin':
                     $this->RecoverPin($xmlArray['request']);
-                    break;                  
+                    break;                                  
                 case 'user.login':
                     $this->userLogin($xmlArray['request']);
                     break;                 
@@ -350,7 +350,7 @@ class UserController extends Controller {
             $userFirstName = $this->sanitizeXML($xmlUserDetails['user']['userinfo']['fname']);
             $userLastName = $this->sanitizeXML($xmlUserDetails['user']['userinfo']['lname']);
 
-            if ($this->checkPhoneVerification($userPhone)) {
+            if ($this->validatePhone($userPhone) && $this->checkPhoneVerification($userPhone)) {
 
                 if (!isset($xmlUserDetails['user']['userinfo']['username']) || trim($xmlUserDetails['user']['userinfo']['username']) == '') {
                     $userName = preg_replace('/\s+/', '', $userFullName); //remove any whitespaces
@@ -380,9 +380,8 @@ class UserController extends Controller {
                     }
                     $security_flag = 1;
                 }
-
                 //check if phone no. is already in use
-                $phone_exists = Patient::find()->where('mobile_phone LIKE "' . $userPhone . '"')->one();
+                    $phone_exists = Patient::find()->where('mobile_phone LIKE "' . $userPhone . '"')->one();           
 
                 if (preg_match('/[^A-Za-z0-9]/', $userName)) {
 
@@ -520,7 +519,8 @@ class UserController extends Controller {
                     }
 
                     //check if phone no. is already in use
-                    $phone_exists = Patient::find()->where('mobile_phone LIKE "' . $userPhone . '"')->all();
+                    $phone_exists = 0;
+                    $phone_exists = Patient::find()->where('mobile_phone LIKE "' . $userPhone . '"')->all();                    
                     $phone_check_flag = count($phone_exists) == 1 ? true : false;                    
                     
 
@@ -598,10 +598,17 @@ class UserController extends Controller {
             Yii::$app->AuthoriseUser->auth_key = $xmlUserDetails['user']['auth_key'];
             $accessAuthorised =  Yii::$app->AuthoriseUser->checkAuthKey();
             if($accessAuthorised){ 
-                $patient_exists = Patient::find()->where('user_id = ' . $xmlUserDetails['user']['id'])->one();
-                $this->addLogEntry('user.getuserinfo', 'Success', 3, 'User info successfully returned. Username :- ' . $patient_exists->fname,$xmlUserDetails['user']['id']);
-                $this->generateJsonResponce(array("response_code" => 113, "description" => $patient_exists->attributes), 'error', 400);
-                //echo "<pre>";print_r($patient_exists->attributes);exit;
+                $query = new Query;
+                $query->select('fname, lname,sex,DOB,mobile_phone,email')
+                        ->from('patient')
+                        ->where('user_id = ' . $xmlUserDetails['user']['id']);
+
+                $command = $query->createCommand();
+                $patient_exists = $command->queryOne();
+                //$patient_exists = Patient::find()->where('user_id = ' . $xmlUserDetails['user']['id'])->one();
+                $this->addLogEntry('user.getuserinfo', 'Success', 3, 'User info successfully returned. Username :- ' . $patient_exists['fname'],$xmlUserDetails['user']['id']);
+                $this->generateJsonResponce(array("response_code" => 113, "description" => $patient_exists), 'error', 400);
+                
             } else {
                 $this->addLogEntry('user.getuserinfo', 'Failure', 9, 'Fetch user info auth key authentication failed for user :' . $xmlUserDetails['user']['id']);
                 $this->generateJsonResponce(array("response_code" => 113, "description" => 'Your auth key is invalid.'), 'error', 400);
@@ -695,7 +702,8 @@ class UserController extends Controller {
         $user_pass          = $this->sanitizeXML($xmlUserDetails['user']['pin'], true);
         $user_exists        = $patient_exists =0;
         //check if user exist 
-        $patient_exists = Patient::find()->where('mobile_phone = '.$user_phone)->one(); 
+        if($this->validatePhone($user_phone))
+        $patient_exists = Patient::find()->where('mobile_phone = "'.$user_phone.'"')->one(); 
         //print_r($patient_exists);exit;
         if(($patient_exists) && ($patient_exists->user_id !=NULL))
         $user_exists = User::find()->where('id = '.$patient_exists->user_id.' AND password LIKE "'.md5($user_pass).'"')->one();        
@@ -770,28 +778,68 @@ class UserController extends Controller {
         }
     }
     
-     /*
+    
+    /*
+     * API Method : consultation.appointmentNotification
+     * Purpose    : send notification SMSto users
+     * Returns    : Result success or failed
+          
+    public function appointmentNotification($xmlUserDetails) {
+
+        if (!isset($xmlUserDetails['user']['date']) || trim($xmlUserDetails['user']['date']) == '') {
+            $this->addLogEntry('consultation.appointmentNotification', 'Failure', 9, 'Date is missing.');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Date is missing.'), 'error', 400);
+        } else if (!isset($xmlUserDetails['user']['doctor']) || trim($xmlUserDetails['user']['doctor']) == '') {
+            $this->addLogEntry('consultation.appointmentNotification', 'Failure', 9, 'Doctor name missing');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Name of the doctor is missing'), 'error', 400);
+        } else if (!isset($xmlUserDetails['user']['sessionId']) || trim($xmlUserDetails['user']['sessionId']) == '') {
+            $this->addLogEntry('consultation.appointmentNotification', 'Failure', 9, 'sessionId missing');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'sessionId is missing'), 'error', 400);
+        } else if (!isset($xmlUserDetails['user']['userId']) || trim($xmlUserDetails['user']['userId']) == '') {
+            $this->addLogEntry('consultation.appointmentNotification', 'Failure', 9, 'sessionId missing');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'userId is missing'), 'error', 400);
+        }
+        
+        $doctor = $xmlUserDetails['user']['doctor'];
+        $appDate = $xmlUserDetails['user']['date'];
+        $sessionId = $xmlUserDetails['user']['sessionId'];
+        $userId = $xmlUserDetails['user']['userId'];
+        // Get user phone
+        $UserCondition = 'user_id = ' . $userId;
+        $user_check = Patient::find()->where($UserCondition)->one();
+        if ($user_check != NULL) {
+            $userPhone = $user_check->mobile_phone;
+
+            $twilio_message = "Phone a doctor: Appointment Notification\nHi ".$user_check->fname . " " . $user_check->lname."\n Your appointment with Dr " . $doctor . " is schedule on " . $appDate . "\n your session Id is: " . $sessionId;
+            //---------------------- TWILIO ----------------------//            
+            $twillio = Yii::$app->Twillio;
+            $message = $twillio->getClient()->account->sms_messages->create($this->twilio_from_phone, // From a valid Twilio number
+                    $userPhone, // Text this number
+                    $twilio_message
+            );
+            $this->addLogEntry('consultation.recoverPin', 'Success', 3, 'Appointment nofificatiopn sms sent for userId: ' . $user_check->fname . " " . $user_check->lname, $userId);
+            $this->generateJsonResponce(array("response_code" => 100, "description" => 'Pin reset and sms sent for user ' . $user_check->fname . " " . $user_check->lname), 'ok', 200);
+        } else {
+            $this->addLogEntry('consultation.recoverPin', 'Failure', 9, 'No user exists with the details provided.');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'No user exists with the userId provided.'), 'error', 400);
+        }
+    }*/ 
+
+
+    /*
      * API Method : user.recoverPin
      * Purpose    : recover user pin
      * Returns    : Result success or failed
      */    
     public function recoverPin($xmlUserDetails) {
-        
+
         if (isset($xmlUserDetails['user']['recovery_option'])) {
             $recovery_option = $xmlUserDetails['user']['recovery_option'];
-        }else{
+        } else {
             $this->addLogEntry('user.recoverPin', 'Failure', 9, 'Recovery option missing.');
-            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Recovery option missing.'), 'error', 400);            
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Recovery option missing.'), 'error', 400);
         }
-        if (!isset($xmlUserDetails['user']['security_que_value']) || trim($xmlUserDetails['user']['security_que_value']) == '') {
-            $this->addLogEntry('user.recoverPin', 'Failure', 9, 'Answer for security question missing.');
-            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Answer for security question missing.'), 'error', 400);
-        } else if (!isset($xmlUserDetails['user']['security_que_id']) || trim($xmlUserDetails['user']['security_que_id']) == '') {
-            if (!isset($xmlUserDetails['user']['custom_question']) || trim($xmlUserDetails['user']['custom_question']) == ''){
-                $this->addLogEntry('user.recoverPin', 'Failure', 9, 'Both Security question Id and custom qusetion missing,please enter any one value. .');
-                $this->generateJsonResponce(array("response_code" => 113, "description" => 'Both Security question Id and custom qusetion missing.'), 'error', 400);            
-            }            
-        }        
+       
         switch ($recovery_option) {
             case 'email':
                 if (!isset($xmlUserDetails['user']['email']) || trim($xmlUserDetails['user']['email']) == '') {
@@ -803,47 +851,38 @@ class UserController extends Controller {
                 if (!isset($xmlUserDetails['user']['phone']) || trim($xmlUserDetails['user']['phone']) == '') {
                     $this->addLogEntry('user.recoverPin', 'Failure', 9, 'Phone no. missing.');
                     $this->generateJsonResponce(array("response_code" => 113, "description" => 'Phone number missing.'), 'error', 400);
+                } else if (!isset($xmlUserDetails['user']['security_que_value']) || trim($xmlUserDetails['user']['security_que_value']) == '') {
+                    $this->addLogEntry('user.recoverPin', 'Failure', 9, 'Answer for security question missing.');
+                    $this->generateJsonResponce(array("response_code" => 113, "description" => 'Answer for security question missing.'), 'error', 400);
+                } else if (!isset($xmlUserDetails['user']['security_que_id']) || trim($xmlUserDetails['user']['security_que_id']) == '') {
+                    if (!isset($xmlUserDetails['user']['custom_question']) || trim($xmlUserDetails['user']['custom_question']) == '') {
+                        $this->addLogEntry('user.recoverPin', 'Failure', 9, 'Both Security question Id and custom qusetion missing,please enter any one value. .');
+                        $this->generateJsonResponce(array("response_code" => 113, "description" => 'Both Security question Id and custom qusetion missing.'), 'error', 400);
+                    }
                 }
                 break;
 
             default:
                 break;
         }
-        
+
         // Get User Id to cross check question
-        $UserCondition = $recovery_option=='email'?'email LIKE "'.$xmlUserDetails['user']['email'].'"':'mobile_phone LIKE "'.$xmlUserDetails['user']['phone'].'"';
-        $user_check   = Patient::find()->where($UserCondition)->one();
-       
+        $UserCondition = $recovery_option == 'email' ? 'email LIKE "' . $xmlUserDetails['user']['email'] . '"' : 'mobile_phone LIKE "' . $xmlUserDetails['user']['phone'] . '"';        
+        $user_check = Patient::find()->where($UserCondition)->one();
+
         if ($user_check != NULL) {
-            $userId = $user_check->user_id;
-        } else {
-            $this->addLogEntry('user.recoverPin', 'Failure', 9, 'No user exists with the details provided.');
-            $this->generateJsonResponce(array("response_code" => 113, "description" => 'No user exists with the details provided.'), 'error', 400);
-        }
-        
-        
-        // Check security question
-        if($xmlUserDetails['user']['security_que_id']!=NULL){
-        //check if user exist and question value is valid
-            $user_exists = UserSecurityQueValues::find()->where('que_id = ' . $xmlUserDetails['user']['security_que_id'] . ' AND user_id = '.$userId.' AND user_value LIKE "' . $xmlUserDetails['user']['security_que_value'] . '"')->one();            
-            
-        }else{
-        //check if user exist and question value is valid with custom que
-            $user_exists = UserSecurityQueValues::find()->where('user_id = '.$userId.' AND user_value LIKE "' . $xmlUserDetails['user']['security_que_value'] . '"')->one();                        
-        }
-        
-       if ($user_exists != NULL) {
             $userId = $user_check->user_id;
 
             //Reset password        
             $model = User::findOne($userId);
+            
             $newPin = rand(10000, 99999);
             $model->password = md5($newPin);
             $model->save();
 
             switch ($recovery_option) {
                 case 'email':
-                    
+
                     $mail_content = Cms::find()->where('name LIKE "recover_pin"')->one();
                     $mail_title = $mail_content->title;
                     $mail_tmp_body = $mail_content->content;
@@ -851,20 +890,32 @@ class UserController extends Controller {
                     $this->sendSystemEmail($mail_body, $mail_title, $xmlUserDetails['user']['email']);
 
                     $this->addLogEntry('user.recoverPin', 'Success', 3, 'Pin reset and email sent for userId: ' . $userId, $model->id);
-                    $this->generateJsonResponce(array("response_code" => 100, "description" => 'Pin reset and email sent for user ' . $user_check->fname . " " . $user_check->lname), 'ok', 200);
+                    $this->generateJsonResponce(array("response_code" => 100, "description" => 'Your pin is reset and email sent for user ' . $user_check->fname . " " . $user_check->lname), 'ok', 200);
 
                     break;
                 case 'phone':
-                    
-                    $twilio_message = "Phone a doctor\nYour pin with phoneadoctor is reset, please use your new Pin: " . $newPin . " to login.";
-                    //---------------------- TWILIO ----------------------//
-                    $twillio = Yii::$app->Twillio;
-                    $message = $twillio->getClient()->account->sms_messages->create($this->twilio_from_phone, // From a valid Twilio number
-                            $xmlUserDetails['user']['phone'], // Text this number
-                            $twilio_message
-                    );
-                    $this->addLogEntry('user.recoverPin', 'Success', 3, 'Pin reset and sms sent for userId: ' . $userId, $model->id);
-                    $this->generateJsonResponce(array("response_code" => 100, "description" => 'Pin reset and sms sent for user ' . $user_check->fname . " " . $user_check->lname), 'ok', 200);
+                    // Check security question
+                    if ($xmlUserDetails['user']['security_que_id'] != NULL) {
+                        //check if user exist and question value is valid
+                        $user_exists = UserSecurityQueValues::find()->where('que_id = ' . $xmlUserDetails['user']['security_que_id'] . ' AND user_id = ' . $userId . ' AND user_value LIKE "' . $xmlUserDetails['user']['security_que_value'] . '"')->one();
+                    } else {
+                        //check if user exist and question value is valid with custom que
+                        $user_exists = UserSecurityQueValues::find()->where('user_id = ' . $userId . ' AND user_value LIKE "' . $xmlUserDetails['user']['security_que_value'] . '"')->one();
+                    }
+                    if ($user_exists != NULL) {
+                        $twilio_message = "Phone a doctor\nYour pin with phoneadoctor is reset, please use your new Pin: " . $newPin . " to login.";
+                        //---------------------- TWILIO ----------------------//
+                        $twillio = Yii::$app->Twillio;
+                        $message = $twillio->getClient()->account->sms_messages->create($this->twilio_from_phone, // From a valid Twilio number
+                                $xmlUserDetails['user']['phone'], // Text this number
+                                $twilio_message
+                        );
+                        $this->addLogEntry('user.recoverPin', 'Success', 3, 'Pin reset and sms sent for userId: ' . $userId, $model->id);
+                        $this->generateJsonResponce(array("response_code" => 100, "description" => 'Pin reset and sms sent for user ' . $user_check->fname . " " . $user_check->lname), 'ok', 200);
+                    } else {
+                        $this->addLogEntry('user.recoverPin', 'Failure', 9, 'Your answer for security question is invalid.');
+                        $this->generateJsonResponce(array("response_code" => 113, "description" => 'Invalid answer for security question.'), 'error', 400);
+                    }
 
                     break;
 
@@ -872,13 +923,12 @@ class UserController extends Controller {
                     break;
             }
         } else {
-            $this->addLogEntry('user.recoverPin', 'Failure', 9, 'Your answer for security question is invalid.');
-            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Invalid answer for security question.'), 'error', 400);
+            $this->addLogEntry('user.recoverPin', 'Failure', 9, 'No user exists with the details provided.');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'No user exists with the details provided.'), 'error', 400);
         }
-        
-    }  
-    
-     /*
+    }
+
+    /*
      * API Method : user.logout
      * Purpose    : user logout
      * Returns    : Result success or failed
@@ -1023,6 +1073,15 @@ public function generateJsonResponce($response){
         ->setTextBody('Plain text content')
         ->setHtmlBody($message)
         ->send();
-    }    
+    }  
+    
+   public function validatePhone($phone){
+     if (preg_match('/([0-9]{9})/', $phone)) {
+            return true;
+        } else {
+            $this->addLogEntry('user.validatephone', 'Failure', 9, 'Illegal characters in mobile number.');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Illegal characters in moblie number. Only numbers are allowed.'), 'error', 400);
+        }
+   } 
        
 }
