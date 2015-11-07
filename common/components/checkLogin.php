@@ -10,7 +10,7 @@
             return false;
 
         //$uri = 'http://localhost/phoneadoc/api/web/index.php/v1/'.$method;
-        $uri = 'http://phoneadoctor.com.ng/app/api/web/index.php/v1/user/api';
+        $uri = 'http://localhost/phoneadoc/api/web/index.php/v1/user/api';
         $data = '
                 <request method="user.getuserinfo">
                   <user>
@@ -25,6 +25,9 @@
         ->body($data)
         ->sendsXml()
         ->send();
+        $session['fname'] = $response->body->description->fname;
+        $session['lname'] = $response->body->description->lname;
+
         //var_dump($response->body);
        // exit;
         if($response->body->response_code==100)

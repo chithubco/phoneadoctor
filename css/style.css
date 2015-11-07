@@ -45,6 +45,7 @@ header{padding-top:108px;}
 .lt-col .accordion .accordion-body ul li a{font-family: 'Roboto', sans-serif; font-size:14px; color:#222222; font-weight:normal; text-decoration:none; padding:15px 0; display:inline-block;}
 .lt-col .accordion .accordion-body ul li.current{background:#eaeef3;}
 .lt-col .accordion .accordion-body ul li.current a{color:#e42127;}
+.lt-col .accordion .active a{color:#e42127;}
 
 
 /*------------------------MAIN CONTAINER-------------------------------*/
@@ -132,6 +133,74 @@ header{padding-top:108px;}
 
 /*====================================CONSULTATION HISTORY PAGE=================================*/
 .consultation-history {background:#consultation-history;}
+.consultation-history h2{font-family: 'Roboto', sans-serif; font-size:20px; color:#393939; font-weight:bold; text-transform:uppercase;}
+.consultation-history h6{font-family: 'Roboto', sans-serif; font-size:13px; color:#424242; font-weight:normal; display:block; padding:0 15px;}
+.con-hist-frm{margin-bottom:30px; padding:}
+.consultation-history .doc{border:1px solid #f1f1f1; background:#f9fafc; border-radius:5px; margin:0 15px 15px 15px;}
+.consultation-history .doc ul{margin:0; padding:0;}
+.consultation-history .doc ul li{list-style:none; margin:0; border-bottom:1px solid #e7e7e7; font-family: 'Roboto', sans-serif; font-size:13px; color:#6d6d6d; font-weight:normal; padding:10px 25px; }
+.consultation-history .doc ul li i{color:#568bde; width:20px; display:block; float:left;}
+.consultation-history .doc ul li p{padding:10px 0 0 0;}
+.consultation-history .doc ul li span{float:right; color:#568bde;}
+.consultation-history .doc ul li a{font-style:italic; font-family: 'Roboto', sans-serif; font-size:13px; color:#e42127; font-weight:normal; display:block; text-align:right; padding:10px 0 0 0; text-decoration:none;}
+.consultation-history .cnt-blk .input-group-addon{background:none; border:0;}
+.consultation-history .cnt-blk .form-control{background:#f6f6f7; border-radius:1px;}
+
+
+/*==========================DESIRED SPECIALIST PAGE==============================*/
+.desired-spec h6{font-family: 'Roboto', sans-serif; font-size:13px; color:#424242; font-weight:normal; display:block; padding:0 15px;}
+.desired-spec .cnt-blk .input-group-addon{background:none; border:0;}
+.desired-spec .cnt-blk .select-style { padding: 0;  margin: 0; width: 100%; border:1PX solid #f0f0f0; border-radius: 1px; overflow: hidden; background-color: #fff;
+    background:#f6f6f7 url(../images/arrow-head.png) no-repeat 96% 13px;}
+.desired-spec .cnt-blk .select-style select {padding: 5px 8px; width: 100%; border: none; box-shadow: none; background-color: transparent; background-image: none;    -webkit-appearance: none; -moz-appearance: none; appearance: none;}
+.desired-spec .cnt-blk .select-style select:focus { outline: none;}
+
+.desired-spec .cnt-blk .dr-details ul{margin:0; padding:0;}
+.desired-spec .cnt-blk .dr-details ul li{margin:10px 0; background:#f7f8fb; list-style:none; padding:10px 0;}
+.desired-spec .cnt-blk .dr-details ul li h4{font-family: 'Roboto', sans-serif; font-size:13px; color:#6e9de6; font-weight:normal; margin:0 0 7px 0;}
+.desired-spec .cnt-blk .dr-details ul li p{font-family: 'Roboto', sans-serif; font-size:13px; color:#6a6a6a; font-weight:normal;}
+.desired-spec .cnt-blk .dr-details ul li h6{font-family: 'Roboto', sans-serif; font-size:11px; color:#6e9de6; font-weight:normal;}
+
+/*=========================DONATION=========================*/
+.mk-donation h2{font-family: 'Roboto', sans-serif; font-size:20px; color:#393939; font-weight:bold; text-transform:uppercase;}
+.mk-donation p{font-family: 'Roboto', sans-serif; font-size:14px; color:#525252; font-weight:normal; display:block; padding:0 15px; margin:10px 0 40px 0;}
+.mk-donation .donation-frm{max-width:360px; margin:0 auto;}
+.mk-donation .form-control{border-radius:1px; height:42px;}
+.mk-donation .donate-amnt{background:#ececec url(../images/N.png) no-repeat 10px center; min-width:13px; min-height:15px; padding-left:50px;}
+.mk-donation .btn{background:#6e9de6 url(../images/heart-icon.png) no-repeat 25px center; font-family: 'Roboto', sans-serif; font-size:14px; color:#fff; font-weight:normal; border:1px solid #6e9de6; margin:10px 0 0 0;}
+
+/*==========================MEDICAL HISTORY===================*/
+.updt-del .nav li a{font-family: 'Roboto', sans-serif; font-size:13px; color:#393939; font-weight:normal;}
+.updt-del .nav li.active a{color:#e42127; background:#f9fafa;}
+.updt-del .tab-content li{background:#f6f8fb; list-style:none; margin:7px 0; padding:20px 15px 15px 25px; }
+.updt-del .tab-content li p{font-family: 'Roboto', sans-serif; font-size:12px; color:#393939; font-weight:normal;}
+.updt-del .tab-content li a{text-decoration:none;}
+.updt-del .tab-content li a.edit{font-family: 'Roboto', sans-serif; font-size:11px; color:#393939; font-weight:normal;}
+.updt-del .tab-content li a.add{font-family: 'Roboto', sans-serif; font-size:11px; color:#115dd6; font-weight:normal; margin:0 20px;}
+.updt-del .tab-content li a.delete{font-family: 'Roboto', sans-serif; font-size:11px; color:#e42127; font-weight:normal;}
+
+/*=====================TRANSACTIONS PAGE========================*/
+.transaction-frm h2{font-family: 'Roboto', sans-serif; font-size:20px; color:#393939; font-weight:bold; text-transform:uppercase; }
+.transaction-frm .btn{background:#f9fafa; border:1px solid #eaeaea; border-radius:0; font-family: 'Roboto', sans-serif; font-size:14px; color:#393939; font-weight:normal; max-width:298px; width:100%; margin:0 auto;}
+.transaction-frm .btn img{position:relative; left:2%; float:left;}
+.transaction-frm .tran-btn a{ min-height:54px; padding:10px 0;}
+.transaction-frm .tran-btn{margin:0 auto 20px;}
+
+
+/*=====================TRANSACTIONS DETAILS PAGE==================*/
+.trans-details table{max-width:366px; width:100%; margin:0 auto; text-align:center;}
+.trans-details table td{font-family: 'Roboto', sans-serif; font-size:13px; color:#868686; font-weight:normal; padding:20px 8px 8px 8px !important;}
+.trans-details table tr:nth-child(1) td{border-top:0;}
+.trans-details .grnd-total td{color:#6d9ce5;}
+
+/*====================WHEN TO PHONE======================*/
+.whn-phn .calling-dctr{max-width:273px; width:100%; margin:0 auto; text-align:center;}
+.whn-phn .calling-dctr span{width:50%; float:left; background:#f5f5f5; font-family: 'Roboto', sans-serif; font-size:11px; color:#393939; font-weight:normal; padding:10px 0;}
+.whn-phn .calling-dctr h3{font-family: 'Roboto', sans-serif; font-size:15px; color:#393939; font-weight:normal; padding:12px 0; clear:left; margin:0;}
+.whn-phn .calling-dctr img{margin:20px 0 10px 0;}
+.whn-phn .calling-dctr p{font-family: 'Roboto', sans-serif; font-size:12px; color:#115dd6; font-weight:normal;}
+.whn-phn .calling-dctr h5{background:#f5f5f5; font-family: 'Roboto', sans-serif; font-size:12px; color:#6e6e6e; font-weight:normal; padding:15px 0;}
+
 
 @media only screen and (min-width:768px) and (max-width:3600px){
 	.sm-no-pad-lt{padding-left:0;}
@@ -141,7 +210,59 @@ header{padding-top:108px;}
 
 .no-pad{padding:0 !important;}
 
+/*============================SIGN UP STEP2====================*/
+.sigup-step2 h2{font-family: 'Roboto', sans-serif; font-size:25px; color:#115dd6; font-weight:normal; text-align:center;}
+.sigup-step2 .sigup-step2-bx{max-width:601px; width:100%; margin:60px auto 0; border:1px solid #e8e8e8; border-radius:5px; background:#f9f9f9;}
+.sigup-step2 .sigup-step2-bx .center-logo{padding:40px 0;}
+.sigup-step2 .sigup-step2-bx .center-logo img{margin:0 auto;}
 
+.sigup-step2 .sigup-step2-bx .verfied{background:#f9f9f9 url(../images/verified.png) no-repeat 80% center; min-width:13px; min-height:14px; height:41px; font-family: 'Roboto', sans-serif; font-size:16px; color:#6d6d6d; font-weight:normal; margin-top:15px;}
+.sigup-step2 .sigup-step2-bx .form-group{max-width:355px; width:100%; margin:0 auto;}
+.sigup-step2 .sigup-step2-bx h4{font-family: 'Roboto', sans-serif; font-size:21px; color:#222222; font-weight:normal; text-align:center;}
+.sigup-step2 .sigup-step2-bx p{font-family: 'Roboto', sans-serif; font-size:11px; color:#383838; font-weight:normal; text-align:center; margin-top:10px;}
+
+.sigup-step2 .sigup-step2-bx .btn{background:#115dd6; border-color:#115dd6; max-width:324px; width:100%; margin:30px auto; display:block; font-family: 'Roboto', sans-serif; font-size:18px; color:#fff; font-weight:normal;}
+
+/*===========================SIGN UP STEP3=================*/
+.signup-step3 .logo-center {border-bottom:1px solid #f1f1f1; display:block; padding-bottom:20px;}
+.signup-step3 .logo-center img{display:block; margin:0 auto;}
+.signup-step3 .step3-cnt{border:1px solid #f1f1f1;}
+.signup-step3 .step3-cnt .date{margin-top:25px; }
+.signup-step3 .step3-cnt .date .form-control, .signup-step3 .step3-cnt .date .input-group-addon{background:#ededed; border:0;}
+.signup-step3 .step3-cnt .gndr{background:#ededed url(../images/gender-icon.png) no-repeat 5px center; min-width:13px; min-height:14px; border:0; border-radius:5px;}
+
+.select-style { padding: 0;  margin: 0; border: 1px solid #ccc; border-right:0;width: 100%; border-radius: 5px; overflow: hidden; background-color: #fff;
+    background: #fff url(images/arrowhead.png) no-repeat right -1px;}
+.select-style select {padding: 5px 8px; width: 100%; border: none; box-shadow: none; background-color: transparent; background-image: none;    -webkit-appearance: none; -moz-appearance: none; appearance: none;}
+.select-style select:focus { outline: none;}
+
+
+/*==============SIGN UP STEP4==================*/
+.signup-step4 h2{font-family: 'Roboto', sans-serif; font-size:25px; color:#115dd6; font-weight:normal; text-align:center;}
+.signup-step4 .center-logo{border-bottom:1px solid #f1f1f1; display:block; padding:20px 0;}
+.signup-step4 h4{font-family: 'Roboto', sans-serif; font-size:20px; color:#222222; font-weight:normal; text-align:center;}
+
+/*=============CHANGE PASSWORD ===================*/
+.change-pin h2{font-family: 'Roboto', sans-serif; font-size:25px; color:#115dd6; font-weight:normal; text-align:center;}
+.change-pin .change-pwd-bx{max-width:601px; width:100%; margin:60px auto 0; border:1px solid #e8e8e8; border-radius:5px; background:#f9f9f9;}
+.change-pin .change-pwd-bx .change-pin-frm{max-width:360px; margin:30px auto 80px;}
+.change-pin .change-pwd-bx label{text-align:center; display:block; font-family: 'Roboto', sans-serif; font-size:20px; color:#222222; font-weight:normal;}
+.change-pin .change-pwd-bx .btn{background:#115dd6; border-color:#115dd6; max-width:244px; width:100%; margin:30px auto; display:block; font-family: 'Roboto', sans-serif; font-size:18px; color:#fff; font-weight:normal;}
+
+
+/*================RECOVER PIN===============*/
+.recover-pin p{max-width:360px; margin:0 auto;}
+.recover-pin .reg2-cnt{border:1px solid #e8e8e8; border-radius:5px;}
+.recover-pin label{font-family: 'Roboto', sans-serif; font-size:16px; color:#6d6d6d; font-weight:normal; text-align:center; padding:30px 0 10px 0;}
+
+
+/*=======================EDIT USER INFORMATION==================================*/
+.edit-info .btn-grp{width:195px; margin:50px auto 15px;}
+.edit-info .form-inline{background:#f2f2f2; padding:50px 25px 0 25px;}
+.edit-info label{font-family: 'Roboto', sans-serif; font-size:13px; color:#5b5b5b; font-weight:normal; padding-right:40px;}
+.edit-info .can-btn {background:#f6f6f6; border-radius:0; border:1px solid #e9e9e9; font-family: 'Roboto', sans-serif; font-size:13px; color:#5b5b5b; font-weight:normal; padding:5px 20px;}
+.edit-info .upd-btn{background:#6d9ce5; border-radius:0; font-family: 'Roboto', sans-serif; font-size:13px; color:#fff; font-weight:normal; padding:5px 20px;}
+.edit-info ul li{list-style:none;}
 /*========================FOOTER=======================*/
 
 footer{background:#e42127; min-height:56px; margin-top:30px;}
@@ -217,3 +338,4 @@ body {
 .main .page-header {
   margin-top: 0;
 }
+

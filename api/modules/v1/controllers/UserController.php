@@ -537,7 +537,7 @@ class UserController extends Controller {
                             $this->generateJsonResponce(array("response_code" => 113, "description" => 'Correct the validation errors.','errors'=>$model->getErrors()), 'error', 400);
                             exit;
                         }                        
-                        $model_patients->save(false);                
+                        $model_patients->save();                
                         }
                         $this->addLogEntry('user.update', 'Success', 3, 'User info successfully updated. Username :- ' . $model->username, $model->id);
                         $this->generateJsonResponce(array("response_code" => 100, "description" => 'User info successfully updated.'), 'ok', 200);

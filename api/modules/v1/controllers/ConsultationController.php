@@ -1,8 +1,5 @@
 <?php
-
 namespace api\modules\v1\controllers;
-
-
 use Yii;
 use common\models\Patient;
 use common\models\Users;
@@ -14,10 +11,8 @@ use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use common\components\XmlDomConstruct;
-
 include_once("../../common/components/xmlToArray.php");
 include_once("../../common/components/XmlDomConstruct.php");
-
 class ConsultationController extends Controller
 {
     public $administrator_email;
@@ -29,15 +24,12 @@ class ConsultationController extends Controller
     public $twilio_from_phone;
     public $twilio_account_sid;
     public $twilio_auth_token;
-    public $close_time = "17:00:00";
+    public $close_time = "23:00:00";
     
     
    public function beforeAction($action) { 
         
-
         $settingValues = Settings::find()->all();                        
-
-
         //$settingValues = Settings::model()->findAll();
         foreach($settingValues as $setting) {
             switch($setting->name) {  
@@ -49,7 +41,6 @@ class ConsultationController extends Controller
                 case 'base_currency_code':
                     $this->base_currency_code = $setting->value;
                     break;
-
                 case 'configURL':
                     $this->configURL = $setting->value;
                     break;
@@ -65,7 +56,6 @@ class ConsultationController extends Controller
                 case 'twilio_from_phone':
                     $this->twilio_from_phone = $setting->value;
                     break;  
-
                 case 'close_time':
                     $this->close_time = $setting->value;
                     break; 
@@ -99,11 +89,9 @@ class ConsultationController extends Controller
        
         //use php://input to get the raw $_POST results
         $xmlInput = file_get_contents('php://input');
-
         //parse the incoming XML to array
         $xmlArray = xml2array($xmlInput);
         //echo'<pre>';print_r($xmlArray);echo'</pre>';
-
         if (!isset($xmlArray['request']) || !isset($xmlArray['request_attr'])) {
             $this->generateJsonResponce(array("response_code" => 112, "description" => 'Invalid request, please check your input.'), 'error', 400);
         } else if ($requestMethod <> 'POST') {
@@ -125,12 +113,9 @@ class ConsultationController extends Controller
             }
         }
     }
-
     
-
     
    
-
     /**
      * Finds the User model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
@@ -146,22 +131,17 @@ class ConsultationController extends Controller
             throw new NotFoundHttpException('The requested page does not exist.');
         }
     }
-
-
     protected function findDoctors()
     {
         $model = Users::findAll("role_id = 2 AND online = 1");
         return $model;
         
     }
-
-
-
     protected function findfreeDoctor()
     {
                 //Check for doctor with empty calendar
                 $command = Yii::$app->db->createCommand("SELECT users.id FROM users WHERE id NOT IN (SELECT user_id FROM calendar_events  
-                    WHERE calendar_events.user_id IS NULL and (calendar_events.start >  '".date("Y-m-d H:i:s")."'
+                    WHERE (calendar_events.start >  '".date("Y-m-d H:i:s")."'
             AND  calendar_events.end <  '".date("Y-m-d")." ".$this->close_time."') )  AND users.role_id = 2 AND users.online = 1 ");
                 $result1= $command->queryAll();
                 //var_dump($result1);
@@ -172,7 +152,6 @@ class ConsultationController extends Controller
                  WHERE (calendar_events.start >  '".date("Y-m-d")." 09:00:00'
             AND  calendar_events.end <  '".date("Y-m-d")." ".$this->close_time."') GROUP BY user_id) t;");
                 $result= $command->queryAll();
-
                 
                 return $result[0]['user_id'];
                 
@@ -183,7 +162,6 @@ class ConsultationController extends Controller
                //exit;
         
     }
-
     protected function getSlot($doc)
     {
         //get doctor's calendar for the day
@@ -193,11 +171,8 @@ class ConsultationController extends Controller
         //
         
     }
-
     protected function getNearestSlot(){
-
         $current_time = time();
-
         $frac = 900;
         $r = $current_time % $frac;
         
@@ -205,14 +180,22 @@ class ConsultationController extends Controller
         $new_date = date('Y-m-d H:i:s', $new_time);
         return $new_date;
     }
+
+    
+    protected function generate_code($length) {
+      $random = '';
+      for ($i = 0; $i < $length; $i++) {
+        $random .= rand(0, 1) ? rand(2, 9) : chr(rand(ord('a'), ord('z')));
+      }
+      return $random;
+    }
    
      /*
      * API Method : user.create
      * Purpose    : Create a user
      * Returns    : Result of insert operation
      */
-       public function createConsultation($xmlconsultationDetails) {
-
+public function createConsultation($xmlconsultationDetails) {
       //check the mandatory fields
  
         if (!isset($xmlconsultationDetails['consultation']['note']) || trim($xmlconsultationDetails['consultation']['note']) == '') {
@@ -229,12 +212,16 @@ class ConsultationController extends Controller
             $note      = $this->sanitizeXML($xmlconsultationDetails['consultation']['note']);
             $user_id  = $this->sanitizeXML($xmlconsultationDetails['consultation']['user_id']);
                 
-                
+            //Authenticate access key before update
+            Yii::$app->AuthoriseUser->userId    = $xmlconsultationDetails['consultation']['user_id'];
+            Yii::$app->AuthoriseUser->auth_key  = $xmlconsultationDetails['consultation']['auth_key'];
+            $accessAuthorised =  Yii::$app->AuthoriseUser->checkAuthKey();
+            if($accessAuthorised){                
+            
                 //create a new Consultation
                 $model = new CalendarEvents();
                 $cons = new Consultations();
                 $user = Patient::find()->where("user_id = '$user_id'")->one();
-
                
                 $name = $user->fname." ".$user->mname." ".$user->lname;
                 //Select a doctor
@@ -250,9 +237,12 @@ class ConsultationController extends Controller
                     $start = $calendar->end;
                     $end = date("Y-m-d H:i:s",(strtotime($calendar->end) + (60*15)));
                 }
-
+                $cons->details               = $note;
+                $cons->user_id             = $user_id;
+                $cons->code                 = $this->generate_code(6);
+                $cons->save(false);
                 //$activate_key               = time() . rand(1000, 9999);echo 1;
-                $model->notes               = $note;
+                $model->notes               = "Code: ".$cons->code."\n".$note;
                 $model->user_id             = $doc;
                 $model->patient_id           = $user->pid;
                 $model->title               = $name;
@@ -262,28 +252,25 @@ class ConsultationController extends Controller
                 $model->status              = '*';
                 $model->start            = $start;
                 $model->end   = $end;
-                
-   
                 $model->save(false);
-
-                $cons->details               = $note;
-                $cons->user_id             = $user_id;
-                $cons->save(false);
                 $doctor = Users::find()->where("id = '$doc'")->one();
-               
                 $this->addLogEntry('consultation.create', 'Success', 3, 'consultation successfully created. Username :- ' . $name, $model->id);
                 $this->generateJsonResponce(array("response_code" => 100, "description" => 'Consultation successfully created.',"data"=>array(
                         "doctor"=>$doctor->title." ".$doctor->fname." ".$doctor->lname,
                         "start"=>$start,
-                        "end"=>$end
+                        "end"=>$end,
+                        "code"=>$cons->code ,
                     )), 'ok', 200);               
                 exit;
             
+            } else {
+                $this->addLogEntry('consultation.create', 'Failure', 9, 'Create consultation auth key authentication failed for user :' .$user_id);
+                $this->generateJsonResponce(array("response_code" => 113, "description" => 'Your auth key is invalid.'), 'error', 400);
+            }            
          }
        }
        
         
-
    public function addLogEntry($api_method, $type, $log_description, $notes = '', $user_id = 0, $trans_id = 0) {
         if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
             $remote_ip = $_SERVER['HTTP_CLIENT_IP'];
@@ -315,11 +302,9 @@ class ConsultationController extends Controller
        
  public function generateXMLResponse($response, $status, $http_status = 200, $apiVersion = 'apiv2') {
         //$checkMethod = new REST();
-
         //$dom = new XmlDomConstructCustomizedForAPI('1.0', 'utf-8');
         Yii::$app->xmlDom->parseMixed(array("response" => $response));
         $data = Yii::$app->xmlDom->saveXML();
-
         $data = str_replace('<response/>', '<response xmlns="http://' . $_SERVER['SERVER_NAME'] . '/pos/index.php/' . $apiVersion . '" status="' . $status . '" />', $data);
         $data = str_replace('<response>', '<response xmlns="http://' . $_SERVER['SERVER_NAME'] . '/pos/index.php/' . $apiVersion . '" status="' . $status . '" >', $data);
         Yii::$app->REST->response($data, $http_status);
@@ -334,13 +319,11 @@ public function generateJsonResponce($response){
     print_r(json_encode($response));
     exit;
 }
-
    /*
      * API Method : N.A
      * Purpose    : Filter out unwanted characters
      * Returns    : Sanitized data
      */
-
     public function sanitizeXML($clear = '', $excludeSpecialChars = false, $skipURLDecode = false) {
        
         if(trim($clear) <> ''){
@@ -363,7 +346,6 @@ public function generateJsonResponce($response){
         }         
         return $clear;
     }
-
     
        
 }

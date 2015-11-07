@@ -9,6 +9,7 @@ use frontend\assets\AppAsset;
 use common\widgets\Alert;
 use yii\helpers\Url;
 AppAsset::register($this);
+$session = \Yii::$app->session;
 ?>
 <?php $this->beginPage() ?>
 <!DOCTYPE html>
@@ -20,6 +21,7 @@ AppAsset::register($this);
         <title><?= Html::encode($this->title) ?></title>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
         <link href="<?php echo \Yii::getAlias('@web') ?>/css/bootstrap.min.css" rel="stylesheet">
+        <link href="<?php echo \Yii::getAlias('@web') ?>/css/style.css" rel="stylesheet">
         <link href="<?php echo \Yii::getAlias('@web') ?>/css/font-awesome.min.css" rel="stylesheet">
         <link href="<?php echo \Yii::getAlias('@web') ?>/css/prettify-1.0.css" rel="stylesheet">
         <link href="<?php echo \Yii::getAlias('@web') ?>/css/base.css" rel="stylesheet">
@@ -27,7 +29,7 @@ AppAsset::register($this);
         <!--[if lt IE 9]>
         <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
         <![endif]-->
-        <link href="<?php echo \Yii::getAlias('@web') ?>/css/style.css" rel="stylesheet">
+        
         <?php $this->head() ?>
     </head>
     <body>
@@ -52,7 +54,7 @@ AppAsset::register($this);
                                 <li><a href="#" title="Search a Doctor"><img src="<?php echo \Yii::getAlias('@web') ?>/images/search-a-doctor-top.png" alt="search a doctor"></a></li> -->
                                 <li><a href="#" title="Manage Medical History"><img src="<?php echo \Yii::getAlias('@web') ?>/images/manage-medical-history-top.png" alt="manage medical history"></a></li>
                                 <li><a href="#" title="Make Donation"><img src="<?php echo \Yii::getAlias('@web') ?>/images/make-donation-top.png" alt="make donation"></a></li>
-                                <a href="#" class="logout"><img src="<?php echo \Yii::getAlias('@web') ?>/images/logout.png" alt="logout"> Logout</a>
+                                <a href="<?php echo Url::toRoute('/site/logout') ?>" class="logout"><img src="<?php echo \Yii::getAlias('@web') ?>/images/logout.png" alt="logout"> Logout</a>
                             </ul>
                         </div>
                     </div>
@@ -62,14 +64,15 @@ AppAsset::register($this);
         <div class="container">
             <div class="row row-offcanvas row-offcanvas-left ">
                 
-                <!----------------LEFT SIDERBAR--------------------------->
+                <!-- --------------LEFT SIDERBAR------------------------- -->
                 <div class="col-sm-4 col-xs-12 sidebar-offcanvas lt-col" id="sidebar" role="navigation">
                     
                     <!----- EDIT PROFILE-------->
                     <div class="edit-profile">
                         <img src="<?php echo \Yii::getAlias('@web') ?>/images/jhon.png">
-                        <p>John Doe</p>
-                        <h6>Edit profile</h6>
+                        <p><?php echo $session['fname']." ".$session['lname'] ?></p>
+                        <h6><a href="<?php echo Url::toRoute('/account/update') ?>">Edit profile</a></h6>
+                        <h6><a href="<?php echo Url::toRoute('/account/changepin') ?>">Change Pin</a></h6>
                         <div class="clearfix"></div>
                     </div>
                     <!-----/EDIT PROFILE-------->
@@ -78,9 +81,9 @@ AppAsset::register($this);
                     <div class="current-sub">
                         <img src="<?php echo \Yii::getAlias('@web') ?>/images/current-subscription-img.png">
                         <p>Current/active subscription</p>
-                        <h4>free minutes</h4>
-                        <h5>Subscription Expired</h5>
-                        <a href="#">Renew/Change Subscription</a>
+                        <h4>Unlimited</h4>
+                        <!-- <h5>Subscription Expired</h5>
+                        <a href="#">Renew/Change Subscription</a> -->
                         <div class="clearfix"></div>
                     </div>
                     <!-----/CURRENT/ACTIVE SUBSCRIPTION-------->
