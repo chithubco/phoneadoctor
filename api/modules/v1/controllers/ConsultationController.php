@@ -289,30 +289,26 @@ public function createConsultation($xmlconsultationDetails) {
        
         
     /*
-     * API Method : consultation.appointmentNotification
+     * Function: Appointment Notification
      * Purpose    : send appointment notification SMS to users
      * Returns    : Result success or failed
      */      
-    public function appointmentNotification($xmlUserDetails) {
+     public function appointmentNotification($userId,$appDate,$doctor,$sessionId) {
 
-        if (!isset($xmlUserDetails['user']['date']) || trim($xmlUserDetails['user']['date']) == '') {
+        if (!isset($appDate) || trim($appDate) == '') {
             $this->addLogEntry('consultation.appointmentNotification', 'Failure', 9, 'Date is missing.');
-            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Date is missing.'), 'error', 400);
-        } else if (!isset($xmlUserDetails['user']['doctor']) || trim($xmlUserDetails['user']['doctor']) == '') {
+            return 'Date is missing.'; //$this->generateJsonResponce(array("response_code" => 113, "description" => 'Date is missing.'), 'error', 400);
+        } else if (!isset($doctor) || trim($doctor) == '') {
             $this->addLogEntry('consultation.appointmentNotification', 'Failure', 9, 'Doctor name missing');
-            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Name of the doctor is missing'), 'error', 400);
-        } else if (!isset($xmlUserDetails['user']['sessionId']) || trim($xmlUserDetails['user']['sessionId']) == '') {
+            return 'Name of the doctor is missing';//$this->generateJsonResponce(array("response_code" => 113, "description" => 'Name of the doctor is missing'), 'error', 400);
+        } else if (!isset($sessionId) || trim($sessionId) == '') {
             $this->addLogEntry('consultation.appointmentNotification', 'Failure', 9, 'sessionId missing');
-            $this->generateJsonResponce(array("response_code" => 113, "description" => 'sessionId is missing'), 'error', 400);
-        } else if (!isset($xmlUserDetails['user']['userId']) || trim($xmlUserDetails['user']['userId']) == '') {
+            return 'sessionId is missing';//$this->generateJsonResponce(array("response_code" => 113, "description" => 'sessionId is missing'), 'error', 400);
+        } else if (!isset($userId) || trim($userId) == '') {
             $this->addLogEntry('consultation.appointmentNotification', 'Failure', 9, 'sessionId missing');
-            $this->generateJsonResponce(array("response_code" => 113, "description" => 'userId is missing'), 'error', 400);
+            return 'userId is missing';//$this->generateJsonResponce(array("response_code" => 113, "description" => 'userId is missing'), 'error', 400);
         }
         
-        $doctor = $xmlUserDetails['user']['doctor'];
-        $appDate = $xmlUserDetails['user']['date'];
-        $sessionId = $xmlUserDetails['user']['sessionId'];
-        $userId = $xmlUserDetails['user']['userId'];
         // Get user phone
         $UserCondition = 'user_id = ' . $userId;
         $user_check = Patient::find()->where($UserCondition)->one();
@@ -320,17 +316,17 @@ public function createConsultation($xmlconsultationDetails) {
             $userPhone = $user_check->mobile_phone;
 
             $twilio_message = "Phone a doctor: Appointment Notification\nHi ".$user_check->fname . " " . $user_check->lname."\n Your appointment with Dr " . $doctor . " is schedule on " . $appDate . "\n your session Id is: " . $sessionId;
-            //---------------------- TWILIO ----------------------//            
+            //---------------------- TWILIO ----------------------//             
             $twillio = Yii::$app->Twillio;
             $message = $twillio->getClient()->account->sms_messages->create($this->twilio_from_phone, // From a valid Twilio number
                     $userPhone, // Text this number
                     $twilio_message
             );
-            $this->addLogEntry('consultation.recoverPin', 'Success', 3, 'Appointment nofificatiopn sms sent for userId: ' . $user_check->fname . " " . $user_check->lname, $userId);
-            $this->generateJsonResponce(array("response_code" => 100, "description" => 'Pin reset and sms sent for user ' . $user_check->fname . " " . $user_check->lname), 'ok', 200);
+            $this->addLogEntry('consultation.appointmentNotification', 'Success', 3, 'Appointment nofificatiopn sms sent for userId: ' . $user_check->fname . " " . $user_check->lname, $userId);
+            return 'Pin reset and sms sent for user ';//$this->generateJsonResponce(array("response_code" => 100, "description" => 'Pin reset and sms sent for user ' . $user_check->fname . " " . $user_check->lname), 'ok', 200);
         } else {
-            $this->addLogEntry('consultation.recoverPin', 'Failure', 9, 'No user exists with the details provided.');
-            $this->generateJsonResponce(array("response_code" => 113, "description" => 'No user exists with the userId provided.'), 'error', 400);
+            $this->addLogEntry('consultation.appointmentNotification', 'Failure', 9, 'No user exists with the details provided.');
+            return 'No user exists with the userId provided.';//$this->generateJsonResponce(array("response_code" => 113, "description" => 'No user exists with the userId provided.'), 'error', 400);
         }
     }
 
