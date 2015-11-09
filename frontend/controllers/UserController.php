@@ -350,8 +350,8 @@ class UserController extends Controller {
             $userFirstName = $this->sanitizeXML($xmlUserDetails['user']['userinfo']['fname']);
             $userLastName = $this->sanitizeXML($xmlUserDetails['user']['userinfo']['lname']);
 
-            if ($this->validatePhone($userPhone) && $this->checkPhoneVerification($userPhone)) {
-
+            //if ($this->validatePhone($userPhone) && $this->checkPhoneVerification($userPhone)) {
+if(true){
                 if (!isset($xmlUserDetails['user']['userinfo']['username']) || trim($xmlUserDetails['user']['userinfo']['username']) == '') {
                     $userName = preg_replace('/\s+/', '', $userFullName); //remove any whitespaces
                 } else {
@@ -381,7 +381,7 @@ class UserController extends Controller {
                     $security_flag = 1;
                 }
                 //check if phone no. is already in use
-                    $phone_exists = Patient::find()->where('mobile_phone LIKE "' . $userPhone . '"')->one();           
+                    $phone_exists = $this->checkIfPhoneExists($userPhone);
 
                 if (preg_match('/[^A-Za-z0-9]/', $userName)) {
 
@@ -1052,6 +1052,36 @@ public function generateJsonResponce($response){
         return $user ? true : false; 
     }   
     
+    public function checkIfPhoneExists($userPhone){
+        
+        $phone_length = strlen($userPhone);
+        
+        switch ($phone_length) {
+            case 10:
+                $phone_exist = Patient::find()->where('mobile_phone LIKE "' . $userPhone . '" OR mobile_phone LIKE "0' . $userPhone . '" OR mobile_phone LIKE "234' . $userPhone . '" OR mobile_phone LIKE "2340' . $userPhone . '"')->one();                    
+                break;
+            case 11:
+                $zero_stripped_phone=substr($userPhone,1,10);                
+                $phone_exist = Patient::find()->where('mobile_phone LIKE "' . $userPhone . '" OR mobile_phone LIKE "234' . $zero_stripped_phone . '" OR mobile_phone LIKE "234' . $userPhone . '" OR mobile_phone LIKE "' . $zero_stripped_phone . '"')->one();                    
+                break;            
+            case 13:
+                $code = substr($userPhone,0,3);                
+                $code_stripped_phone=substr($userPhone,3,10);                
+                $phone_exist = Patient::find()->where('mobile_phone LIKE "' . $userPhone . '" OR mobile_phone LIKE "0' . $code_stripped_phone . '" OR mobile_phone LIKE "' . $code_stripped_phone . '" OR mobile_phone LIKE "'. $code .'0' . $code_stripped_phone . '"')->one();                    
+                break; 
+            case 14:
+                $code = substr($userPhone,0,3);  
+                $code_stripped_phone=substr($userPhone,4,10);                
+                $phone_exist = Patient::find()->where('mobile_phone LIKE "' . $userPhone . '" OR mobile_phone LIKE "0' . $code_stripped_phone . '" OR mobile_phone LIKE "'. $code . $code_stripped_phone . '" OR mobile_phone LIKE "' . $code_stripped_phone . '"')->one();                    
+                break;             
+            default:
+                $phone_exist = Patient::find()->where('mobile_phone LIKE "' . $userPhone . '"')->one();                    
+                break;
+        }        
+        return ($phone_exist!=NULL)?true:false;       
+    }
+
+
     public function validateEmail($email) {
         
         $regex = '/^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$/';
