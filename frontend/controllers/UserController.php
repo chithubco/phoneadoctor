@@ -698,13 +698,13 @@ class UserController extends Controller {
             $this->generateJsonResponce(array("response_code" => 113, "description" => 'Pin missing.'), 'error', 400);            
         }
         
-        $user_phone         = $this->sanitizeXML($xmlUserDetails['user']['phone']);
+        $user_phone         = $xmlUserDetails['user']['phone'];
         $user_pass          = $this->sanitizeXML($xmlUserDetails['user']['pin'], true);
         $user_exists        = $patient_exists =0;
         //check if user exist 
         if($this->validatePhone($user_phone))
         $patient_exists = Patient::find()->where('mobile_phone = "'.$user_phone.'"')->one(); 
-        //print_r($patient_exists);exit;
+        
         if(($patient_exists) && ($patient_exists->user_id !=NULL))
         $user_exists = User::find()->where('id = '.$patient_exists->user_id.' AND password LIKE "'.md5($user_pass).'"')->one();        
         if($user_exists){
