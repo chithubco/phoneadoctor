@@ -326,6 +326,7 @@ class UserController extends Controller {
         if ($userPhone != NULL) {
             //check if phone no. is verified
             $phone_verification = VerifyPhone::find()->where('phone_no LIKE "' . $userPhone . '"')->one();
+            
             if ($phone_verification != NULL) {
                 return ($phone_verification->verified == 'YES') ? true : false;
             } else {
@@ -346,7 +347,7 @@ class UserController extends Controller {
 
         if ($xmlUserDetails['user']['userinfo']) {
             $userFullName = $this->sanitizeXML($xmlUserDetails['user']['userinfo']['fname']) . $this->sanitizeXML($xmlUserDetails['user']['userinfo']['lname']);
-            $userPhone = $this->sanitizeXML($xmlUserDetails['user']['patients']['mobile_phone']);
+            $userPhone = $xmlUserDetails['user']['patients']['mobile_phone'];
             $userFirstName = $this->sanitizeXML($xmlUserDetails['user']['userinfo']['fname']);
             $userLastName = $this->sanitizeXML($xmlUserDetails['user']['userinfo']['lname']);
 
@@ -607,7 +608,7 @@ class UserController extends Controller {
                 $patient_exists = $command->queryOne();
                 //$patient_exists = Patient::find()->where('user_id = ' . $xmlUserDetails['user']['id'])->one();
                 $this->addLogEntry('user.getuserinfo', 'Success', 3, 'User info successfully returned. Username :- ' . $patient_exists['fname'],$xmlUserDetails['user']['id']);
-                $this->generateJsonResponce(array("response_code" => 113, "description" => $patient_exists), 'error', 400);
+                $this->generateJsonResponce(array("response_code" => 100, "description" => $patient_exists), 'error', 400);
                 
             } else {
                 $this->addLogEntry('user.getuserinfo', 'Failure', 9, 'Fetch user info auth key authentication failed for user :' . $xmlUserDetails['user']['id']);
@@ -828,7 +829,7 @@ class UserController extends Controller {
      * Returns    : Result success or failed
      */    
     public function recoverPin($xmlUserDetails) {
-
+        $newPin=0;
         if (isset($xmlUserDetails['user']['recovery_option'])) {
             $recovery_option = $xmlUserDetails['user']['recovery_option'];
         } else {
@@ -864,6 +865,7 @@ class UserController extends Controller {
 
         // Get User Id to cross check question
         $UserCondition = $recovery_option == 'email' ? 'email LIKE "' . $xmlUserDetails['user']['email'] . '"' : 'mobile_phone LIKE "' . $xmlUserDetails['user']['phone'] . '"';        
+        //echo $UserCondition;exit;
         $user_check = Patient::find()->where($UserCondition)->one();
 
         if ($user_check != NULL) {
@@ -891,15 +893,15 @@ class UserController extends Controller {
                     break;
                 case 'phone':
                     // Check security question
-                    if ($xmlUserDetails['user']['security_que_id'] != NULL) {
+                    if (isset($xmlUserDetails['user']['security_que_id']) && $xmlUserDetails['user']['security_que_id'] != NULL) {
                         //check if user exist and question value is valid
                         $user_exists = UserSecurityQueValues::find()->where('que_id = ' . $xmlUserDetails['user']['security_que_id'] . ' AND user_id = ' . $userId . ' AND user_value LIKE "' . $xmlUserDetails['user']['security_que_value'] . '"')->one();
                     } else {
-                        //check if user exist and question value is valid with custom que
+                        //check if user exist and question value is valid with custom que                        
                         $user_exists = UserSecurityQueValues::find()->where('user_id = ' . $userId . ' AND user_value LIKE "' . $xmlUserDetails['user']['security_que_value'] . '"')->one();
                     }
                     if ($user_exists != NULL) {
-                        $twilio_message = "Phone a doctor\nYour pin with phoneadoctor is reset, please use your new Pin: " . $newPin . " to login.";
+                        $twilio_message = "Phone a doctor\nYour pin with phoneadoctor is reset, please use your new Pin: " . $newPin . " to login.";                         
                         //---------------------- TWILIO ----------------------//
                         $twillio = Yii::$app->Twillio;
                         $message = $twillio->getClient()->account->sms_messages->create($this->twilio_from_phone, // From a valid Twilio number
@@ -1054,22 +1056,38 @@ public function generateJsonResponce($response){
         
         switch ($phone_length) {
             case 10:
-                $phone_exist = Patient::find()->where('mobile_phone LIKE "' . $userPhone . '" OR mobile_phone LIKE "0' . $userPhone . '" OR mobile_phone LIKE "234' . $userPhone . '" OR mobile_phone LIKE "2340' . $userPhone . '"')->one();                    
+                $phone_exist = Patient::find()->where('mobile_phone LIKE "' . $userPhone . '" OR mobile_phone LIKE "0' . $userPhone . '" OR mobile_phone LIKE "234' . $userPhone . '" OR mobile_phone LIKE "2340' . $userPhone . '" OR mobile_phone LIKE "+234' . $userPhone . '" OR mobile_phone LIKE "+2340' . $userPhone . '"')->one();                    
                 break;
             case 11:
                 $zero_stripped_phone=substr($userPhone,1,10);                
-                $phone_exist = Patient::find()->where('mobile_phone LIKE "' . $userPhone . '" OR mobile_phone LIKE "234' . $zero_stripped_phone . '" OR mobile_phone LIKE "234' . $userPhone . '" OR mobile_phone LIKE "' . $zero_stripped_phone . '"')->one();                    
+                $phone_exist = Patient::find()->where('mobile_phone LIKE "' . $userPhone . '" OR mobile_phone LIKE "234' . $zero_stripped_phone . '" OR mobile_phone LIKE "234' . $userPhone . '" OR mobile_phone LIKE "+234' . $userPhone . '" OR mobile_phone LIKE "+234' . $zero_stripped_phone . '" OR mobile_phone LIKE "' . $zero_stripped_phone . '"')->one();                    
                 break;            
-            case 13:
+            case 13: 
                 $code = substr($userPhone,0,3);                
-                $code_stripped_phone=substr($userPhone,3,10);                
-                $phone_exist = Patient::find()->where('mobile_phone LIKE "' . $userPhone . '" OR mobile_phone LIKE "0' . $code_stripped_phone . '" OR mobile_phone LIKE "' . $code_stripped_phone . '" OR mobile_phone LIKE "'. $code .'0' . $code_stripped_phone . '"')->one();                    
+                $code_stripped_phone=substr($userPhone,3,10);
+                $phone_exist = Patient::find()->where('mobile_phone LIKE "' . $userPhone . '" OR mobile_phone LIKE "0' . $code_stripped_phone . '" OR mobile_phone LIKE "' . $code_stripped_phone . '" OR mobile_phone LIKE "'. $code .'0' . $code_stripped_phone . '" OR mobile_phone LIKE "'. $code . $code_stripped_phone . '" OR mobile_phone LIKE "+'. $code . $code_stripped_phone . '"')->one();                    
                 break; 
             case 14:
                 $code = substr($userPhone,0,3);  
-                $code_stripped_phone=substr($userPhone,4,10);                
-                $phone_exist = Patient::find()->where('mobile_phone LIKE "' . $userPhone . '" OR mobile_phone LIKE "0' . $code_stripped_phone . '" OR mobile_phone LIKE "'. $code . $code_stripped_phone . '" OR mobile_phone LIKE "' . $code_stripped_phone . '"')->one();                    
-                break;             
+                $plus_stripped_code = $plus_code = substr($userPhone,1,3); 
+                $plus_code = substr($userPhone,0,4); 
+                $code_stripped_phone=substr($userPhone,4,10);  
+                
+                $phone_exist = Patient::find()->where('mobile_phone LIKE "' . $userPhone . '" OR mobile_phone LIKE "0' . $code_stripped_phone . 
+                                '" OR mobile_phone LIKE "'. $code . $code_stripped_phone . '" OR mobile_phone LIKE "+'. $code . $code_stripped_phone . '" OR mobile_phone LIKE "' . $code_stripped_phone . 
+                                '" OR mobile_phone LIKE "'. $plus_stripped_code.$code_stripped_phone . '" OR mobile_phone LIKE "'. $plus_code .'0'. $code_stripped_phone . 
+                                '" OR mobile_phone LIKE "'. $code .'0'. $code_stripped_phone . '" OR mobile_phone LIKE "'. $plus_stripped_code .'0'. $code_stripped_phone . '"')->one();                    
+                break; 
+            case 15:
+                $plusStripped = substr($userPhone,1,14);                
+                $code = substr($userPhone,1,3);  
+                $code_stripped_phone=substr($userPhone,5,10);   
+                $plus_code = substr($userPhone,0,4);                 
+                $phone_exist = Patient::find()->where('mobile_phone LIKE "' . $userPhone . '" OR mobile_phone LIKE "0' .
+                                $code_stripped_phone . '" OR mobile_phone LIKE "'. $code . $code_stripped_phone . 
+                                '" OR mobile_phone LIKE "+'. $code . $code_stripped_phone . '" OR mobile_phone LIKE "'. $code .'0'. $code_stripped_phone . '" OR mobile_phone LIKE "' . 
+                                $code_stripped_phone . '" OR mobile_phone LIKE " ' . $plusStripped . '" OR mobile_phone LIKE "+'. $code .'0'. $code_stripped_phone . '" OR mobile_phone LIKE "' . $plus_code.$code_stripped_phone . '"')->one();                    
+                break;            
             default:
                 $phone_exist = Patient::find()->where('mobile_phone LIKE "' . $userPhone . '"')->one();                    
                 break;
