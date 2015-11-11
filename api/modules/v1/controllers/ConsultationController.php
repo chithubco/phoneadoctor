@@ -1,5 +1,6 @@
 <?php
 namespace api\modules\v1\controllers;
+
 use Yii;
 use common\models\Patient;
 use common\models\Users;
@@ -11,8 +12,10 @@ use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use common\components\XmlDomConstruct;
+
 include_once("../../common/components/xmlToArray.php");
 include_once("../../common/components/XmlDomConstruct.php");
+
 class ConsultationController extends Controller
 {
     public $administrator_email;
@@ -106,6 +109,9 @@ class ConsultationController extends Controller
                     break;
                 case 'consultation.update':
                     $this->updateConsultation($xmlArray['request']);
+                    break;  
+                case 'consultation.appointmentNotification':
+                    $this->appointmentNotification($xmlArray['request']);
                     break;                  
                 default:
                    $this->generateJsonResponce(array("response_code" => 999, "description" => 'Unknown method.'), 'error', 400);
@@ -226,6 +232,7 @@ public function createConsultation($xmlconsultationDetails) {
                 $name = $user->fname." ".$user->mname." ".$user->lname;
                 //Select a doctor
                 $doc = $this->findfreeDoctor();
+                
                 $calendar = $this->getSlot($doc);
                 if($calendar == NULL){
                     //$current_date = date('d-M-Y g:i:s A');
@@ -254,6 +261,7 @@ public function createConsultation($xmlconsultationDetails) {
                 $model->end   = $end;
                 $model->save(false);
                 $doctor = Users::find()->where("id = '$doc'")->one();
+                $this->appointmentNotification($user_id,$start,$doctor->title." ".$doctor->fname." ".$doctor->lname,$cons->code);
                 $this->addLogEntry('consultation.create', 'Success', 3, 'consultation successfully created. Username :- ' . $name, $model->id);
                 $this->generateJsonResponce(array("response_code" => 100, "description" => 'Consultation successfully created.',"data"=>array(
                         "doctor"=>$doctor->title." ".$doctor->fname." ".$doctor->lname,
@@ -269,9 +277,50 @@ public function createConsultation($xmlconsultationDetails) {
             }            
          }
        }
+
+
+    /*
+     * Function: Appointment Notification
+     * Purpose    : send appointment notification SMS to users
+     * Returns    : Result success or failed
+     */      
+     public function appointmentNotification($userId,$appDate,$doctor,$sessionId) {
+        if (!isset($appDate) || trim($appDate) == '') {
+            $this->addLogEntry('consultation.appointmentNotification', 'Failure', 9, 'Date is missing.');
+            return 'Date is missing.'; //$this->generateJsonResponce(array("response_code" => 113, "description" => 'Date is missing.'), 'error', 400);
+        } else if (!isset($doctor) || trim($doctor) == '') {
+            $this->addLogEntry('consultation.appointmentNotification', 'Failure', 9, 'Doctor name missing');
+            return 'Name of the doctor is missing';//$this->generateJsonResponce(array("response_code" => 113, "description" => 'Name of the doctor is missing'), 'error', 400);
+        } else if (!isset($sessionId) || trim($sessionId) == '') {
+            $this->addLogEntry('consultation.appointmentNotification', 'Failure', 9, 'sessionId missing');
+            return 'sessionId is missing';//$this->generateJsonResponce(array("response_code" => 113, "description" => 'sessionId is missing'), 'error', 400);
+        } else if (!isset($userId) || trim($userId) == '') {
+            $this->addLogEntry('consultation.appointmentNotification', 'Failure', 9, 'sessionId missing');
+            return 'userId is missing';//$this->generateJsonResponce(array("response_code" => 113, "description" => 'userId is missing'), 'error', 400);
+        }
+        
+        // Get user phone
+        $UserCondition = 'user_id = ' . $userId;
+        $user_check = Patient::find()->where($UserCondition)->one();
+        if ($user_check != NULL) {
+            $userPhone = $user_check->mobile_phone;
+            $twilio_message = "Phone a doctor: Appointment Notification\nHi ".$user_check->fname . " " . $user_check->lname."\n Your appointment with " . $doctor . " is schedule on " . $appDate . "\n your session Id is: " . $sessionId;
+            //---------------------- TWILIO ----------------------//             
+            $twillio = Yii::$app->Twillio;
+            $message = $twillio->getClient()->account->sms_messages->create($this->twilio_from_phone, // From a valid Twilio number
+                    $userPhone, // Text this number
+                    $twilio_message
+            );
+            $this->addLogEntry('consultation.appointmentNotification', 'Success', 3, 'Appointment nofificatiopn sms sent for userId: ' . $user_check->fname . " " . $user_check->lname, $userId);
+            return 'Pin reset and sms sent for user ';//$this->generateJsonResponce(array("response_code" => 100, "description" => 'Pin reset and sms sent for user ' . $user_check->fname . " " . $user_check->lname), 'ok', 200);
+        } else {
+            $this->addLogEntry('consultation.appointmentNotification', 'Failure', 9, 'No user exists with the details provided.');
+            return 'No user exists with the userId provided.';//$this->generateJsonResponce(array("response_code" => 113, "description" => 'No user exists with the userId provided.'), 'error', 400);
+        }
+    }
        
         
-   public function addLogEntry($api_method, $type, $log_description, $notes = '', $user_id = 0, $trans_id = 0) {
+    public function addLogEntry($api_method, $type, $log_description, $notes = '', $user_id = 0, $trans_id = 0) {
         if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
             $remote_ip = $_SERVER['HTTP_CLIENT_IP'];
         } else if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
@@ -287,7 +336,7 @@ public function createConsultation($xmlconsultationDetails) {
         $date   = date("Y-m-d H:i:s");
         
         $api_log = new ApiLog;
-        $api_log->api_method_id             = 1;//$this->api_methods[$api_method];
+        $api_log->api_method             = $api_method;//$this->api_methods[$api_method];
         $api_log->type                      = $type;
         $api_log->api_log_description_id    = $log_description;
         $api_log->notes                     = $notes;

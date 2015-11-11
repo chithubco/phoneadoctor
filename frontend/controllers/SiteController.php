@@ -78,9 +78,11 @@ class SiteController extends Controller
         }
             //var_dump($response->body);
         $session = Yii::$app->session;
+        $error = $session['error'];
+        $session['error'] = NULL;
         return $this->render('login', [
             'model' => $model,
-            'response'=>$session['error']
+            'response'=>$error
         ]);
     
     }
@@ -93,6 +95,9 @@ class SiteController extends Controller
           <pin>'.$pin.'</pin>    
           </user>
         </request>');
+        
+        //var_dump($response->body);
+        
         $session = Yii::$app->session;
         if($response->body->response_code==100){
             
@@ -196,7 +201,9 @@ class SiteController extends Controller
                 ');
         $question = NULL;
         //var_dump($_POST);
-        if($_POST['email-button']){
+        
+        if($_POST['email-button']=='clicked'){
+      
           $response = pull('user/api','
             <request method="user.recoverPin">
               <user>
@@ -205,20 +212,24 @@ class SiteController extends Controller
               </user>
             </request>
             ');
+         
             if($response->body->response_code==100){
             
             return $this->redirect('login');
             }
-        }elseif($_POST['phone-button']){
+        }elseif($_POST['phone-button']=='clicked'){
+          
           $response = pull('user/api','
             <request method="user.recoverPin">
               <user>
-              <recovery_option>phone</recovery_option>    
+              <recovery_option>phone</recovery_option>  
+              <phone>'.$_POST['code'].$_POST['phone'].'</phone> 
               <security_que_id>'.$_POST['question'].'</security_que_id> 
               <security_que_value>'.$_POST['answer'].'</security_que_value>    
               </user>
             </request>
             ');
+          
             if($response->body->response_code==100){
             
             return $this->redirect('login');

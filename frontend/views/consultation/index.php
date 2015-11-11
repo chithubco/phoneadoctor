@@ -2,56 +2,180 @@
 /* @var $this yii\web\View */
 ?>
 <!----------------MAIN CONTAINER--------------------------->
-<div class="col-sm-8 main-container consult-pg">
-	<!--toggle sidebar button-->
-	<p class="visible-xs">
-		<button type="button" class="btn btn-primary btn-xs" data-toggle="offcanvas"><i class="glyphicon glyphicon-chevron-left"></i></button>
-	</p>
-	
-	<h2>Ask a doctor now</h2>
-	<div class="cnt-blk">
-		<form class="ask-frm" method="post">
-			
-			<div class="form-group">
-				<textarea class="form-control txt-area" placeholder="Type your question here"></textarea>
-			</div>
-			<div class="form-group">
-				<p>Scheduled for  a consultation</p>
-				<div class="col-sm-6 sm-no-pad-lt">
-					<div class="input-group date" id="datetimepicker2">
-						<span class="input-group-addon">
-							<span class="glyphicon glyphicon-calendar"></span>
-						</span>
-						<input type="text" class="form-control">
-					</div>
-				</div>
-				<div class="col-sm-6 sm-no-pad-rt">
-					<div class="input-group date" id="datetimepicker3">
-						<span class="input-group-addon">
-							<span class="glyphicon glyphicon-time"></span>
-						</span>
-						<input type="text" class="form-control">
-					</div>
-				</div>
-			</div>
-			
-			<div class="chrg-opt">
-				<p>Select available charging options</p>
-				<ul>
-					<li class="col-xs-4 col-lt-12">
-						<a href="#"><span><img src="<?php echo \Yii::getAlias('@web') ?>/images/free-minutes.png" alt="free minutes"></span> Free Minutes</a>
-					</li>
-					
-					<li class="col-xs-4 col-lt-12">
-						<a href="#"><span class="payg"><img src="<?php echo \Yii::getAlias('@web') ?>/images/payus.png" alt="payg"></span> PAYG</a>
-					</li>
-					
-					<li class="col-xs-4 col-lt-12">
-						<a href="#"><span><img src="<?php echo \Yii::getAlias('@web') ?>/images/premium.png" alt="Active subscription icon"></span>Active Subscription</a>
-					</li>
-					
-				</ul>
-			</div>
-		</form>
-	</div>
-	<!----------------MAIN CONTAINER--------------------------->
+        
+        <div class="col-sm-9 main-container dsh-brd">          
+          <!--toggle sidebar button-->
+          <p class="visible-xs">
+            <button type="button" class="btn btn-primary btn-xs" data-toggle="offcanvas"><i class="glyphicon glyphicon-chevron-left"></i></button>
+          </p> 
+          
+          <h3>Welcome John Doe to Phone A Doctor</h3>
+          
+         <div class="col-md-6 col-xs-12 sm-no-pad-lt sm-pad-rt">
+         	<div class="dsh-blk">
+            	<h4>Detail Patient Informtion</h4>
+                <div class="blk-inr">
+                    <p>Patient info goes here <span><img src="<?php echo \Yii::getAlias('@web') ?>/images/jhon.png" alt=""></span></p>
+                    <i class="clearfix"></i>
+                    
+                    <ul class="icn-list">
+                        <li><a href="#" title="Manage Medical History"><img src="<?php echo \Yii::getAlias('@web') ?>/images/img1.png" alt=""></a></li>
+                        <li><a href="#" title="Consultation History"><img src="<?php echo \Yii::getAlias('@web') ?>/images/img2.png" alt=""></a></li>
+                        <li><a href="#" title="Make Donation"><img src="<?php echo \Yii::getAlias('@web') ?>/images/img3.png" alt=""></a></li>
+                        <li><a href="#" title="Patient"><img src="<?php echo \Yii::getAlias('@web') ?>/images/patient-icon.png" alt=""></a></li>
+                    </ul>
+                </div>
+            </div>
+         </div>
+         
+         <div class="col-md-6 col-xs-12 sm-no-pad-rt sm-pad-lt">
+         	<div class="dsh-blk">
+            	<h4>Search A Doctor</h4>
+                <div class="blk-inr">
+                    <form class="srch-dctr-frm">
+                     <div class="form-group">                    
+                        <div class="input-group">
+                          <div class="input-group-addon"><i class="fa fa-search-plus"></i></div>
+                          <input type="text" class="form-control" id="exampleInputAmount" placeholder="Enter Search item">                      
+                        </div>
+                      </div>
+                      <div class="form-group">
+                          <div class="col-sm-3 col-xs-12">
+                            <label>Speciality</label>
+                          </div>  
+                            <div class=" col-sm-9 col-xs-12 sm-no-pad-rt">
+                                <select class="form-control">
+                                    <option>General</option>
+                                </select>                        	
+                            </div> 
+                            <div class="clearfix"></div>
+                      </div>
+                      
+                      <div class="form-inline spc">
+                      		<div class="form-group">
+                            	<label>Results per Page</label>
+                                <div class="input-group">
+                                <select class="sel">
+                                    <option></option>
+                                </select>
+                                
+                                <label class="radio-inline">
+                                  <input type="radio" name="inlineRadioOptions" id="inlineRadio1" value="option1"> Option A
+                                </label>
+                                <label class="radio-inline">
+                                  <input type="radio" name="inlineRadioOptions" id="inlineRadio2" value="option2"> Option B
+                                </label>                               
+                                </div>
+                            </div>
+                            
+                      </div>
+                      
+                      <input type="submit" value="Search" class="btn btn-default pull-right srch-btn">
+                      <div class="clearfix"></div>
+                    </form>
+                </div>
+            </div>
+         </div>
+         
+         <div class="col-md-6 col-xs-12 sm-no-pad-lt sm-pad-rt">
+         	<div class="dsh-blk">
+            	<h4>Detail Patient Informtion</h4>
+                <div class="blk-inr">
+                	<div class="table-responsive">
+                    	<table class="table table-bordered">
+ 							<tr class="hdng">
+                            	<td>Number</td>
+                                <td>Column 2</td>
+                                <td>Column 3</td>
+                            </tr>
+                            
+                            <tr>
+                            	<td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            
+                            <tr>
+                            	<td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            
+                            <tr>
+                            	<td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            
+                            <tr>
+                            	<td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                            	<td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            
+						</table>
+                    </div>
+                    
+                    <a href="#" class="btn btn-default view-btn pull-right">View more</a>
+                    <i class="clearfix"></i>
+                </div>
+            </div>
+         </div>
+         
+         <div class="col-md-6 col-xs-12 sm-no-pad-rt sm-pad-lt">
+         	<div class="dsh-blk">
+            	<h4>Detail Patient Informtion</h4>
+                <div class="blk-inr">
+                	<div class="table-responsive">
+                    	<table class="table table-bordered">
+ 							<tr class="hdng">
+                            	<td>Number</td>
+                                <td>Column 2</td>
+                                <td>Column 3</td>
+                            </tr>
+                            
+                            <tr>
+                            	<td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            
+                            <tr>
+                            	<td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            
+                            <tr>
+                            	<td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            
+                            <tr>
+                            	<td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                            	<td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            
+						</table>
+                    </div>
+                    <a href="#" class="btn btn-default view-btn pull-right">View more</a>
+                    <i class="clearfix"></i>
+                </div>
+            </div>
+         </div>
+         
+        </div>
+        
+	 <!----------------MAIN CONTAINER--------------------------->

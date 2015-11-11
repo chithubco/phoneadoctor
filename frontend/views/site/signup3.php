@@ -6,6 +6,7 @@
 
 use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
+use yii\helpers\Url;
 
 $this->title = 'Signup';
 $this->params['breadcrumbs'][] = $this->title;
@@ -81,6 +82,8 @@ $this->params['breadcrumbs'][] = $this->title;
                         <h4>Enter Personal Details Using</h4>
                         <a href="#" class="fb-btn"><img src="<?php echo \Yii::getAlias('@web') ?>/images/facebook-icon.png" alt="facebook"></a>
                         <a href="#" class="twitter-btn"><img src="<?php echo \Yii::getAlias('@web') ?>/images/twitter-icon.png" alt="twitter"></a> 
+                        <p>Already have an account? <a href="<?php echo Url::toRoute('/site/login') ?>">Click here</a></p>
+      <p>Can't remember your pin? <a href="<?php echo Url::toRoute('/site/recover') ?>">Click here</a></p>
                          <?= Html::submitButton('Next', ['class' => 'btn btn-default', 'name' => 'signup-button']) ?>
             
             <?php ActiveForm::end(); ?>

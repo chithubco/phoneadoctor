@@ -4,6 +4,8 @@
 /* @var $model \frontend\models\SignupForm */
 use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
+use yii\helpers\Url;
+
 $this->title = 'Signup';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -31,7 +33,9 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
       </div>
       <p>A six digit code will be sent to you mobile phone</p>
-      <p> please enter the the code for verification</p>
+      
+      <p>Already have an account? <a href="<?php echo Url::toRoute('/site/login') ?>">Click here</a></p>
+      <p>Can't remember your pin? <a href="<?php echo Url::toRoute('/site/recover') ?>">Click here</a></p>
       <?= Html::submitButton('Next', ['class' => 'btn btn-default', 'name' => 'signup-button']) ?>
       
       <?php ActiveForm::end(); ?>

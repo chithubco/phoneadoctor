@@ -4,6 +4,8 @@
 /* @var $model \common\models\LoginForm */
 use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
+use yii\helpers\Url;
+
 $this->title = 'Login';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -23,15 +25,15 @@ $this->params['breadcrumbs'][] = $this->title;
             'class' => 'lgn-frm'
             ]]); ?>
             <div class="form-group">
-                <div class="input-group">
-                    <div class="input-group-addon">
-                        <select name="code" class="sel-bx">
-                            <option>+234</option>
-                        </select>
-                    </div>
-                    <input type="text" class="form-control phn-no" name="phone" placeholder="Phone number">
+                <div class="drp-bx">
+                    <select name="code" class="sel-fld">
+                        <option>+234</option>
+                        
+                    </select>
                 </div>
+                <input type="text" class="form-control phn-no" name="phone" placeholder="Phone number">
             </div>
+            
             
             
             <div class="form-group">
@@ -39,7 +41,8 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
             
             <?= Html::submitButton('Login', ['class' => 'btn btn-default', 'name' => 'login-button']) ?>
-            
+            <p>Can't remember your pin? <a href="<?php echo Url::toRoute('/site/recover') ?>">Click here</a></p>
+            <p>Don't have an account? <a href="<?php echo Url::toRoute('/site/signup') ?>">Sign up here</a></p>
             <?php ActiveForm::end(); ?>
             
         </div>
