@@ -272,28 +272,43 @@ class UserController extends Controller {
      * Returns    : Send code to User phone
      */  
     public function sendVerificationCode($xmlUserDetails) {
-        
-         if (!isset($xmlUserDetails['user']['phone']) || trim($xmlUserDetails['user']['phone']) == '') {            
+
+        if (!isset($xmlUserDetails['user']['phone']) || trim($xmlUserDetails['user']['phone']) == '') {
             $this->addLogEntry('user.sendCode', 'Failure', 9, 'Phone number missing.');
-            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Phone number missing.'), 'error', 400);            
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Phone number missing.'), 'error', 400);
         }
-        $code = rand(111111,999999);        
-        $twilio_message = "Phone a doctor\nPlease use verification Code: " . $code . " to sign up." ;
-        //---------------------- TWILIO ----------------------//         
-        $twillio = Yii::$app->Twillio;        
-        $message = $twillio->getClient()->account->sms_messages->create($this->twilio_from_phone, // From a valid Twilio number
-            $xmlUserDetails['user']['phone'], // Text this number
-            $twilio_message
-        );
-        
-        $model                      = new VerifyPhone();
-        $model->phone_no            = $xmlUserDetails['user']['phone'];
-        $model->verification_code   = $code;
-        $model->verified            = 'NO';      
-        $model->save();
-        $this->addLogEntry('user.sendCode', 'Success', 3, 'User signup verification code send to phone :- ' . $xmlUserDetails['user']['phone']);
-        $this->generateJsonResponce(array("response_code" => 100, "description" => 'Verification code sent.'), 'ok', 200);               
-        
+        if ($this->validatePhone($xmlUserDetails['user']['phone'])) {
+            //check if phone no. is already in use
+            $phone_exists = $this->checkIfPhoneExists($xmlUserDetails['user']['phone']);
+            if ($phone_exists) {
+
+                $this->addLogEntry('user.sendCode', 'Failure', 9, 'Phone [' . $xmlUserDetails['user']['phone'] . '] already in use.');
+                $this->generateJsonResponce(array("response_code" => 113, "description" => 'Phone already in use.'), 'error', 400);
+            } else {
+                $code = rand(111111, 999999);
+                $twilio_message = "Phone a doctor\nPlease use verification Code: " . $code . " to sign up.";
+                //---------------------- TWILIO ----------------------//         
+                $twillio = Yii::$app->Twillio;
+                $message = $twillio->getClient()->account->sms_messages->create($this->twilio_from_phone, // From a valid Twilio number
+                        $xmlUserDetails['user']['phone'], // Text this number
+                        $twilio_message
+                );
+
+
+                if (isset($message->description) && ($message->description != NULL)) {
+                    $this->addLogEntry('user.sendCode', 'Failure', 3, 'User signup verification attempt with invalid phone number :- ' . $xmlUserDetails['user']['phone']);
+                    $this->generateJsonResponce(array("response_code" => 113, "description" => $message->description), 'ok', 200);
+                } else {
+                    $model = new VerifyPhone();
+                    $model->phone_no = $xmlUserDetails['user']['phone'];
+                    $model->verification_code = $code;
+                    $model->verified = 'NO';
+                    $model->save();
+                    $this->addLogEntry('user.sendCode', 'Success', 3, 'User signup verification code send to phone :- ' . $xmlUserDetails['user']['phone']);
+                    $this->generateJsonResponce(array("response_code" => 100, "description" => 'Verification code sent.'), 'ok', 200);
+                }
+            }
+        }
     }
      /*
      * API Method : user.verifyPhone
@@ -331,10 +346,15 @@ class UserController extends Controller {
 
         if ($userPhone != NULL) {
             //check if phone no. is verified
-            $phone_verification = VerifyPhone::find()->where('phone_no LIKE "' . $userPhone . '"')->one();
-            
+            $phone_verification = VerifyPhone::find()->where('phone_no LIKE "' . $userPhone . '"')->all();                    
+
             if ($phone_verification != NULL) {
-                return ($phone_verification->verified == 'YES') ? true : false;
+                 $rec_count = count($phone_verification);  
+                 if($rec_count>1 && $phone_verification[$rec_count-1]->verified =='NO'){
+                    $this->addLogEntry('user.create', 'Failure', 9, 'Multiple entries found for same number: '.$userPhone.' and the latest not verified.');
+                    $this->generateJsonResponce(array("response_code" => 113, "description" => 'Step 2 failed, Multiple entries found for your mobile number and the latest not verified, redirect:user.verifyphone'), 'error', 400);
+                  }
+                return ($phone_verification[$rec_count-1]->verified == 'YES') ? true : false;
             } else {
                 $this->addLogEntry('user.create', 'Failure', 9, 'Mobile number not verified, phone no not found in verification table.');
                 $this->generateJsonResponce(array("response_code" => 113, "description" => 'Step 2 failed, Please verifiy your mobile number.'), 'error', 400);
@@ -356,6 +376,15 @@ class UserController extends Controller {
             $userPhone = $xmlUserDetails['user']['patients']['mobile_phone'];
             $userFirstName = $this->sanitizeXML($xmlUserDetails['user']['userinfo']['fname']);
             $userLastName = $this->sanitizeXML($xmlUserDetails['user']['userinfo']['lname']);
+            if (!isset($xmlUserDetails['user']['userinfo']['fname']) || trim($xmlUserDetails['user']['userinfo']['fname']) == '') {
+                
+                $this->addLogEntry('user.create', 'Failure', 9, 'Firstname missing.');
+                $this->generateJsonResponce(array("response_code" => 113, "description" => 'Firstname missing.'), 'error', 400);
+            } else if (!isset($xmlUserDetails['user']['userinfo']['lname']) || trim($xmlUserDetails['user']['userinfo']['lname']) == '') {
+
+                $this->addLogEntry('user.create', 'Failure', 9, 'Lastname missing.');
+                $this->generateJsonResponce(array("response_code" => 113, "description" => 'Lastname missing.'), 'error', 400);
+            }
 
             if ($this->validatePhone($userPhone) && $this->checkPhoneVerification($userPhone)) {
 
