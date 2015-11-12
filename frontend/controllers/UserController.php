@@ -137,10 +137,10 @@ class UserController extends Controller {
                 case 'user.recoverPin':
                     $this->RecoverPin($xmlArray['request']);
                     break;  
-                /*case 'user.getMedicalHistory':
+                case 'user.getMedicalHistory':
                     $this->getMedicalHistory($xmlArray['request']);
                     break;  
-                case 'user.getConsultationHistory':
+                /*case 'user.getConsultationHistory':
                     $this->getConsultationHistory($xmlArray['request']);
                     break;*/
                 case 'user.login':
@@ -586,18 +586,18 @@ class UserController extends Controller {
      /*
      * API Method : consultation.getMedicalHistory
      * Purpose    : get user medical details
-     * Returns    : User related ino
+     * Returns    : User related ino*/
     
     
     public function getMedicalHistory($xmlUserDetails) {
         
     if((!isset($xmlUserDetails['user']['auth_key']) || trim($xmlUserDetails['user']['auth_key']) == '')) {
                 
-            $this->addLogEntry('consultation.getMedicalHistory', 'Failure', 9, 'Auth key missing.');
+            $this->addLogEntry('user.getMedicalHistory', 'Failure', 9, 'Auth key missing.');
             $this->generateJsonResponce(array("response_code" => 113, "description" => 'Auth key missing.'), 'error', 400);
 
         } elseif (!isset($xmlUserDetails['user']['id']) || trim($xmlUserDetails['user']['id']) == '') {            
-            $this->addLogEntry('consultation.getMedicalHistory', 'Failure', 9, 'User ID missing.');
+            $this->addLogEntry('user.getMedicalHistory', 'Failure', 9, 'User ID missing.');
             $this->generateJsonResponce(array("response_code" => 113, "description" => 'User ID missing.'), 'error', 400);            
         }else {  
             
@@ -620,11 +620,11 @@ class UserController extends Controller {
                 $results = $command->queryAll();
                 $history_data = ($results!=NULL)?$results:"No records found"; 
                 
-                $this->addLogEntry('consultation.getMedicalHistory', 'Success', 3, 'User MedicalHistory successfully returned. Username :- ' . $user_exists['fname'],$xmlUserDetails['user']['id']);
+                $this->addLogEntry('user.getMedicalHistory', 'Success', 3, 'User MedicalHistory successfully returned. Username :- ' . $user_exists['fname'],$xmlUserDetails['user']['id']);
                 $this->generateJsonResponce(array("response_code" => 100, "description" => $history_data), 'error', 400);
                 
             } else {
-                $this->addLogEntry('consultation.getMedicalHistory', 'Failure', 9, 'Fetch user info auth key authentication failed for user :' . $xmlUserDetails['user']['id']);
+                $this->addLogEntry('user.getMedicalHistory', 'Failure', 9, 'Fetch user info auth key authentication failed for user :' . $xmlUserDetails['user']['id']);
                 $this->generateJsonResponce(array("response_code" => 113, "description" => 'Your auth key is invalid.'), 'error', 400);
             }
             
