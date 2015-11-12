@@ -10,6 +10,8 @@ use app\models\User;
 use app\models\UserSearch;
 use app\models\Patient;
 use app\models\VerifyPhone;
+use app\models\PatientAllergies;
+use app\models\PatientMedications;
 use app\models\Settings;
 use app\models\Cms;
 use app\models\ApiLog;
@@ -148,7 +150,10 @@ class UserController extends Controller {
                     break;                 
                 case 'user.logout':
                     $this->userLogout($xmlArray['request']);
-                    break;   
+                    break;
+                case 'user.addmedical':
+                    $this->addMedicals($xmlArray['request']);
+                    break;               
                 
                 default:
                    $this->generateJsonResponce(array("response_code" => 999, "description" => 'Unknown method.'), 'error', 400);
@@ -1092,6 +1097,74 @@ class UserController extends Controller {
             }
             
         
+    } 
+    
+    /*
+     * API Method : user.addmedical
+     * Purpose    : user's current conditions & symptoms, allergies,medications/treatments if currently receiving
+     * Returns    : Result success or failed
+     */      
+    public function addMedicals($xmlUserDetails) {
+
+        if ((!isset($xmlUserDetails['user']['userinfo']['id']) || trim($xmlUserDetails['user']['userinfo']['id']) == '')) {
+
+            $this->addLogEntry('user.addmedical', 'Failure', 9, 'User Id missing.');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'User Id missing.'), 'error', 400);
+        }elseif ((!isset($xmlUserDetails['user']['userinfo']['auth_key']) || trim($xmlUserDetails['user']['userinfo']['auth_key']) == '')) {
+
+            $this->addLogEntry('user.addmedical', 'Failure', 9, 'Auth key missing.');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Auth key missing.'), 'error', 400);
+        } else {            
+            $user_exists = User::find()->where('id = ' . $xmlUserDetails['user']['userinfo']['id'])->one();
+            $patient_exists = Patient::find()->where('user_id = ' . $xmlUserDetails['user']['userinfo']['id'])->one();
+            //Authenticate access key before update
+            Yii::$app->AuthoriseUser->userId = $xmlUserDetails['user']['userinfo']['id'];
+            Yii::$app->AuthoriseUser->auth_key = $xmlUserDetails['user']['userinfo']['auth_key'];
+            $accessAuthorised = Yii::$app->AuthoriseUser->checkAuthKey();
+            if ($accessAuthorised) {
+                if ($user_exists) {
+                    if (is_array($xmlUserDetails['user']['alergies'])) {
+                        $model = new PatientAllergies;
+                        $xmlUserDetails['user']['alergies']['pid']        = $patient_exists->pid;
+                        $model->setAttributes($xmlUserDetails['user']['alergies']);
+                        //$model->load($xmlUserDetails['user']['alergies']);
+                        $model->validate();
+                        if ($model->getErrors()) {
+                            $this->addLogEntry('user.medicals', 'Failure', 9, 'Correct the validation errors.');
+                            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Correct the validation errors.', 'errors' => $model->getErrors()), 'error', 400);
+                            exit;
+                        }
+
+                        $model->save();
+                    }
+
+                    if (is_array($xmlUserDetails['user']['medications'])) {
+                        $model2 = new PatientMedications;
+                        $xmlUserDetails['user']['medications']['pid']        = $patient_exists->pid;
+                        $xmlUserDetails['user']['medications']['uid']        = $xmlUserDetails['user']['userinfo']['id'];
+                        $model2->setAttributes($xmlUserDetails['user']['medications']);                        
+                        //$model2->load($xmlUserDetails['user']['medications']);
+                        $model2->validate();
+                        if ($model2->getErrors()) {
+                            $this->addLogEntry('user.medicals', 'Failure', 9, 'Correct the validation errors.');
+                            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Correct the validation errors.', 'errors' => $model2->getErrors()), 'error', 400);
+                            exit;
+                        }
+                        $model2->save();
+                    }
+
+                    $this->addLogEntry('user.medicals', 'Success', 3, 'User medicals successfully added. Username :- ' . $user_exists->username, $user_exists->id);
+                    $this->generateJsonResponce(array("response_code" => 100, "description" => 'User medicals successfully added.'), 'ok', 200);
+                    exit;
+                } else {
+                    $this->addLogEntry('user.medicals', 'Failure', 9, 'Add user medicals failed for user :' . $xmlUserDetails['user']['userinfo']['id']);
+                    $this->generateJsonResponce(array("response_code" => 113, "description" => 'User Id is invalid.'), 'error', 400);
+                }
+            } else {
+                $this->addLogEntry('user.medicals', 'Failure', 9, 'User profile update auth key authentication failed for user :' . $xmlUserDetails['user']['userinfo']['id']);
+                $this->generateJsonResponce(array("response_code" => 113, "description" => 'Your auth key is invalid.'), 'error', 400);
+            }
+        }
     }    
   
 
