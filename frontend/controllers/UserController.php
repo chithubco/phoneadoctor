@@ -36,6 +36,7 @@ class UserController extends Controller {
     public $twilio_from_phone;
     public $twilio_account_sid;
     public $twilio_auth_token;
+    public $call_center_phone;
     
     
    public function beforeAction($action) { 
@@ -70,7 +71,11 @@ class UserController extends Controller {
                 
                 case 'twilio_from_phone':
                     $this->twilio_from_phone = $setting->value;
-                    break;  
+                    break; 
+                
+                case 'call_center_phone':
+                    $this->call_center_phone = $setting->value;
+                    break;                    
                 
                 default:
                     break;
@@ -734,7 +739,7 @@ class UserController extends Controller {
             $accessAuthorised =  Yii::$app->AuthoriseUser->checkAuthKey();
             if($accessAuthorised){ 
                 $query = new Query;
-                $query->select('fname, lname,sex,DOB,mobile_phone,email')
+                $query->select('title, fname, lname,sex,DOB,marital_status,SS,pubpid,address,city,state,country,zipcode,mobile_phone,email,mothers_name,guardians_name,pharmacy')
                         ->from('patient')
                         ->where('user_id = ' . $xmlUserDetails['user']['id']);
 
@@ -920,7 +925,7 @@ class UserController extends Controller {
      * Returns    : Result success or failed
           
     public function appointmentNotification($userId,$appDate,$doctor,$sessionId) {
-
+        $officePhone = 0;
         if (!isset($appDate) || trim($appDate) == '') {
             $this->addLogEntry('consultation.appointmentNotification', 'Failure', 9, 'Date is missing.');
             return 'Date is missing.'; //$this->generateJsonResponce(array("response_code" => 113, "description" => 'Date is missing.'), 'error', 400);
@@ -940,9 +945,9 @@ class UserController extends Controller {
         $user_check = Patient::find()->where($UserCondition)->one();
         if ($user_check != NULL) {
             $userPhone = $user_check->mobile_phone;
-
-            $twilio_message = "Phone a doctor: Appointment Notification\nHi ".$user_check->fname . " " . $user_check->lname."\n Your appointment with Dr " . $doctor . " is schedule on " . $appDate . "\n your session Id is: " . $sessionId;
-            //---------------------- TWILIO ----------------------//             
+            $officePhone = (isset($this->call_center_phone) && $this->call_center_phone != NULL)?$this->call_center_phone:07003628677;
+            $twilio_message = "Hi ".$user_check->fname . " " . $user_check->lname."\n Your Phone A Doctor appointment with Dr. " . $doctor . " is scheduled for " . $appDate . "\n.Please call ".$officePhone." and present your session Id : " . $sessionId ." at the appointment time";
+            //---------------------- TWILIO ----------------------//                         
             $twillio = Yii::$app->Twillio;
             $message = $twillio->getClient()->account->sms_messages->create($this->twilio_from_phone, // From a valid Twilio number
                     $userPhone, // Text this number
@@ -1174,7 +1179,7 @@ class UserController extends Controller {
      */
 
     public function sendSMS($xmlUserDetails) {
-
+        
         if (!isset($xmlUserDetails['user']['phone']) || trim($xmlUserDetails['user']['phone']) == '') {
             $this->addLogEntry('user.sendSMS', 'Failure', 9, 'Phone number missing.');
             $this->generateJsonResponce(array("response_code" => 113, "description" => 'Phone number missing.'), 'error', 400);
