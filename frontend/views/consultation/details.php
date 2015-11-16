@@ -27,7 +27,7 @@ $this->title = 'Consultation Details';
           <div class="calling-dctr">
           	<span>Date: <?php echo $start_date ?></span><span>Time: <?php echo $start_time ?></span>
             <h3>Doctor you would be speaking to</h3>
-            <img src="<?php echo \Yii::getAlias('@web') ?>/images/dr-rob.png" alt=""	>
+            <img src="<?php echo \Yii::getAlias('@web') ?>/doctorimages/<?php echo $details->image ?>.png" alt="" width="150px"  >
             <p><?php echo $details->doctor ?></p>
             <h3>Identification Code for the session</h3>
             <h5>#<?php echo $details->code ?></h5>            

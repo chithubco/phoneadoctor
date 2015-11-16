@@ -1,19 +1,17 @@
 <?php
-
 namespace api\modules\v1\controllers;
 
-
 use Yii;
-use common\models\Users;
+use app\models\Users;
 use app\models\Settings;
 use app\models\ApiLog;
-use common\models\Transactions;
-use common\models\PaymentAttempts;
+use app\models\Donations;
+use app\models\Transactions;
+use app\models\PaymentAttempts;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use common\components\XmlDomConstruct;
-
 include_once("../../common/components/xmlToArray.php");
 include_once("../../common/components/XmlDomConstruct.php");
 
@@ -32,10 +30,7 @@ class PaymentController extends Controller
     
    public function beforeAction($action) { 
         
-
         $settingValues = Settings::find()->all();                        
-
-
         //$settingValues = Settings::model()->findAll();
         foreach($settingValues as $setting) {
             switch($setting->name) {  
@@ -47,7 +42,6 @@ class PaymentController extends Controller
                 case 'base_currency_code':
                     $this->base_currency_code = $setting->value;
                     break;
-
                 case 'configURL':
                     $this->configURL = $setting->value;
                     break;
@@ -93,11 +87,9 @@ class PaymentController extends Controller
        
         //use php://input to get the raw $_POST results
         $xmlInput = file_get_contents('php://input');
-
         //parse the incoming XML to array
         $xmlArray = xml2array($xmlInput);
         //echo'<pre>';print_r($xmlArray);echo'</pre>';
-
         if (!isset($xmlArray['request']) || !isset($xmlArray['request_attr'])) {
             $this->generateJsonResponce(array("response_code" => 112, "description" => 'Invalid request, please check your input.'), 'error', 400);
         } else if ($requestMethod <> 'POST') {
@@ -116,12 +108,9 @@ class PaymentController extends Controller
             }
         }
     }
-
     
-
     
    
-
     /**
      * Finds the User model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
@@ -144,7 +133,6 @@ class PaymentController extends Controller
      * Returns    : Result of insert operation
      */
        public function makePayment($xmlpaymentDetails) {
-
       //check the mandatory fields
  
         if (!isset($xmlpaymentDetails['payment']['amount']) || trim($xmlpaymentDetails['payment']['amount']) == '') {
@@ -159,29 +147,36 @@ class PaymentController extends Controller
             
         }else {
             $amount      = $this->sanitizeXML($xmlpaymentDetails['payment']['amount']);
-            $id  = $this->sanitizeXML($xmlpaymentDetails['payment']['id']);
+            $id          = $this->sanitizeXML($xmlpaymentDetails['payment']['id']);
             
             
                 
                 
-                //create a new payment
-                
-                $payment = PaymentAttempts::findOne($id);
-                $handler = "frontend\\components\\".$payment->handler;
-                
-                $class= new $handler;
+            //create a new payment
+            $donations = Donations::findOne($id);
+            if (isset($donations) && $donations != NULL) {
+                $payment = PaymentAttempts::findOne($donations->payment_attempt_id);
                
-                var_dump(class_exists($handler));
+                $handler = "frontend\\components\\" . $payment->handler;
+                if ($payment->status == 'success') {
+                    $class = new $handler;
+                    $class->run($id);
+                } else {
+                    $this->addLogEntry('payment.create', 'Faliure', 3, 'Payment status is pending');
+                    $this->generateJsonResponce(array("response_code" => 113, "description" => 'Payment status is pendind.'), 'error', 400);
+                }
+            } else {
+                $this->addLogEntry('payment.create', 'Faliure', 3, 'Invalid donation Id');
+                $this->generateJsonResponce(array("response_code" => 113, "description" => 'Invalid donation Id.'), 'error', 400);
+            }
+                //var_dump(class_exists($handler));
                
-                //$this->addLogEntry('payment.create', 'Success', 3, 'payment successfully created. Username :- ' . $name, $model->id);
-               // $this->generateJsonResponce(array("response_code" => 100, "description" => 'payment successfully created.'), 'ok', 200);               
-                exit;
+              
             
          }
        }
        
         
-
    public function addLogEntry($api_method, $type, $log_description, $notes = '', $user_id = 0, $trans_id = 0) {
         if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
             $remote_ip = $_SERVER['HTTP_CLIENT_IP'];
@@ -190,15 +185,11 @@ class PaymentController extends Controller
         } else {
             $remote_ip = $_SERVER['REMOTE_ADDR'];
         }        
-       
-        /*$t      = microtime(true);
-        $micro  = sprintf("%06d",($t - floor($t)) * 1000000);         
-        $d      = new \DateTime( date('Y-m-d H:i:s.' . $micro, $t) );       
-        $date   = $d->format("Y-m-d H:i:s.u");*/
+      
         $date   = date("Y-m-d H:i:s");
         
         $api_log = new ApiLog;
-        $api_log->api_method_id             = 1;//$this->api_methods[$api_method];
+        $api_log->api_method                = $api_method;
         $api_log->type                      = $type;
         $api_log->api_log_description_id    = $log_description;
         $api_log->notes                     = $notes;
@@ -213,11 +204,9 @@ class PaymentController extends Controller
        
  public function generateXMLResponse($response, $status, $http_status = 200, $apiVersion = 'apiv2') {
         //$checkMethod = new REST();
-
         //$dom = new XmlDomConstructCustomizedForAPI('1.0', 'utf-8');
         Yii::$app->xmlDom->parseMixed(array("response" => $response));
         $data = Yii::$app->xmlDom->saveXML();
-
         $data = str_replace('<response/>', '<response xmlns="http://' . $_SERVER['SERVER_NAME'] . '/pos/index.php/' . $apiVersion . '" status="' . $status . '" />', $data);
         $data = str_replace('<response>', '<response xmlns="http://' . $_SERVER['SERVER_NAME'] . '/pos/index.php/' . $apiVersion . '" status="' . $status . '" >', $data);
         Yii::$app->REST->response($data, $http_status);
@@ -232,13 +221,11 @@ public function generateJsonResponce($response){
     print_r(json_encode($response));
     exit;
 }
-
    /*
      * API Method : N.A
      * Purpose    : Filter out unwanted characters
      * Returns    : Sanitized data
      */
-
     public function sanitizeXML($clear = '', $excludeSpecialChars = false, $skipURLDecode = false) {
        
         if(trim($clear) <> ''){
@@ -261,7 +248,6 @@ public function generateJsonResponce($response){
         }         
         return $clear;
     }
-
     
        
 }

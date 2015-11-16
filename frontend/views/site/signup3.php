@@ -17,6 +17,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 <h2>Sign up</h2>
                 <div class="reg2-cnt step3-cnt">
                     <span class="logo-center"><img src="<?php echo \Yii::getAlias('@web') ?>/images/logo-center.png" alt="logo"></span>
+                    <?php echo $response ?>
                     <?php $form = ActiveForm::begin(['id' => 'form-signup','options' => [
             'class' => 'reg2-frm'
             ]]); ?>                   

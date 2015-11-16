@@ -1,7 +1,7 @@
 <?php
 namespace api\modules\v1\controllers;
-
 use Yii;
+use yii\db\Query;
 use common\models\Patient;
 use common\models\Users;
 use app\models\Settings;
@@ -12,10 +12,8 @@ use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use common\components\XmlDomConstruct;
-
 include_once("../../common/components/xmlToArray.php");
 include_once("../../common/components/XmlDomConstruct.php");
-
 class ConsultationController extends Controller
 {
     public $administrator_email;
@@ -112,7 +110,13 @@ class ConsultationController extends Controller
                     break;  
                 case 'consultation.appointmentNotification':
                     $this->appointmentNotification($xmlArray['request']);
-                    break;                  
+                    break;  
+                /*case 'consultation.getMedicalHistory':
+                    $this->getMedicalHistory($xmlArray['request']);
+                    break; */ 
+                case 'consultation.getConsultationHistory':
+                    $this->getConsultationHistory($xmlArray['request']);
+                    break;                    
                 default:
                    $this->generateJsonResponce(array("response_code" => 999, "description" => 'Unknown method.'), 'error', 400);
                     break;
@@ -172,10 +176,19 @@ class ConsultationController extends Controller
     {
         //get doctor's calendar for the day
             $calendar = CalendarEvents::find()->where("user_id = '$doc' and `start` >  '".date("Y-m-d H:i:s")."'
-            AND  `end` <  '".date("Y-m-d")."  ".$this->close_time."'")->one();
+            AND  `end` <  '".date("Y-m-d")." ".$this->close_time."'")->one();
             return $calendar;
         //
         
+    }
+    protected function hasSchedule($user_id){
+        $user = Patient::find()->where("user_id = '$user_id'")->one();
+        $calendar = CalendarEvents::find()->where("patient_id = '$user->pid' and `end` >  '".date("Y-m-d H:i:s")."'")->one();
+        if($calendar)
+            return true;
+        else
+            return false;
+
     }
     protected function getNearestSlot(){
         $current_time = time();
@@ -186,7 +199,6 @@ class ConsultationController extends Controller
         $new_date = date('Y-m-d H:i:s', $new_time);
         return $new_date;
     }
-
     
     protected function generate_code($length) {
       $random = '';
@@ -213,6 +225,11 @@ public function createConsultation($xmlconsultationDetails) {
             
             $this->addLogEntry('consultation.create', 'Failure', 9, 'User missing.');
             $this->generateJsonResponce(array("response_code" => 113, "description" => 'User missing.'), 'error', 400);
+            
+        }else if ($this->hasSchedule($xmlconsultationDetails['consultation']['user_id'])) {
+            
+            $this->addLogEntry('consultation.create', 'Failure', 9, 'pending consultation.');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'You have a pending consultation.'), 'error', 400);
             
         } else {
             $note      = $this->sanitizeXML($xmlconsultationDetails['consultation']['note']);
@@ -249,9 +266,11 @@ public function createConsultation($xmlconsultationDetails) {
                 $cons->code                 = $this->generate_code(6);
                 $cons->save(false);
                 //$activate_key               = time() . rand(1000, 9999);echo 1;
-                $model->notes               = "Code: ".$cons->code."\n".$note;
+                $model->notes               = $note;
                 $model->user_id             = $doc;
                 $model->patient_id           = $user->pid;
+                $model->consult_code    = $cons->code;
+                $model->consult_id     = $cons->id;
                 $model->title               = $name;
                 $model->category            = 2;
                 $model->facility            = 1;
@@ -268,6 +287,7 @@ public function createConsultation($xmlconsultationDetails) {
                         "start"=>$start,
                         "end"=>$end,
                         "code"=>$cons->code ,
+                        "image"=>$doctor->image ,
                     )), 'ok', 200);               
                 exit;
             
@@ -277,8 +297,6 @@ public function createConsultation($xmlconsultationDetails) {
             }            
          }
        }
-
-
     /*
      * Function: Appointment Notification
      * Purpose    : send appointment notification SMS to users
@@ -318,7 +336,101 @@ public function createConsultation($xmlconsultationDetails) {
             return 'No user exists with the userId provided.';//$this->generateJsonResponce(array("response_code" => 113, "description" => 'No user exists with the userId provided.'), 'error', 400);
         }
     }
-       
+    
+         /*
+     * API Method : consultation.getMedicalHistory
+     * Purpose    : get user medical details
+     * Returns    : User related ino
+     */
+    
+    public function getMedicalHistory($xmlUserDetails) {
+        
+    if((!isset($xmlUserDetails['user']['auth_key']) || trim($xmlUserDetails['user']['auth_key']) == '')) {
+                
+            $this->addLogEntry('consultation.getMedicalHistory', 'Failure', 9, 'Auth key missing.');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Auth key missing.'), 'error', 400);
+        } elseif (!isset($xmlUserDetails['user']['id']) || trim($xmlUserDetails['user']['id']) == '') {            
+            $this->addLogEntry('consultation.getMedicalHistory', 'Failure', 9, 'User ID missing.');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'User ID missing.'), 'error', 400);            
+        }else {  
+            
+            //Authenticate access key before update
+            Yii::$app->AuthoriseUser->userId = $xmlUserDetails['user']['id'];
+            Yii::$app->AuthoriseUser->auth_key = $xmlUserDetails['user']['auth_key'];
+            $accessAuthorised =  Yii::$app->AuthoriseUser->checkAuthKey();
+            if($accessAuthorised){ 
+                $user_exists = Patient::find()->where('user_id LIKE "' . $xmlUserDetails['user']['id'] . '"')->one();                    
+                $patient_id = ($user_exists!=NULL)?$user_exists->pid:0;
+                
+                $query = new Query;
+                $query->select('pm.STR,pm.begin_date,pm.end_date,pm.prescription_id,pm.route,pm.dispense,
+                        pm.dose,pm.refill,pm.take_pills,pm.form,pa.allergy_type,pa.allergy,pa.begin_date,pa.end_date,pa.reaction,pa.severity,pa.location') 
+                    ->from('patient_medications pm')
+                    ->join('LEFT JOIN', 'patient_allergies pa',
+                                'pa.pid =pm.pid')   
+                    ->where('pm.pid = ' . $patient_id);
+                $command = $query->createCommand();                
+                $results = $command->queryAll();
+                $history_data = ($results!=NULL)?$results:"No records found"; 
+                
+                $this->addLogEntry('consultation.getMedicalHistory', 'Success', 3, 'User MedicalHistory successfully returned. Username :- ' . $user_exists['fname'],$xmlUserDetails['user']['id']);
+                $this->generateJsonResponce(array("response_code" => 100, "description" => $history_data), 'error', 400);
+                
+            } else {
+                $this->addLogEntry('consultation.getMedicalHistory', 'Failure', 9, 'Fetch user info auth key authentication failed for user :' . $xmlUserDetails['user']['id']);
+                $this->generateJsonResponce(array("response_code" => 113, "description" => 'Your auth key is invalid.'), 'error', 400);
+            }
+            
+        } 
+    }
+     /*
+     * API Method : consultation.getConsultationHistory
+     * Purpose    : get user consultation details
+     * Returns    : User related info
+     */
+    
+    public function getConsultationHistory($xmlUserDetails) {
+        
+    if((!isset($xmlUserDetails['user']['auth_key']) || trim($xmlUserDetails['user']['auth_key']) == '')) {
+                
+            $this->addLogEntry('consultation.getConsultationHistory', 'Failure', 9, 'Auth key missing.');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Auth key missing.'), 'error', 400);
+        } elseif (!isset($xmlUserDetails['user']['id']) || trim($xmlUserDetails['user']['id']) == '') {            
+            $this->addLogEntry('consultation.getConsultationHistory', 'Failure', 9, 'User ID missing.');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'User ID missing.'), 'error', 400);            
+        }else {  
+            
+            //Authenticate access key before update
+            Yii::$app->AuthoriseUser->userId = $xmlUserDetails['user']['id'];
+            Yii::$app->AuthoriseUser->auth_key = $xmlUserDetails['user']['auth_key'];
+            $accessAuthorised =  Yii::$app->AuthoriseUser->checkAuthKey();
+            if($accessAuthorised){ 
+                $user = Patient::find()->where("user_id = '".$xmlUserDetails['user']['id']."'")->one();
+                //$query = new Query;
+                $query = CalendarEvents::find()
+                ->joinWith(['users']);
+                $query->select('calendar_events.consult_code,calendar_events.notes,calendar_events.start,users.title,users.fname,users.lname') 
+
+                    //->from('consultations') 
+                    ->joinWith(['users'])                    
+                    ->where("patient_id = '". $user->pid."'")
+                    ->orderby("start desc");
+                $command = $query->createCommand(); 
+                $results = $command->queryAll();                
+                $history_data = ($results!=NULL)?$results:"No consultation records found";                
+                
+                $this->addLogEntry('consultation.getConsultationHistory', 'Success', 3, 'User Consultation History successfully returned. User ID :- ' . $xmlUserDetails['user']['id'],$xmlUserDetails['user']['id']);
+                $this->generateJsonResponce(array("response_code" => 100, "description" => $history_data), 'error', 400);
+                
+            } else {
+                $this->addLogEntry('consultation.getConsultationHistory', 'Failure', 9, 'Fetch user info auth key authentication failed for user :' . $xmlUserDetails['user']['id']);
+                $this->generateJsonResponce(array("response_code" => 113, "description" => 'Your auth key is invalid.'), 'error', 400);
+            }
+            
+        } 
+    
+        
+    }   
         
     public function addLogEntry($api_method, $type, $log_description, $notes = '', $user_id = 0, $trans_id = 0) {
         if (!empty($_SERVER['HTTP_CLIENT_IP'])) {

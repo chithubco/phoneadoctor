@@ -37,7 +37,7 @@ $this->params['breadcrumbs'][] = $this->title;
             
             
             <div class="form-group">
-                <input type="password" name="pin" class="form-control pin-code" placeholder="Pin/secret code.">
+                <input type="password" maxlength="4" name="pin" class="form-control pin-code" placeholder="Pin/secret code.">
             </div>
             
             <?= Html::submitButton('Login', ['class' => 'btn btn-default', 'name' => 'login-button']) ?>

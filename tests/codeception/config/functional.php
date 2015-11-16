@@ -4,6 +4,9 @@
  */
 return [
     'components' => [
+    'db' => [
+                'dsn' => 'mysql:host=localhost;dbname=gaia_test',
+            ],
         'request' => [
             // it's not recommended to run functional tests with CSRF validation enabled
             'enableCsrfValidation' => false,

@@ -18,17 +18,17 @@ $this->title = 'Change Pin';
 		<?php $form = ActiveForm::begin(['id' => 'form-consult']); ?>
 			<div class="form-group">
                     	<label>Enter old pin</label>
-                    	<input type="password" name="pin" class="form-control" placeholder="">
+                    	<input type="password" name="pin" maxlength="4" class="form-control" placeholder="">
                     </div>
                     
                     <div class="form-group">
                     	<label>Enter new pin</label>
-                    	<input type="password" name="newpin" class="form-control" placeholder="">
+                    	<input type="password" name="newpin" maxlength="4" class="form-control" placeholder="">
                     </div>
                     
                     <div class="form-group">
                     	<label>Confirm new pin</label>
-                    	<input type="password" name="newpin2" class="form-control" placeholder="">
+                    	<input type="password" name="newpin2" maxlength="4" class="form-control" placeholder="">
                     </div>
 			
 			<!--
@@ -71,7 +71,7 @@ $this->title = 'Change Pin';
 				</ul>
 			</div>
 			-->
-		<?= Html::submitButton('Submit your question', ['class' => 'btn btn-default', 'name' => 'signup-button']) ?>
+		<?= Html::submitButton('Submit', ['class' => 'btn btn-default', 'name' => 'signup-button']) ?>
                    
                 <?php ActiveForm::end(); ?>
 	</div>

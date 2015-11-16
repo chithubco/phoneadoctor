@@ -212,7 +212,7 @@ class SiteController extends Controller
               </user>
             </request>
             ');
-         
+         $resp = $response->body->description;
             if($response->body->response_code==100){
             
             return $this->redirect('login');
@@ -229,7 +229,7 @@ class SiteController extends Controller
               </user>
             </request>
             ');
-          
+          $resp = $response->body->description;
             if($response->body->response_code==100){
             
             return $this->redirect('login');
@@ -240,6 +240,8 @@ class SiteController extends Controller
         }
         return $this->render('recover', [
             'question'=>$question,
+            'error'=>$resp,
+            
         ]);
     }
 
@@ -351,7 +353,8 @@ class SiteController extends Controller
                   <patients>
                   <mobile_phone>'.$session['phone'].'</mobile_phone>    
                   <email>'.$_POST['email'].'</email>
-                  <security_que_value>'.$_POST['question'].'</security_que_value>
+                  <security_que_id>'.$_POST['question'].'</security_que_id>
+                  <security_que_value>'.$_POST['answer'].'</security_que_value>
                   <DOB>'.$_POST['age'].'</DOB>
                   <address></address>    
                   <sex>'.$_POST['sex'].'</sex>

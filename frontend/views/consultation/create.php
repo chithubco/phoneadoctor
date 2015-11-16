@@ -13,6 +13,7 @@ $this->title = 'Make a Consultation';
 	
 	<h2>Ask a doctor now</h2>
 	<div class="cnt-blk">
+	<?php echo $error; ?>
 		<?php $form = ActiveForm::begin(['id' => 'form-consult']); ?>
 			
 			<div class="form-group">

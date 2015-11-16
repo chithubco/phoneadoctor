@@ -3,6 +3,8 @@
 namespace frontend\controllers;
 
 use yii\helpers\Url;
+use common\models\UploadForm;
+use yii\web\UploadedFile;
 require_once("common/components/Send.php");
 require_once("common/components/checkLogin.php");
 class AccountController extends \yii\web\Controller
@@ -44,7 +46,7 @@ class AccountController extends \yii\web\Controller
             if($response->body->response_code==100){
             
             
-            //return $this->redirect('update');
+            return $this->redirect(Url::toRoute('/consultation/index'));
             }
             $resp = $response->body->description;
             //$session['phone'] = $_POST['phone'];
@@ -61,6 +63,9 @@ class AccountController extends \yii\web\Controller
     {
         $session = \Yii::$app->session;
         $resp='';
+        $model = new UploadForm();
+
+    
         $response = pull('user/api','
                 <request method="user.getuserinfo">
                   <user>
@@ -71,7 +76,11 @@ class AccountController extends \yii\web\Controller
                 ');
         $data = $response->body;
 
-        if($_POST){
+        
+    
+
+    
+        if (\Yii::$app->request->isPost) {
         	
             $response = pull('user/api','
             	<request method="user.update">
@@ -90,17 +99,19 @@ class AccountController extends \yii\web\Controller
 				  <DOB>123456</DOB>
 				  <address>'.$_POST['address'].'</address>    
 				  <sex>'.$_POST['sex'].'</sex>
-				  <address>'.$_POST['city'].'</address>    
-				  <sex>'.$_POST['state'].'</sex>
 				  </patients>
 				  </user>
 				</request>
                 ');
-            
+            $model->file = UploadedFile::getInstance($model, 'file');
+
+        if ($model->validate()) {                
+            $model->file->saveAs('pix/' .$session['id']. '.jpg');
+        }
             if($response->body->response_code==100){
             
             
-            return $this->redirect('update');
+            //return $this->redirect(Url::toRoute('/consultation/index'));
             }
             $resp = $response->body->description;
             //$session['phone'] = $_POST['phone'];
@@ -110,8 +121,76 @@ class AccountController extends \yii\web\Controller
         }
         return $this->render('edit',[
         	"error"=>$resp,
-        	"data"=>$data
+        	"data"=>$data,
+            'model' => $model
         	]);
+    }
+
+    public function actionMedical()
+    {
+        $session = \Yii::$app->session;
+        $resp='';
+        $model = new UploadForm();
+
+    
+        $response = pull('user/api','
+                <request method="user.getuserinfo">
+                  <user>
+                  <id>'.$session['id'].'</id>    
+                  <auth_key>'.$session['authkey'].'</auth_key>    
+                  </user>
+                </request>
+                ');
+        $data = $response->body;
+
+        
+    
+
+    
+        if (\Yii::$app->request->isPost) {
+            
+            $response = pull('user/api','
+                <request method="user.update">
+                  <user>
+                  <userinfo>
+                  <id>'.$session['id'].'</id>    
+                  <auth_key>'.$session['authkey'].'</auth_key>  
+                  <fname>'.$_POST['fname'].'</fname>    
+                  <lname>'.$_POST['lname'].'</lname>
+                  <password>'.$_POST['pin'].'</password>
+                  </userinfo>
+                  <patients>
+       
+                  <email></email>
+                  <security_que_value>test</security_que_value>
+                  <DOB>123456</DOB>
+                  <address>'.$_POST['address'].'</address>    
+                  <sex>'.$_POST['sex'].'</sex>
+                  </patients>
+                  </user>
+                </request>
+                ');
+            $model->file = UploadedFile::getInstance($model, 'file');
+
+        if ($model->validate()) {                
+            $model->file->saveAs('pix/' .$session['id']. '.jpg');
+        }
+            if($response->body->response_code==100){
+            
+            
+            //return $this->redirect(Url::toRoute('/consultation/index'));
+            }
+            $resp = $response->body->description;
+            //$session['phone'] = $_POST['phone'];
+            
+            //return $this->redirect('signup3');
+
+        }
+        return $this->render('medical',[
+            "error"=>$resp,
+            "data"=>$data,
+            'model' => $model
+            ]);
     }
 
     public function actionDetails()
@@ -124,5 +203,7 @@ class AccountController extends \yii\web\Controller
         	"details"=>$details
         	]);
     }
+
+
 
 }

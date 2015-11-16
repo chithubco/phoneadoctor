@@ -195,6 +195,7 @@ abstract class Services_Twilio_ListResource
     protected function _create(array $params)
     {
         $params = $this->client->createData($this->uri, $params);
+        
         /* Some methods like verified caller ID don't return sids. */
         if (isset($params->sid)) {
             $resource_uri = $this->uri . '/' . $params->sid;
@@ -1032,7 +1033,13 @@ class Services_Twilio extends Services_Twilio_Resource
         $response = $this->http->post(
             $path, $headers, http_build_query($params, '', '&')
         );
-        return $this->_processResponse($response);
+        try {
+            $this->_processResponse($response);            
+            return $this->_processResponse($response);  
+        } catch (Exception $e) { 
+            return array('success' => false, 'description' => $e->getMessage());
+        } 
+        //return $this->_processResponse($response);
     }
 
     /**

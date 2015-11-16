@@ -12,6 +12,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="row">
         <div class="reg-pg2">
             <h2>Recover pin</h2>
+            <?php echo $error ?>
             <div class="reg2-cnt">
                 <h4>Use Email as Recovery</h4>
                 <?php $form = ActiveForm::begin(['id' => 'form-login','options' => [

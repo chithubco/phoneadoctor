@@ -46,7 +46,7 @@ class CalendarEvents extends \yii\db\ActiveRecord
         ];
     }
 
-    public function getUser()
+    public function getUsers()
     {
         return $this->hasOne(Users::className(), ['id' => 'user_id']);
     }

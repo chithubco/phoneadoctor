@@ -4,8 +4,48 @@ use yii\helpers\Html;
 //use yii\bootstrap\ActiveForm;
 use kartik\widgets\ActiveForm;
 use kartik\widgets\FileInput;
-$this->title = 'Update Account Details';
+$this->title = 'Add Medical Details';
 ?>
+<script type="text/javascript">
+     function configureDropDownLists(ddl1,ddl2) {
+     
+    var Environmental = new Array('Dust', 'Pollen', 'Dust Mites','Animal Dander','Insect Sting','Nikel','Mould','Latex');
+    var Food = new Array('Dairy', 'Egg', 'Peanut','Other Nuts','Seafood','Shellfish','Soy','Wheat','Melons, bananas, cucumbers (ragweed pollen)','Baker\'s Yeast');
+    //var names = new Array('John', 'David', 'Sarah');
+
+    switch (ddl1.value) {
+        case 'Environmental':
+            ddl2.options.length = 0;
+            for (i = 0; i < Environmental.length; i++) {
+                createOption(ddl2, Environmental[i], Environmental[i]);
+            }
+            break;
+        case 'Food':
+            ddl2.options.length = 0; 
+        for (i = 0; i < Food.length; i++) {
+            createOption(ddl2, Food[i], Food[i]);
+            }
+            break;
+        case 'Names':
+            ddl2.options.length = 0;
+            for (i = 0; i < names.length; i++) {
+                createOption(ddl2, names[i], names[i]);
+            }
+            break;
+            default:
+                ddl2.options.length = 0;
+            break;
+    }
+
+}
+
+    function createOption(ddl, text, value) {
+        var opt = document.createElement('option');
+        opt.value = value;
+        opt.text = text;
+        ddl.options.add(opt);
+    }
+</script>
 <!----------------MAIN CONTAINER--------------------------->
 <div class="col-sm-8 main-container consult-pg">
 	<!--toggle sidebar button-->
@@ -13,17 +53,26 @@ $this->title = 'Update Account Details';
 		<button type="button" class="btn btn-primary btn-xs" data-toggle="offcanvas"><i class="glyphicon glyphicon-chevron-left"></i></button>
 	</p>
 	
-	<h2>Update Account</h2>
+	<h2>Add Medicals</h2>
 	<div class="cnt-blk">
 		<?php $form = ActiveForm::begin(['id' => 'form-consult','options' => ['enctype' => 'multipart/form-data']]); ?>
-			
+			Alergies
 			<div class="form-group">
-			First Name:
-				<input type="text" name="fname" class="form-control" value="<?php echo $data->description->fname ?>">
+			
+			Type:
+				<select id="ddl1" class="stringInfoSpacing" onchange="configureDropDownLists(this,document.getElementById('ddl2'))">
+				<option value="-1" selected="selected">Type</option>
+				<option value="Environmental">Environmental</option>
+				<option value="Food" >Food</option>
+				</select>
+				
 			</div>
 			<div class="form-group">
-			Last Name:
-				<input type="text" name="lname" class="form-control" value="<?php echo $data->description->lname ?>">
+			Alergy:
+			<select id="ddl2" class="stringInfoSpacing">
+				<option value="-1" selected="selected">Alergy</option>
+
+				</select>
 			</div>
 			<div class="form-group">
 			Sex:

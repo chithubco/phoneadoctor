@@ -14,5 +14,10 @@ return yii\helpers\ArrayHelper::merge(
     require(dirname(__DIR__) . '/functional.php'),
     require(__DIR__ . '/config.php'),
     [
+    'components' => [
+            'db' => [
+                'dsn' => 'mysql:host=localhost;dbname=gaiadb',
+            ],
+        ],
     ]
 );

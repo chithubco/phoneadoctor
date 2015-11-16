@@ -18,6 +18,9 @@ class ConsultationController extends \yii\web\Controller
     }
     public function actionIndex()
     {
+        if($_POST){
+            $this->actionCreate();
+        }
         return $this->render('index');
     }
 
@@ -25,6 +28,9 @@ class ConsultationController extends \yii\web\Controller
     {
         $session = \Yii::$app->session;
         $resp='';
+        $details=$session['consult'];
+        if($details && (strtotime($details->end) > time()))
+            return $this->redirect('details');
         if($_POST){
             
             $response = pull('consultation/api','
@@ -51,6 +57,34 @@ class ConsultationController extends \yii\web\Controller
         return $this->render('create',[
         	"error"=>$resp
         	]);
+    }
+
+    public function actionHistory()
+    {
+        $session = \Yii::$app->session;
+        $resp='';
+        
+            
+            $response = pull('consultation/api','
+                <request method="consultation.getConsultationHistory">
+                  <user>
+                  <id>'.$session['id'].'</id>    
+                  <auth_key>'.$session['authkey'].'</auth_key>   
+                  </user>
+                </request>
+                
+                ');
+            
+            //var_dump($response->body);
+            $resp = $response->body->description;
+            //$session['phone'] = $_POST['phone'];
+            
+            //return $this->redirect('signup3');
+
+        
+        return $this->render('history',[
+            "data"=>$resp
+            ]);
     }
 
     public function actionDetails()

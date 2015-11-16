@@ -1,23 +1,20 @@
 <?php
-
 namespace api\modules\v1\controllers;
 
-
 use Yii;
+use yii\db\Query;
 use common\models\Donations;
-use common\models\Users;
+use app\models\Users;
 use app\models\Settings;
 use app\models\ApiLog;
-use common\models\Transactions;
+use app\models\Transactions;
 use common\models\PaymentAttempts;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use common\components\XmlDomConstruct;
-
 include_once("../../common/components/xmlToArray.php");
 include_once("../../common/components/XmlDomConstruct.php");
-
 class DonationController extends Controller
 {
     public $administrator_email;
@@ -33,10 +30,7 @@ class DonationController extends Controller
     
    public function beforeAction($action) { 
         
-
         $settingValues = Settings::find()->all();                        
-
-
         //$settingValues = Settings::model()->findAll();
         foreach($settingValues as $setting) {
             switch($setting->name) {  
@@ -48,7 +42,6 @@ class DonationController extends Controller
                 case 'base_currency_code':
                     $this->base_currency_code = $setting->value;
                     break;
-
                 case 'configURL':
                     $this->configURL = $setting->value;
                     break;
@@ -64,7 +57,6 @@ class DonationController extends Controller
                 case 'twilio_from_phone':
                     $this->twilio_from_phone = $setting->value;
                     break;  
-                
                 default:
                     break;
             }
@@ -94,11 +86,9 @@ class DonationController extends Controller
        
         //use php://input to get the raw $_POST results
         $xmlInput = file_get_contents('php://input');
-
         //parse the incoming XML to array
         $xmlArray = xml2array($xmlInput);
         //echo'<pre>';print_r($xmlArray);echo'</pre>';
-
         if (!isset($xmlArray['request']) || !isset($xmlArray['request_attr'])) {
             $this->generateJsonResponce(array("response_code" => 112, "description" => 'Invalid request, please check your input.'), 'error', 400);
         } else if ($requestMethod <> 'POST') {
@@ -120,12 +110,9 @@ class DonationController extends Controller
             }
         }
     }
-
     
-
     
    
-
     /**
      * Finds the User model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
@@ -148,7 +135,6 @@ class DonationController extends Controller
      * Returns    : Result of insert operation
      */
        public function createDonation($xmldonationDetails) {
-
       //check the mandatory fields
  
         if (!isset($xmldonationDetails['donation']['amount']) || trim($xmldonationDetails['donation']['amount']) == '') {
@@ -163,45 +149,39 @@ class DonationController extends Controller
             
         }else {
             $amount      = $this->sanitizeXML($xmldonationDetails['donation']['amount']);
-            @$name  = $this->sanitizeXML($xmldonationDetails['donation']['name']);
-            @$email      = $this->sanitizeXML($xmldonationDetails['donation']['email']);
-            $gateway      = $this->sanitizeXML($xmldonationDetails['donation']['gateway']);
+            @$name       = $this->sanitizeXML($xmldonationDetails['donation']['name']);
+            @$email      = $xmldonationDetails['donation']['email'];
+            $gateway     = $this->sanitizeXML($xmldonationDetails['donation']['gateway']);
             
                 
                 
                 //create a new donation
                 $model = new Donations();
-                $paym = new PaymentAttempts();
-                
-               
-                
+                $paym  = new PaymentAttempts();   
 
-                //$activate_key               = time() . rand(1000, 9999);echo 1;
-                $model->amount               = $amount;
-                $model->name             = $name;
-                $model->email           = $email;
-                
-                
-   
-                $model->save(false);
-
-                $paym->amount               = $amount;
-                //$paym->user_id             = $user_id;
-                $paym->gateway               = $gateway;
-                $paym->email             = $email;
-                $paym->handler             = "Donation";
-                $paym->details             = "Donation from ".$name;
+                $paym->amount               = $amount;                
+                $paym->gateway              = $gateway;
+                $paym->email                = $email;
+                $paym->handler              = "Donation";
+                $paym->status               = "pending"; 
+                $paym->details              = "Donation from ".$name;
                 $paym->save(false);
-               
+                
+                $model->amount           = $amount;
+                $model->name             = $name;
+                $model->email            = $email;
+                $model->payment_attempt_id = $paym->id;
+                $model->status            = "pending"; 
+                $model->save(false);
+                
                 $this->addLogEntry('donation.create', 'Success', 3, 'Donation successfully created. Username :- ' . $name, $model->id);
-                $this->generateJsonResponce(array("response_code" => 100, "description" => 'Donation successfully created.',"response"=>array("payment_id"=>$paym->id)), 'ok', 200);               
+                $this->generateJsonResponce(array("response_code" => 100, "description" => 'Donation successfully created.',"response"=>array("payment_id"=>$model->id,"gateway"=>$gateway)), 'ok', 200);               
                 exit;
             
          }
        }
        
         
-
    public function addLogEntry($api_method, $type, $log_description, $notes = '', $user_id = 0, $trans_id = 0) {
         if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
             $remote_ip = $_SERVER['HTTP_CLIENT_IP'];
@@ -211,14 +191,10 @@ class DonationController extends Controller
             $remote_ip = $_SERVER['REMOTE_ADDR'];
         }        
        
-        /*$t      = microtime(true);
-        $micro  = sprintf("%06d",($t - floor($t)) * 1000000);         
-        $d      = new \DateTime( date('Y-m-d H:i:s.' . $micro, $t) );       
-        $date   = $d->format("Y-m-d H:i:s.u");*/
         $date   = date("Y-m-d H:i:s");
         
         $api_log = new ApiLog;
-        $api_log->api_method_id             = 1;//$this->api_methods[$api_method];
+        $api_log->api_method             = $api_method;
         $api_log->type                      = $type;
         $api_log->api_log_description_id    = $log_description;
         $api_log->notes                     = $notes;
@@ -233,11 +209,9 @@ class DonationController extends Controller
        
  public function generateXMLResponse($response, $status, $http_status = 200, $apiVersion = 'apiv2') {
         //$checkMethod = new REST();
-
         //$dom = new XmlDomConstructCustomizedForAPI('1.0', 'utf-8');
         Yii::$app->xmlDom->parseMixed(array("response" => $response));
         $data = Yii::$app->xmlDom->saveXML();
-
         $data = str_replace('<response/>', '<response xmlns="http://' . $_SERVER['SERVER_NAME'] . '/pos/index.php/' . $apiVersion . '" status="' . $status . '" />', $data);
         $data = str_replace('<response>', '<response xmlns="http://' . $_SERVER['SERVER_NAME'] . '/pos/index.php/' . $apiVersion . '" status="' . $status . '" >', $data);
         Yii::$app->REST->response($data, $http_status);
@@ -252,13 +226,11 @@ public function generateJsonResponce($response){
     print_r(json_encode($response));
     exit;
 }
-
    /*
      * API Method : N.A
      * Purpose    : Filter out unwanted characters
      * Returns    : Sanitized data
      */
-
     public function sanitizeXML($clear = '', $excludeSpecialChars = false, $skipURLDecode = false) {
        
         if(trim($clear) <> ''){
@@ -281,7 +253,7 @@ public function generateJsonResponce($response){
         }         
         return $clear;
     }
-
     
        
 }
+?>

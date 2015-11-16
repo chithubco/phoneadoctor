@@ -46,7 +46,7 @@ $session = \Yii::$app->session;
                             <span class="icon-bar"></span>
                             <span class="icon-bar"></span>
                             </button>
-                            <a class="navbar-brand" href="#"><img src="<?php echo \Yii::getAlias('@web') ?>/images/logo.png" alt="logo" class="img-responsive"></a>
+                            <a class="navbar-brand" href="<?php echo Url::toRoute('/consultation/index') ?>"><img src="<?php echo \Yii::getAlias('@web') ?>/images/logo.png" alt="logo" class="img-responsive"></a>
                         </div>
                         <div class="navbar-collapse collapse">
                         <ul class="nav navbar-nav navbar-right">
@@ -72,7 +72,17 @@ $session = \Yii::$app->session;
                     
                     <!----- EDIT PROFILE-------->
                     <div class="edit-profile">
+                    <?php
+                    if(file_exists(\Yii::getAlias('@webroot')."/pix/".$session['id'].".jpg")){
+                    ?>
+                        <img src="<?php echo \Yii::getAlias('@web') ?>/pix/<?php echo $session['id']?>.jpg" width="69px">
+                        <?php
+                    }else{
+                        ?>
                         <img src="<?php echo \Yii::getAlias('@web') ?>/images/jhon.png">
+                        <?php
+                    }
+                        ?>
                         <p><?php echo $session['fname']." ".$session['lname'] ?></p>
                         <br />
                         <h6><a href="<?php echo Url::toRoute('/account/update') ?>">Edit profile</a></h6>
@@ -98,11 +108,11 @@ $session = \Yii::$app->session;
                     
                     <div class="accordion">
                         <div class="accordion-head col-xs-12"><a href="<?php echo Url::toRoute('/consultation/create') ?>">Consult a doctor</a></div>
-                        <div class="accordion-head col-xs-12"><a href="#">Search a doctor</a></div>
-                        <div class="accordion-head col-xs-12"><a href="#">Manage Medical History</a></div>
+                        <!--<div class="accordion-head col-xs-12"><a href="#">Search a doctor</a></div>-->
                         <div class="accordion-head col-xs-12"><a href="#">Make Payment</a></div>
+                        <div class="accordion-head col-xs-12"><a href="#">Manage Medical History</a></div>
                         <div class="accordion-head col-xs-12"><a href="#">View Transactions</a></div>
-                        <div class="accordion-head col-xs-12"><a href="#">Consultation History</a></div>
+                        <div class="accordion-head col-xs-12"><a href="<?php echo Url::toRoute('/consultation/history') ?>">Consultation History</a></div>
                         <div class="accordion-head col-xs-12">
                             <p>Subscription</p><div class="arrow down"></div>
                         </div>

@@ -1,5 +1,9 @@
 <?php
 /* @var $this yii\web\View */
+use yii\helpers\Html;
+use yii\bootstrap\ActiveForm;
+$this->title = 'Dashboard';
+$session = \Yii::$app->session;
 ?>
 <!----------------MAIN CONTAINER--------------------------->
         
@@ -9,25 +13,65 @@
             <button type="button" class="btn btn-primary btn-xs" data-toggle="offcanvas"><i class="glyphicon glyphicon-chevron-left"></i></button>
           </p> 
           
-          <h3>Welcome John Doe to Phone A Doctor</h3>
+          <h3>Welcome <?php echo $session['fname']." ".$session['lname'] ?> to Phone A Doctor</h3>
+          <?php
+            
+            $details=$session['consult'];
+           if($details && (strtotime($details->end) > time())){
+
+          $start = explode(" ", $details->start);
+          $start_time = $start[1];
+          $start_date = $start[0];
+
+          $end = explode(" ", $details->end);
+          $end_time = $end[1];
+          $end_date = $end[0];
+          ?>
+         <div class="col-md-12 col-xs-12 sm-no-pad-lt sm-pad-rt">
+          <div class="dsh-blk">
+          <h4>your schedule for consultation  </h4> 
+        <div class="col-sm-12 main-container whn-phn">          
+          <!--toggle sidebar button-->
+          <p class="visible-xs">
+            <button type="button" class="btn btn-primary btn-xs" data-toggle="offcanvas"><i class="glyphicon glyphicon-chevron-left"></i></button>
+          </p> 
           
-         <div class="col-md-6 col-xs-12 sm-no-pad-lt sm-pad-rt">
-         	<div class="dsh-blk">
-            	<h4>Detail Patient Informtion</h4>
-                <div class="blk-inr">
-                    <p>Patient info goes here <span><img src="<?php echo \Yii::getAlias('@web') ?>/images/jhon.png" alt=""></span></p>
-                    <i class="clearfix"></i>
-                    
-                    <ul class="icn-list">
-                        <li><a href="#" title="Manage Medical History"><img src="<?php echo \Yii::getAlias('@web') ?>/images/img1.png" alt=""></a></li>
-                        <li><a href="#" title="Consultation History"><img src="<?php echo \Yii::getAlias('@web') ?>/images/img2.png" alt=""></a></li>
-                        <li><a href="#" title="Make Donation"><img src="<?php echo \Yii::getAlias('@web') ?>/images/img3.png" alt=""></a></li>
-                        <li><a href="#" title="Patient"><img src="<?php echo \Yii::getAlias('@web') ?>/images/patient-icon.png" alt=""></a></li>
-                    </ul>
-                </div>
+                   
+          <div class="calling-dctr">
+            <span>Date: <?php echo $start_date ?></span><span>Time: <?php echo $start_time ?></span>
+            <h3>Doctor you would be speaking to</h3>
+            <img src="<?php echo \Yii::getAlias('@web') ?>/doctorimages/<?php echo $details->image ?>.png" alt="" width="60px"  >
+            <p><?php echo $details->doctor ?></p>
+            <h3>Identification Code for the session</h3>
+            <h5>#<?php echo $details->code ?></h5>            
+          </div>
+          </div>
+          </div>
+        </div>
+         <?php
+       }else{
+        
+
+        ?>
+        <div class="col-md-12 col-xs-12 sm-no-pad-lt sm-pad-rt">
+          <div class="dsh-blk">
+              <h4>Make a consultation</h4>
+                <?php $form = ActiveForm::begin(['id' => 'form-consult']); ?>
+      
+      <div class="form-group">
+        <textarea class="form-control txt-area" name="question" rows="8" placeholder="Type your question here"></textarea>
+      </div>
+     
+    <?= Html::submitButton('Submit your question', ['class' => 'btn btn-default', 'name' => 'signup-button']) ?>
+                   
+                <?php ActiveForm::end(); ?>
             </div>
          </div>
-         
+        
+        <?php
+          }
+        ?>
+         <!--
          <div class="col-md-6 col-xs-12 sm-no-pad-rt sm-pad-lt">
          	<div class="dsh-blk">
             	<h4>Search A Doctor</h4>
@@ -75,7 +119,7 @@
                     </form>
                 </div>
             </div>
-         </div>
+         </div>-->
          
          <div class="col-md-6 col-xs-12 sm-no-pad-lt sm-pad-rt">
          	<div class="dsh-blk">

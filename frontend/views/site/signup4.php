@@ -20,12 +20,12 @@ $this->params['breadcrumbs'][] = $this->title;
             ]]); ?>
             <h4>Enter Pin Code</h4>
             <div class="form-group">
-                <input type="password" class="form-control pin-code" placeholder="Enter your desired pin code" name="pin">
+                <input type="password" maxlength="4" class="form-control pin-code" placeholder="Enter your desired pin code" name="pin">
                 
             </div>
             
             <div class="form-group">
-                <input type="password" class="form-control pin-code" placeholder="Confirm Pin" name="confirm_pin">
+                <input type="password" maxlength="4" class="form-control pin-code" placeholder="Confirm Pin" name="confirm_pin">
             </div>
             <?= Html::submitButton('Next', ['class' => 'btn btn-default', 'name' => 'signup-button']) ?>
             

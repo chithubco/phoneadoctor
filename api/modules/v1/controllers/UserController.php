@@ -7,6 +7,8 @@ use app\models\User;
 use app\models\UserSearch;
 use app\models\Patient;
 use app\models\VerifyPhone;
+use app\models\PatientAllergies;
+use app\models\PatientMedications;
 use app\models\Settings;
 use app\models\Cms;
 use app\models\ApiLog;
@@ -133,13 +135,22 @@ class UserController extends Controller {
                     break;  
                 case 'user.recoverPin':
                     $this->RecoverPin($xmlArray['request']);
-                    break;                                  
+                    break;  
+                case 'user.getMedicalHistory':
+                    $this->getMedicalHistory($xmlArray['request']);
+                    break;  
+                /*case 'user.getConsultationHistory':
+                    $this->getConsultationHistory($xmlArray['request']);
+                    break;*/
                 case 'user.login':
                     $this->userLogin($xmlArray['request']);
                     break;                 
                 case 'user.logout':
                     $this->userLogout($xmlArray['request']);
-                    break;   
+                    break;
+                case 'user.addmedical':
+                    $this->addMedicals($xmlArray['request']);
+                    break;               
                 
                 default:
                    $this->generateJsonResponce(array("response_code" => 999, "description" => 'Unknown method.'), 'error', 400);
@@ -263,28 +274,43 @@ class UserController extends Controller {
      * Returns    : Send code to User phone
      */  
     public function sendVerificationCode($xmlUserDetails) {
-        
-         if (!isset($xmlUserDetails['user']['phone']) || trim($xmlUserDetails['user']['phone']) == '') {            
+
+        if (!isset($xmlUserDetails['user']['phone']) || trim($xmlUserDetails['user']['phone']) == '') {
             $this->addLogEntry('user.sendCode', 'Failure', 9, 'Phone number missing.');
-            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Phone number missing.'), 'error', 400);            
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Phone number missing.'), 'error', 400);
         }
-        $code = rand(111111,999999);        
-        $twilio_message = "Phone a doctor\nPlease use verification Code: " . $code . " to sign up." ;
-        //---------------------- TWILIO ----------------------//         
-        $twillio = Yii::$app->Twillio;        
-        $message = $twillio->getClient()->account->sms_messages->create($this->twilio_from_phone, // From a valid Twilio number
-            $xmlUserDetails['user']['phone'], // Text this number
-            $twilio_message
-        );
-        
-        $model                      = new VerifyPhone();
-        $model->phone_no            = $xmlUserDetails['user']['phone'];
-        $model->verification_code   = $code;
-        $model->verified            = 'NO';      
-        $model->save();
-        $this->addLogEntry('user.sendCode', 'Success', 3, 'User signup verification code send to phone :- ' . $xmlUserDetails['user']['phone']);
-        $this->generateJsonResponce(array("response_code" => 100, "description" => 'Verification code sent.'), 'ok', 200);               
-        
+        if ($this->validatePhone($xmlUserDetails['user']['phone'])) {
+            //check if phone no. is already in use
+            $phone_exists = $this->checkIfPhoneExists($xmlUserDetails['user']['phone']);
+            if ($phone_exists) {
+
+                $this->addLogEntry('user.sendCode', 'Failure', 9, 'Phone [' . $xmlUserDetails['user']['phone'] . '] already in use.');
+                $this->generateJsonResponce(array("response_code" => 113, "description" => 'Phone already in use.'), 'error', 400);
+            } else {
+                $code = rand(111111, 999999);
+                $twilio_message = "Phone a doctor\nPlease use verification Code: " . $code . " to sign up.";
+                //---------------------- TWILIO ----------------------//         
+                $twillio = Yii::$app->Twillio;
+                $message = $twillio->getClient()->account->sms_messages->create($this->twilio_from_phone, // From a valid Twilio number
+                        $xmlUserDetails['user']['phone'], // Text this number
+                        $twilio_message
+                );
+
+
+                if (isset($message->description) && ($message->description != NULL)) {
+                    $this->addLogEntry('user.sendCode', 'Failure', 3, 'User signup verification attempt with invalid phone number :- ' . $xmlUserDetails['user']['phone']);
+                    $this->generateJsonResponce(array("response_code" => 113, "description" => $message->description), 'ok', 200);
+                } else {
+                    $model = new VerifyPhone();
+                    $model->phone_no = $xmlUserDetails['user']['phone'];
+                    $model->verification_code = $code;
+                    $model->verified = 'NO';
+                    $model->save();
+                    $this->addLogEntry('user.sendCode', 'Success', 3, 'User signup verification code send to phone :- ' . $xmlUserDetails['user']['phone']);
+                    $this->generateJsonResponce(array("response_code" => 100, "description" => 'Verification code sent.'), 'ok', 200);
+                }
+            }
+        }
     }
      /*
      * API Method : user.verifyPhone
@@ -322,9 +348,15 @@ class UserController extends Controller {
 
         if ($userPhone != NULL) {
             //check if phone no. is verified
-            $phone_verification = VerifyPhone::find()->where('phone_no LIKE "' . $userPhone . '"')->one();
+            $phone_verification = VerifyPhone::find()->where('phone_no LIKE "' . $userPhone . '"')->all();                    
+
             if ($phone_verification != NULL) {
-                return ($phone_verification->verified == 'YES') ? true : false;
+                 $rec_count = count($phone_verification);  
+                 if($rec_count>1 && $phone_verification[$rec_count-1]->verified =='NO'){
+                    $this->addLogEntry('user.create', 'Failure', 9, 'Multiple entries found for same number: '.$userPhone.' and the latest not verified.');
+                    $this->generateJsonResponce(array("response_code" => 113, "description" => 'Step 2 failed, Multiple entries found for your mobile number and the latest not verified, redirect:user.verifyphone'), 'error', 400);
+                  }
+                return ($phone_verification[$rec_count-1]->verified == 'YES') ? true : false;
             } else {
                 $this->addLogEntry('user.create', 'Failure', 9, 'Mobile number not verified, phone no not found in verification table.');
                 $this->generateJsonResponce(array("response_code" => 113, "description" => 'Step 2 failed, Please verifiy your mobile number.'), 'error', 400);
@@ -343,11 +375,20 @@ class UserController extends Controller {
 
         if ($xmlUserDetails['user']['userinfo']) {
             $userFullName = $this->sanitizeXML($xmlUserDetails['user']['userinfo']['fname']) . $this->sanitizeXML($xmlUserDetails['user']['userinfo']['lname']);
-            $userPhone = $this->sanitizeXML($xmlUserDetails['user']['patients']['mobile_phone']);
+            $userPhone = $xmlUserDetails['user']['patients']['mobile_phone'];
             $userFirstName = $this->sanitizeXML($xmlUserDetails['user']['userinfo']['fname']);
             $userLastName = $this->sanitizeXML($xmlUserDetails['user']['userinfo']['lname']);
+            if (!isset($xmlUserDetails['user']['userinfo']['fname']) || trim($xmlUserDetails['user']['userinfo']['fname']) == '') {
+                
+                $this->addLogEntry('user.create', 'Failure', 9, 'Firstname missing.');
+                $this->generateJsonResponce(array("response_code" => 113, "description" => 'Firstname missing.'), 'error', 400);
+            } else if (!isset($xmlUserDetails['user']['userinfo']['lname']) || trim($xmlUserDetails['user']['userinfo']['lname']) == '') {
 
-            if ($this->validatePhone($userPhone) ) {
+                $this->addLogEntry('user.create', 'Failure', 9, 'Lastname missing.');
+                $this->generateJsonResponce(array("response_code" => 113, "description" => 'Lastname missing.'), 'error', 400);
+            }
+
+            if ($this->validatePhone($userPhone) && $this->checkPhoneVerification($userPhone)) {
 
                 if (!isset($xmlUserDetails['user']['userinfo']['username']) || trim($xmlUserDetails['user']['userinfo']['username']) == '') {
                     $userName = preg_replace('/\s+/', '', $userFullName); //remove any whitespaces
@@ -366,7 +407,7 @@ class UserController extends Controller {
 
                 $security_flag = $email_exists = $email = 0;
 
-                if ($xmlUserDetails['user']['patients']['email'] != NULL) {
+                if (isset($xmlUserDetails['user']['patients']['email']) && $xmlUserDetails['user']['patients']['email'] != NULL) {
                     //check if email is already in use.
                     $email = $this->sanitizeXML($xmlUserDetails['user']['patients']['email'], true);
                     $email_exists = Patient::find()->where('email LIKE "' . $email . '"')->one();
@@ -427,12 +468,24 @@ class UserController extends Controller {
                             exit;
                         }
                         $model_patients->save(false);
+                        if($model_patients->email!=''){
+                            \Yii::$app->mailer->compose([
+                                    'html' => 'welcome-html',
+                                    'text' => 'welcome-text',
+                                ])
+                             ->setFrom('no-reply@phoneadoctor.com.ng')
+                             ->setTo($model_patients->email)
+                             ->setSubject("Welcome to PhoneADoctor")
+                             ->setTextBody('Welcome to Phone A Doctor')
+                             ->setHtmlBody('<b>Welcome to Phone A Doctor</b>')
+                             ->send();
+                        }
                     }
                     if ($security_flag == 1) {
                         // Record security que value
                         $model_security_que = new UserSecurityQueValues();
                         $model_security_que->user_id = $userId;
-                        if ($xmlUserDetails['user']['patients']['security_que_id'] != NULL)
+                        if (isset($xmlUserDetails['user']['patients']['security_que_id']) && $xmlUserDetails['user']['patients']['security_que_id'] != NULL)
                             $model_security_que->que_id = $xmlUserDetails['user']['patients']['security_que_id'];
                         else
                             $model_security_que->custom_question = $xmlUserDetails['user']['patients']['custom_question'];
@@ -572,6 +625,100 @@ class UserController extends Controller {
         }
     }
     
+    
+     /*
+     * API Method : consultation.getMedicalHistory
+     * Purpose    : get user medical details
+     * Returns    : User related ino*/
+    
+    
+    public function getMedicalHistory($xmlUserDetails) {
+        
+    if((!isset($xmlUserDetails['user']['auth_key']) || trim($xmlUserDetails['user']['auth_key']) == '')) {
+                
+            $this->addLogEntry('user.getMedicalHistory', 'Failure', 9, 'Auth key missing.');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Auth key missing.'), 'error', 400);
+
+        } elseif (!isset($xmlUserDetails['user']['id']) || trim($xmlUserDetails['user']['id']) == '') {            
+            $this->addLogEntry('user.getMedicalHistory', 'Failure', 9, 'User ID missing.');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'User ID missing.'), 'error', 400);            
+        }else {  
+            
+            //Authenticate access key before update
+            Yii::$app->AuthoriseUser->userId = $xmlUserDetails['user']['id'];
+            Yii::$app->AuthoriseUser->auth_key = $xmlUserDetails['user']['auth_key'];
+            $accessAuthorised =  Yii::$app->AuthoriseUser->checkAuthKey();
+            if($accessAuthorised){ 
+                $user_exists = Patient::find()->where('user_id LIKE "' . $xmlUserDetails['user']['id'] . '"')->one();                    
+                $patient_id = ($user_exists!=NULL)?$user_exists->pid:0;
+                
+                $query = new Query;
+                $query->select('pm.STR,pm.begin_date,pm.end_date,pm.prescription_id,pm.route,pm.dispense,
+                        pm.dose,pm.refill,pm.take_pills,pm.form,pa.allergy_type,pa.allergy,pa.begin_date,pa.end_date,pa.reaction,pa.severity,pa.location') 
+                    ->from('patient_medications pm')
+                    ->join('LEFT JOIN', 'patient_allergies pa',
+                                'pa.pid =pm.pid')   
+                    ->where('pm.pid = ' . $patient_id);
+                $command = $query->createCommand();                
+                $results = $command->queryAll();
+                $history_data = ($results!=NULL)?$results:"No records found"; 
+                
+                $this->addLogEntry('user.getMedicalHistory', 'Success', 3, 'User MedicalHistory successfully returned. Username :- ' . $user_exists['fname'],$xmlUserDetails['user']['id']);
+                $this->generateJsonResponce(array("response_code" => 100, "description" => $history_data), 'error', 400);
+                
+            } else {
+                $this->addLogEntry('user.getMedicalHistory', 'Failure', 9, 'Fetch user info auth key authentication failed for user :' . $xmlUserDetails['user']['id']);
+                $this->generateJsonResponce(array("response_code" => 113, "description" => 'Your auth key is invalid.'), 'error', 400);
+            }
+            
+        } 
+    }
+    
+     /*
+     * API Method : consultation.getConsultationHistory
+     * Purpose    : get user consultation details
+     * Returns    : User related info
+     
+    
+    public function getConsultationHistory($xmlUserDetails) {
+        
+    if((!isset($xmlUserDetails['user']['auth_key']) || trim($xmlUserDetails['user']['auth_key']) == '')) {
+                
+            $this->addLogEntry('consultation.getConsultationHistory', 'Failure', 9, 'Auth key missing.');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Auth key missing.'), 'error', 400);
+
+        } elseif (!isset($xmlUserDetails['user']['id']) || trim($xmlUserDetails['user']['id']) == '') {            
+            $this->addLogEntry('consultation.getConsultationHistory', 'Failure', 9, 'User ID missing.');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'User ID missing.'), 'error', 400);            
+        }else {  
+            
+            //Authenticate access key before update
+            Yii::$app->AuthoriseUser->userId = $xmlUserDetails['user']['id'];
+            Yii::$app->AuthoriseUser->auth_key = $xmlUserDetails['user']['auth_key'];
+            $accessAuthorised =  Yii::$app->AuthoriseUser->checkAuthKey();
+            if($accessAuthorised){ 
+                
+                $query = new Query;
+                $query->select('code,details,type,date') 
+                    ->from('consultations')                     
+                    ->where('user_id = '. $xmlUserDetails['user']['id']);
+                $command = $query->createCommand(); 
+                $results = $command->queryAll();                
+                $history_data = ($results!=NULL)?$results:"No consultation records found";                
+                
+                $this->addLogEntry('consultation.getConsultationHistory', 'Success', 3, 'User Consultation History successfully returned. User ID :- ' . $xmlUserDetails['user']['id'],$xmlUserDetails['user']['id']);
+                $this->generateJsonResponce(array("response_code" => 100, "description" => $history_data), 'error', 400);
+                
+            } else {
+                $this->addLogEntry('consultation.getConsultationHistory', 'Failure', 9, 'Fetch user info auth key authentication failed for user :' . $xmlUserDetails['user']['id']);
+                $this->generateJsonResponce(array("response_code" => 113, "description" => 'Your auth key is invalid.'), 'error', 400);
+            }
+            
+        } 
+    
+        
+    }  */  
+    
     /*
      * API Method : user.getuserinfo
      * Purpose    : get user details
@@ -630,6 +777,12 @@ class UserController extends Controller {
         }else if (!isset($xmlUserDetails['user']['pin']) || trim($xmlUserDetails['user']['pin']) == '') {            
             $this->addLogEntry('user.create password', 'Failure', 9, 'Pin missing.');
             $this->generateJsonResponce(array("response_code" => 113, "description" => 'Pin missing.'), 'error', 400);            
+        }else if (strlen($xmlUserDetails['user']['pin'])!=4) {            
+            $this->addLogEntry('user.create password', 'Failure', 9, 'Pin not 4 digits.');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Pin should be 4 digits.'), 'error', 400);            
+        }else if (!is_numeric($xmlUserDetails['user']['pin'])) {            
+            $this->addLogEntry('user.create password', 'Failure', 9, 'Pin not numeric.');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Pin should be numbers only.'), 'error', 400);            
         }else if (!isset($xmlUserDetails['user']['confirm_pin']) || trim($xmlUserDetails['user']['confirm_pin']) == '') {            
             $this->addLogEntry('user.changePin', 'Failure', 9, 'Confirm pin missing.');
             $this->generateJsonResponce(array("response_code" => 113, "description" => 'Confirm pin missing.'), 'error', 400);            
@@ -825,7 +978,7 @@ class UserController extends Controller {
      * Returns    : Result success or failed
      */    
     public function recoverPin($xmlUserDetails) {
-
+        $newPin=0;
         if (isset($xmlUserDetails['user']['recovery_option'])) {
             $recovery_option = $xmlUserDetails['user']['recovery_option'];
         } else {
@@ -861,6 +1014,7 @@ class UserController extends Controller {
 
         // Get User Id to cross check question
         $UserCondition = $recovery_option == 'email' ? 'email LIKE "' . $xmlUserDetails['user']['email'] . '"' : 'mobile_phone LIKE "' . $xmlUserDetails['user']['phone'] . '"';        
+        //echo $UserCondition;exit;
         $user_check = Patient::find()->where($UserCondition)->one();
 
         if ($user_check != NULL) {
@@ -888,15 +1042,15 @@ class UserController extends Controller {
                     break;
                 case 'phone':
                     // Check security question
-                    if ($xmlUserDetails['user']['security_que_id'] != NULL) {
+                    if (isset($xmlUserDetails['user']['security_que_id']) && $xmlUserDetails['user']['security_que_id'] != NULL) {
                         //check if user exist and question value is valid
                         $user_exists = UserSecurityQueValues::find()->where('que_id = ' . $xmlUserDetails['user']['security_que_id'] . ' AND user_id = ' . $userId . ' AND user_value LIKE "' . $xmlUserDetails['user']['security_que_value'] . '"')->one();
                     } else {
-                        //check if user exist and question value is valid with custom que
+                        //check if user exist and question value is valid with custom que                        
                         $user_exists = UserSecurityQueValues::find()->where('user_id = ' . $userId . ' AND user_value LIKE "' . $xmlUserDetails['user']['security_que_value'] . '"')->one();
                     }
                     if ($user_exists != NULL) {
-                        $twilio_message = "Phone a doctor\nYour pin with phoneadoctor is reset, please use your new Pin: " . $newPin . " to login.";
+                        $twilio_message = "Phone a doctor\nYour pin with phoneadoctor is reset, please use your new Pin: " . $newPin . " to login.";                         
                         //---------------------- TWILIO ----------------------//
                         $twillio = Yii::$app->Twillio;
                         $message = $twillio->getClient()->account->sms_messages->create($this->twilio_from_phone, // From a valid Twilio number
@@ -958,6 +1112,74 @@ class UserController extends Controller {
             }
             
         
+    } 
+    
+    /*
+     * API Method : user.addmedical
+     * Purpose    : user's current conditions & symptoms, allergies,medications/treatments if currently receiving
+     * Returns    : Result success or failed
+     */      
+    public function addMedicals($xmlUserDetails) {
+
+        if ((!isset($xmlUserDetails['user']['userinfo']['id']) || trim($xmlUserDetails['user']['userinfo']['id']) == '')) {
+
+            $this->addLogEntry('user.addmedical', 'Failure', 9, 'User Id missing.');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'User Id missing.'), 'error', 400);
+        }elseif ((!isset($xmlUserDetails['user']['userinfo']['auth_key']) || trim($xmlUserDetails['user']['userinfo']['auth_key']) == '')) {
+
+            $this->addLogEntry('user.addmedical', 'Failure', 9, 'Auth key missing.');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Auth key missing.'), 'error', 400);
+        } else {            
+            $user_exists = User::find()->where('id = ' . $xmlUserDetails['user']['userinfo']['id'])->one();
+            $patient_exists = Patient::find()->where('user_id = ' . $xmlUserDetails['user']['userinfo']['id'])->one();
+            //Authenticate access key before update
+            Yii::$app->AuthoriseUser->userId = $xmlUserDetails['user']['userinfo']['id'];
+            Yii::$app->AuthoriseUser->auth_key = $xmlUserDetails['user']['userinfo']['auth_key'];
+            $accessAuthorised = Yii::$app->AuthoriseUser->checkAuthKey();
+            if ($accessAuthorised) {
+                if ($user_exists) {
+                    if (is_array($xmlUserDetails['user']['alergies'])) {
+                        $model = new PatientAllergies;
+                        $xmlUserDetails['user']['alergies']['pid']        = $patient_exists->pid;
+                        $model->setAttributes($xmlUserDetails['user']['alergies']);
+                        //$model->load($xmlUserDetails['user']['alergies']);
+                        $model->validate();
+                        if ($model->getErrors()) {
+                            $this->addLogEntry('user.medicals', 'Failure', 9, 'Correct the validation errors.');
+                            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Correct the validation errors.', 'errors' => $model->getErrors()), 'error', 400);
+                            exit;
+                        }
+
+                        $model->save();
+                    }
+
+                    if (is_array($xmlUserDetails['user']['medications'])) {
+                        $model2 = new PatientMedications;
+                        $xmlUserDetails['user']['medications']['pid']        = $patient_exists->pid;
+                        $xmlUserDetails['user']['medications']['uid']        = $xmlUserDetails['user']['userinfo']['id'];
+                        $model2->setAttributes($xmlUserDetails['user']['medications']);                        
+                        //$model2->load($xmlUserDetails['user']['medications']);
+                        $model2->validate();
+                        if ($model2->getErrors()) {
+                            $this->addLogEntry('user.medicals', 'Failure', 9, 'Correct the validation errors.');
+                            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Correct the validation errors.', 'errors' => $model2->getErrors()), 'error', 400);
+                            exit;
+                        }
+                        $model2->save();
+                    }
+
+                    $this->addLogEntry('user.medicals', 'Success', 3, 'User medicals successfully added. Username :- ' . $user_exists->username, $user_exists->id);
+                    $this->generateJsonResponce(array("response_code" => 100, "description" => 'User medicals successfully added.'), 'ok', 200);
+                    exit;
+                } else {
+                    $this->addLogEntry('user.medicals', 'Failure', 9, 'Add user medicals failed for user :' . $xmlUserDetails['user']['userinfo']['id']);
+                    $this->generateJsonResponce(array("response_code" => 113, "description" => 'User Id is invalid.'), 'error', 400);
+                }
+            } else {
+                $this->addLogEntry('user.medicals', 'Failure', 9, 'User profile update auth key authentication failed for user :' . $xmlUserDetails['user']['userinfo']['id']);
+                $this->generateJsonResponce(array("response_code" => 113, "description" => 'Your auth key is invalid.'), 'error', 400);
+            }
+        }
     }    
   
 
@@ -1051,22 +1273,38 @@ public function generateJsonResponce($response){
         
         switch ($phone_length) {
             case 10:
-                $phone_exist = Patient::find()->where('mobile_phone LIKE "' . $userPhone . '" OR mobile_phone LIKE "0' . $userPhone . '" OR mobile_phone LIKE "234' . $userPhone . '" OR mobile_phone LIKE "2340' . $userPhone . '"')->one();                    
+                $phone_exist = Patient::find()->where('mobile_phone LIKE "' . $userPhone . '" OR mobile_phone LIKE "0' . $userPhone . '" OR mobile_phone LIKE "234' . $userPhone . '" OR mobile_phone LIKE "2340' . $userPhone . '" OR mobile_phone LIKE "+234' . $userPhone . '" OR mobile_phone LIKE "+2340' . $userPhone . '"')->one();                    
                 break;
             case 11:
                 $zero_stripped_phone=substr($userPhone,1,10);                
-                $phone_exist = Patient::find()->where('mobile_phone LIKE "' . $userPhone . '" OR mobile_phone LIKE "234' . $zero_stripped_phone . '" OR mobile_phone LIKE "234' . $userPhone . '" OR mobile_phone LIKE "' . $zero_stripped_phone . '"')->one();                    
+                $phone_exist = Patient::find()->where('mobile_phone LIKE "' . $userPhone . '" OR mobile_phone LIKE "234' . $zero_stripped_phone . '" OR mobile_phone LIKE "234' . $userPhone . '" OR mobile_phone LIKE "+234' . $userPhone . '" OR mobile_phone LIKE "+234' . $zero_stripped_phone . '" OR mobile_phone LIKE "' . $zero_stripped_phone . '"')->one();                    
                 break;            
-            case 13:
+            case 13: 
                 $code = substr($userPhone,0,3);                
-                $code_stripped_phone=substr($userPhone,3,10);                
-                $phone_exist = Patient::find()->where('mobile_phone LIKE "' . $userPhone . '" OR mobile_phone LIKE "0' . $code_stripped_phone . '" OR mobile_phone LIKE "' . $code_stripped_phone . '" OR mobile_phone LIKE "'. $code .'0' . $code_stripped_phone . '"')->one();                    
+                $code_stripped_phone=substr($userPhone,3,10);
+                $phone_exist = Patient::find()->where('mobile_phone LIKE "' . $userPhone . '" OR mobile_phone LIKE "0' . $code_stripped_phone . '" OR mobile_phone LIKE "' . $code_stripped_phone . '" OR mobile_phone LIKE "'. $code .'0' . $code_stripped_phone . '" OR mobile_phone LIKE "'. $code . $code_stripped_phone . '" OR mobile_phone LIKE "+'. $code . $code_stripped_phone . '"')->one();                    
                 break; 
             case 14:
                 $code = substr($userPhone,0,3);  
-                $code_stripped_phone=substr($userPhone,4,10);                
-                $phone_exist = Patient::find()->where('mobile_phone LIKE "' . $userPhone . '" OR mobile_phone LIKE "0' . $code_stripped_phone . '" OR mobile_phone LIKE "'. $code . $code_stripped_phone . '" OR mobile_phone LIKE "' . $code_stripped_phone . '"')->one();                    
-                break;             
+                $plus_stripped_code = $plus_code = substr($userPhone,1,3); 
+                $plus_code = substr($userPhone,0,4); 
+                $code_stripped_phone=substr($userPhone,4,10);  
+                
+                $phone_exist = Patient::find()->where('mobile_phone LIKE "' . $userPhone . '" OR mobile_phone LIKE "0' . $code_stripped_phone . 
+                                '" OR mobile_phone LIKE "'. $code . $code_stripped_phone . '" OR mobile_phone LIKE "+'. $code . $code_stripped_phone . '" OR mobile_phone LIKE "' . $code_stripped_phone . 
+                                '" OR mobile_phone LIKE "'. $plus_stripped_code.$code_stripped_phone . '" OR mobile_phone LIKE "'. $plus_code .'0'. $code_stripped_phone . 
+                                '" OR mobile_phone LIKE "'. $code .'0'. $code_stripped_phone . '" OR mobile_phone LIKE "'. $plus_stripped_code .'0'. $code_stripped_phone . '"')->one();                    
+                break; 
+            case 15:
+                $plusStripped = substr($userPhone,1,14);                
+                $code = substr($userPhone,1,3);  
+                $code_stripped_phone=substr($userPhone,5,10);   
+                $plus_code = substr($userPhone,0,4);                 
+                $phone_exist = Patient::find()->where('mobile_phone LIKE "' . $userPhone . '" OR mobile_phone LIKE "0' .
+                                $code_stripped_phone . '" OR mobile_phone LIKE "'. $code . $code_stripped_phone . 
+                                '" OR mobile_phone LIKE "+'. $code . $code_stripped_phone . '" OR mobile_phone LIKE "'. $code .'0'. $code_stripped_phone . '" OR mobile_phone LIKE "' . 
+                                $code_stripped_phone . '" OR mobile_phone LIKE " ' . $plusStripped . '" OR mobile_phone LIKE "+'. $code .'0'. $code_stripped_phone . '" OR mobile_phone LIKE "' . $plus_code.$code_stripped_phone . '"')->one();                    
+                break;            
             default:
                 $phone_exist = Patient::find()->where('mobile_phone LIKE "' . $userPhone . '"')->one();                    
                 break;
