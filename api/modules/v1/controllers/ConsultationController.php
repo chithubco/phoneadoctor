@@ -26,6 +26,7 @@ class ConsultationController extends Controller
     public $twilio_account_sid;
     public $twilio_auth_token;
     public $close_time = "23:00:00";
+    public $call_center_phone;
     
     
    public function beforeAction($action) { 
@@ -60,6 +61,9 @@ class ConsultationController extends Controller
                 case 'close_time':
                     $this->close_time = $setting->value;
                     break; 
+                case 'call_center_phone':
+                    $this->call_center_phone = $setting->value;
+                    break;                       
                 
                 default:
                     break;
@@ -302,7 +306,8 @@ public function createConsultation($xmlconsultationDetails) {
      * Purpose    : send appointment notification SMS to users
      * Returns    : Result success or failed
      */      
-     public function appointmentNotification($userId,$appDate,$doctor,$sessionId) {
+  public function appointmentNotification($userId,$appDate,$doctor,$sessionId) {
+        $officePhone = 0;
         if (!isset($appDate) || trim($appDate) == '') {
             $this->addLogEntry('consultation.appointmentNotification', 'Failure', 9, 'Date is missing.');
             return 'Date is missing.'; //$this->generateJsonResponce(array("response_code" => 113, "description" => 'Date is missing.'), 'error', 400);
@@ -322,8 +327,9 @@ public function createConsultation($xmlconsultationDetails) {
         $user_check = Patient::find()->where($UserCondition)->one();
         if ($user_check != NULL) {
             $userPhone = $user_check->mobile_phone;
-            $twilio_message = "Phone a doctor: Appointment Notification\nHi ".$user_check->fname . " " . $user_check->lname."\n Your appointment with " . $doctor . " is schedule on " . $appDate . "\n your session Id is: " . $sessionId;
-            //---------------------- TWILIO ----------------------//             
+            $officePhone = (isset($this->call_center_phone) && $this->call_center_phone != NULL)?$this->call_center_phone:07003628677;
+            $twilio_message = "Hi ".$user_check->fname . " " . $user_check->lname."\n Your Phone A Doctor appointment with Dr. " . $doctor . " is scheduled for " . $appDate . "\n.Please call ".$officePhone." and present your session Id : " . $sessionId ." at the appointment time";
+            //---------------------- TWILIO ----------------------//                         
             $twillio = Yii::$app->Twillio;
             $message = $twillio->getClient()->account->sms_messages->create($this->twilio_from_phone, // From a valid Twilio number
                     $userPhone, // Text this number
