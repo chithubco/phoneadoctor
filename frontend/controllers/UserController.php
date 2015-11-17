@@ -12,6 +12,7 @@ use app\models\Patient;
 use app\models\VerifyPhone;
 use app\models\PatientAllergies;
 use app\models\PatientMedications;
+use app\models\PatientActiveProblems;
 use app\models\Settings;
 use app\models\Cms;
 use app\models\ApiLog;
@@ -1135,8 +1136,8 @@ class UserController extends Controller {
                         //$model->load($xmlUserDetails['user']['alergies']);
                         $model->validate();
                         if ($model->getErrors()) {
-                            $this->addLogEntry('user.medicals', 'Failure', 9, 'Correct the validation errors.');
-                            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Correct the validation errors.', 'errors' => $model->getErrors()), 'error', 400);
+                            $this->addLogEntry('user.medicals', 'Failure', 9, 'Correct the validation errors of allergies.');
+                            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Correct the validation errors of allergies.', 'errors' => $model->getErrors()), 'error', 400);
                             exit;
                         }
 
@@ -1151,12 +1152,27 @@ class UserController extends Controller {
                         //$model2->load($xmlUserDetails['user']['medications']);
                         $model2->validate();
                         if ($model2->getErrors()) {
-                            $this->addLogEntry('user.medicals', 'Failure', 9, 'Correct the validation errors.');
-                            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Correct the validation errors.', 'errors' => $model2->getErrors()), 'error', 400);
+                            $this->addLogEntry('user.medicals', 'Failure', 9, 'Correct the validation errors of medications.');
+                            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Correct the validation errors of medications.', 'errors' => $model2->getErrors()), 'error', 400);
                             exit;
                         }
                         $model2->save();
                     }
+                    
+                    if (is_array($xmlUserDetails['user']['active_problems'])) {
+                        $model3 = new PatientActiveProblems;
+                        $xmlUserDetails['user']['active_problems']['pid']        = $patient_exists->pid;
+                        $xmlUserDetails['user']['active_problems']['eid']        = 0;
+                        $model3->setAttributes($xmlUserDetails['user']['active_problems']);                        
+                        
+                        $model3->validate();
+                        if ($model3->getErrors()) {
+                            $this->addLogEntry('user.medicals', 'Failure', 9, 'Correct the validation errors of active problems.');
+                            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Correct the validation errors of active problems.', 'errors' => $model2->getErrors()), 'error', 400);
+                            exit;
+                        }
+                        $model3->save();
+                    }                    
 
                     $this->addLogEntry('user.medicals', 'Success', 3, 'User medicals successfully added. Username :- ' . $user_exists->username, $user_exists->id);
                     $this->generateJsonResponce(array("response_code" => 100, "description" => 'User medicals successfully added.'), 'ok', 200);
