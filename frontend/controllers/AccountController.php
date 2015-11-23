@@ -133,52 +133,68 @@ class AccountController extends \yii\web\Controller
         $model = new UploadForm();
 
     
-        $response = pull('user/api','
-                <request method="user.getuserinfo">
+        /*$response = pull('user/api','
+                <request method="user.getMedicalHistory">
                   <user>
                   <id>'.$session['id'].'</id>    
                   <auth_key>'.$session['authkey'].'</auth_key>    
                   </user>
                 </request>
                 ');
-        $data = $response->body;
-
-        
-    
+        $data = $response->body;  */     
+       
 
     
-        if (\Yii::$app->request->isPost) {
+        if (\Yii::$app->request->isPost) {//echo "<pre>";print_r($_POST);exit;
             
             $response = pull('user/api','
                 <request method="user.update">
                   <user>
-                  <userinfo>
-                  <id>'.$session['id'].'</id>    
-                  <auth_key>'.$session['authkey'].'</auth_key>  
-                  <fname>'.$_POST['fname'].'</fname>    
-                  <lname>'.$_POST['lname'].'</lname>
-                  <password>'.$_POST['pin'].'</password>
-                  </userinfo>
-                  <patients>
-       
-                  <email></email>
-                  <security_que_value>test</security_que_value>
-                  <DOB>123456</DOB>
-                  <address>'.$_POST['address'].'</address>    
-                  <sex>'.$_POST['sex'].'</sex>
-                  </patients>
+                <userinfo>
+                <id>'.$session['id'].'</id>    
+                <auth_key>'.$session['authkey'].'</auth_key>  
+                </userinfo>
+                  
+                <alergies>
+                <allergy_type>'.$_POST['allergy_type'].'</allergy_type>
+                <allergy>'.$_POST['allergy'].'</allergy>
+               
+                <reaction>'.$_POST['reaction'].'</reaction>
+                <severity>'.$_POST['severity'].'</severity>
+                <location>'.$_POST['location'].'</location>
+                </alergies>
+                
+                <medications>
+                <STR>'.$_POST['STR'].' STR</STR>    
+                <RXCUI>'.$_POST['RXCUI'].'</RXCUI>
+                <CODE>'.$_POST['CODE'].'</CODE>
+                <ICDS>'.$_POST['ICDS'].'</ICDS>
+
+                <ocurrence>'.$_POST['ocurrence'].'</ocurrence>
+                <form>'.$_POST['form'].'</form>
+                <route>'.$_POST['route'].'</route>
+                </medications>
+                
+                <active_problems>
+                <code_text>'.$_POST['code_text'].'</code_text>    
+              
+                <occurrence>'.$_POST['ap_ocurrence'].'</occurrence>
+                <outcome>'.$_POST['outcome'].'</outcome>
+                <referred_by>'.$_POST['referred_by'].'</referred_by>
+                </active_problems>
+
                   </user>
                 </request>
                 ');
+            echo $response;exit;
             $model->file = UploadedFile::getInstance($model, 'file');
 
         if ($model->validate()) {                
             $model->file->saveAs('pix/' .$session['id']. '.jpg');
         }
-            if($response->body->response_code==100){
+            if($response->body->response_code==100){            
             
-            
-            //return $this->redirect(Url::toRoute('/consultation/index'));
+            return $this->redirect(Url::toRoute('/consultation/index'));
             }
             $resp = $response->body->description;
             //$session['phone'] = $_POST['phone'];
@@ -188,7 +204,7 @@ class AccountController extends \yii\web\Controller
         }
         return $this->render('medical',[
             "error"=>$resp,
-            "data"=>$data,
+            "data"=>$_POST,
             'model' => $model
             ]);
     }

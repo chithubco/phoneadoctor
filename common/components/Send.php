@@ -2,7 +2,7 @@
 
 
     function pull($method,$data) {
-        //$uri = 'http://localhost/phoneadoc/api/web/index.php/v1/'.$method;
+        //$uri = 'http://phoneadoctor.com.ng/api/web/index.php/v1/'.$method;
         $uri = 'http://localhost/phoneadoc/api/web/index.php/v1/'.$method;
         $response = \HttpFull\Request::post($uri)
         ->expectsJson()

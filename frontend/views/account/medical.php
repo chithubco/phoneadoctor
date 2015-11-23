@@ -57,10 +57,9 @@ $this->title = 'Add Medical Details';
 	<div class="cnt-blk">
 		<?php $form = ActiveForm::begin(['id' => 'form-consult','options' => ['enctype' => 'multipart/form-data']]); ?>
 			Alergies
-			<div class="form-group">
-			
+			<div class="form-group">			
 			Type:
-				<select id="ddl1" class="stringInfoSpacing" onchange="configureDropDownLists(this,document.getElementById('ddl2'))">
+                        <select id="ddl1" name="allergy_type" class="stringInfoSpacing" onchange="configureDropDownLists(this,document.getElementById('ddl2'))">
 				<option value="-1" selected="selected">Type</option>
 				<option value="Environmental">Environmental</option>
 				<option value="Food" >Food</option>
@@ -69,39 +68,92 @@ $this->title = 'Add Medical Details';
 			</div>
 			<div class="form-group">
 			Alergy:
-			<select id="ddl2" class="stringInfoSpacing">
+                        <select id="ddl2" name="allergy" class="stringInfoSpacing">
 				<option value="-1" selected="selected">Alergy</option>
 
 				</select>
 			</div>
-			<div class="form-group">
-			Sex:
-				<input type="text" name="sex" class="form-control" value="<?php echo $data->description->sex ?>">
+			<!--<div class="form-group">
+			Begin Date:
+				<input type="text" name="begin_date" class="form-control" >
 			</div>
+                        <div class="form-group">
+			End Date:
+				<input type="text" name="end_date" class="form-control" >
+			</div>-->
+                        <div class="form-group">
+			Reaction:
+				<input type="text" name="reaction" class="form-control" >
+			</div>	
 			<div class="form-group">
-				<textarea class="form-control txt-area" name="address" placeholder="Type your address here"><?php echo $data->description->address ?></textarea>
+			Severity:
+				<input type="text" name="severity" class="form-control" >
 			</div>
+                        <div class="form-group">
+			Location:
+				<input type="text" name="location" class="form-control" >
+			</div>	
+                        <div class="form-group">
+			STR:
+				<input type="text" name="STR" class="form-control" >
+			</div>	
 			<div class="form-group">
-			City:
-				<input type="text" name="city" class="form-control" value="<?php echo $data->description->city ?>">
+			RXCUI:
+				<input type="text" name="RXCUI" class="form-control" >
 			</div>
+                        <div class="form-group">
+			CODE:
+				<input type="text" name="CODE" class="form-control" >
+			</div>  
+                        <div class="form-group">
+			ICDS:
+				<input type="text" name="ICDS" class="form-control" >
+			</div>	
+                        <div class="form-group">
+			Ocurrence:
+				<input type="text" name="ocurrence" class="form-control" >
+			</div>	
 			<div class="form-group">
-			State:
-				<input type="text" name="state" class="form-control" value="<?php echo $data->description->state ?>">
+			Form:
+				<input type="text" name="form" class="form-control" >
 			</div>
-			<?php
-			
-
-   
-    echo $form->field($model, 'file')->widget(FileInput::classname(), [
+                        <div class="form-group">
+			Route:
+				<input type="text" name="route" class="form-control" >
+			</div>  
+                        <div class="form-group">
+			Code Text:
+				<input type="text" name="code_text" class="form-control" >
+			</div>	
+                        <div class="form-group">
+			Ocurrence:
+				<input type="text" name="ap_ocurrence" class="form-control" >
+			</div>	
+			<div class="form-group">
+			Outcome:
+				<input type="text" name="outcome" class="form-control" >
+			</div>
+                        <div class="form-group">
+			Referred By:
+				<input type="text" name="referred_by" class="form-control" >
+			</div>                        
+			<div class="form-group">		
+			<?php 
+   /* echo $form->field($model, 'file')->widget(FileInput::classname(), [
         'options' => ['accept' => 'image/*'],
     ]);
-			?>
-			<div class="form-group">
-			Pin:
-				<input type="password" name="pin" class="form-control">
-			</div>
-			<!--
+		*/	?>
+			<!--<div class="form-group">				
+			Begin Date:	
+                            <div class="input-group date" id="datetimepicker2">
+                                    <span class="input-group-addon">
+                                            <span class="glyphicon glyphicon-calendar"></span>
+                                    </span>
+                                    <input type="text" class="form-control">
+                            </div>
+                        </div>
+
+			
 			<div class="form-group">
 				<p>Scheduled for  a consultation</p>
 				<div class="col-sm-6 sm-no-pad-lt">

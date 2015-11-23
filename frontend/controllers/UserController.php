@@ -586,16 +586,16 @@ class UserController extends Controller {
 
     public function addMedicals($xmlUserDetails) {
         
-       if (!isset($xmlUserDetails['user']['password']) || trim($xmlUserDetails['user']['password']) == '') {
+       if (!isset($xmlUserDetails['user']['userinfo']['auth_key']) || trim($xmlUserDetails['user']['userinfo']['auth_key']) == '') {
             
-            $this->addLogEntry('user.update', 'Failure', 9, 'Pin missing.');
+            $this->addLogEntry('user.update', 'Failure', 9, 'Auth key missing.');
             $this->generateJsonResponce(array("response_code" => 113, "description" => 'Pin missing.'), 'error', 400);
             
         }else {
             //Authenticate user before update
-            $user_exists = User::find()->where('id = ' . $xmlUserDetails['user']['id'] . ' AND password LIKE "' . md5($xmlUserDetails['user']['password']) . '"')->one();
+            $user_exists = User::find()->where('id = ' . $xmlUserDetails['user']['id'])->one();
             //Authenticate access key before update
-            $access_code_exists = User::find()->where('id = ' . $xmlUserDetails['user']['id'] . ' AND accessKey LIKE "' . $xmlUserDetails['user']['accessKey'] . '"')->one();
+            $access_code_exists = User::find()->where('id = ' . $xmlUserDetails['user']['id'] . ' AND auth_key LIKE "' . $xmlUserDetails['user']['auth_key'] . '"')->one();
             if ($access_code_exists) {
                 if ($user_exists) {
 

@@ -9,7 +9,7 @@
         if(!isset($session['authkey']) || $session['authkey'] == '')
             return false;
 
-        //$uri = 'http://localhost/phoneadoc/api/web/index.php/v1/'.$method;
+        //$uri = 'http://phoneadoctor.com.ng/api/web/index.php/v1/user/api';
         $uri = 'http://localhost/phoneadoc/api/web/index.php/v1/user/api';
         $data = '
                 <request method="user.getuserinfo">
@@ -21,16 +21,18 @@
                 ';
         
         $response = \HttpFull\Request::post($uri)
-        ->expectsJson()
+        //->expectsJson()
         ->body($data)
         ->sendsXml()
         ->send();
-        $session['fname'] = $response->body->description->fname;
-        $session['lname'] = $response->body->description->lname;
+        
+        $response_des = json_decode($response->body);        
+        $session['fname'] = $response_des->description->fname;
+        $session['lname'] = $response_des->description->lname;
 
         //var_dump($response->body);
        // exit;
-        if($response->body->response_code==100)
+         if($response_des->response_code==100)
             return true;
         else
             return false;

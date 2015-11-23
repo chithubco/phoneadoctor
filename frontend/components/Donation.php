@@ -1,14 +1,14 @@
 <?php
+
 namespace app\components;
 namespace frontend\components;
-
 use Yii;
-use common\models\Donations;
-use common\models\Users;
-use common\models\Transactions;
-use common\models\PaymentAttempts;
+use app\models\Donations;
+use app\models\ApiLog;
+/*use app\models\Users;
+use app\models\Transactions;
+use app\models\PaymentAttempts;*/
 use yii\filters\VerbFilter;
-
 
 class Donation
 {
@@ -18,7 +18,6 @@ class Donation
     public $homeURL;
     public $salt                = 'phoneDoctor';
     public $currencyLabel       = 'N';  
-
     
   
     /**
@@ -43,17 +42,17 @@ class Donation
      * Returns    : Result of insert operation
      */
        public function run($id) {
-
                 
-                $this->addLogEntry('donation.create', 'Success', 3, 'Donation successfully created. Username :- ' . $name, $model->id);
-                $this->generateJsonResponce(array("response_code" => 100, "description" => 'Donation successfully created.',"response"=>array("payment_id"=>$paym->id)), 'ok', 200);               
-                exit;
-            
+                $donations = Donations::findOne($id);              
+                $donations->status = 'success';
+                $donations->save();
+                $this->addLogEntry('donation.create', 'Success', 3, 'Donation successfully created.');
+                $this->generateJsonResponce(array("response_code" => 100, "description" => 'Donation successfully created.',"response"=>array("Donation Id"=>$id)), 'ok', 200);               
+                
          
        }
        
         
-
    public function addLogEntry($api_method, $type, $log_description, $notes = '', $user_id = 0, $trans_id = 0) {
         if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
             $remote_ip = $_SERVER['HTTP_CLIENT_IP'];
@@ -62,15 +61,11 @@ class Donation
         } else {
             $remote_ip = $_SERVER['REMOTE_ADDR'];
         }        
-       
-        /*$t      = microtime(true);
-        $micro  = sprintf("%06d",($t - floor($t)) * 1000000);         
-        $d      = new \DateTime( date('Y-m-d H:i:s.' . $micro, $t) );       
-        $date   = $d->format("Y-m-d H:i:s.u");*/
+
         $date   = date("Y-m-d H:i:s");
         
         $api_log = new ApiLog;
-        $api_log->api_method_id             = 1;//$this->api_methods[$api_method];
+        $api_log->api_method                = $api_method;
         $api_log->type                      = $type;
         $api_log->api_log_description_id    = $log_description;
         $api_log->notes                     = $notes;
@@ -85,11 +80,9 @@ class Donation
        
  public function generateXMLResponse($response, $status, $http_status = 200, $apiVersion = 'apiv2') {
         //$checkMethod = new REST();
-
         //$dom = new XmlDomConstructCustomizedForAPI('1.0', 'utf-8');
         Yii::$app->xmlDom->parseMixed(array("response" => $response));
         $data = Yii::$app->xmlDom->saveXML();
-
         $data = str_replace('<response/>', '<response xmlns="http://' . $_SERVER['SERVER_NAME'] . '/pos/index.php/' . $apiVersion . '" status="' . $status . '" />', $data);
         $data = str_replace('<response>', '<response xmlns="http://' . $_SERVER['SERVER_NAME'] . '/pos/index.php/' . $apiVersion . '" status="' . $status . '" >', $data);
         Yii::$app->REST->response($data, $http_status);
@@ -104,13 +97,11 @@ public function generateJsonResponce($response){
     print_r(json_encode($response));
     exit;
 }
-
    /*
      * API Method : N.A
      * Purpose    : Filter out unwanted characters
      * Returns    : Sanitized data
      */
-
     public function sanitizeXML($clear = '', $excludeSpecialChars = false, $skipURLDecode = false) {
        
         if(trim($clear) <> ''){
@@ -133,7 +124,7 @@ public function generateJsonResponce($response){
         }         
         return $clear;
     }
-
     
        
 }
+?>

@@ -74,14 +74,14 @@ class SiteController extends Controller
             if($this->login($_POST['code'].$_POST['phone'],$_POST['pin']))
                 return $this->redirect(Url::toRoute('/consultation/index'));
         
-        $resp = $response->body->description;
+        //$resp = $response->body->description;
         }
             //var_dump($response->body);
         $session = Yii::$app->session;
         $error = $session['error'];
         $session['error'] = NULL;
         return $this->render('login', [
-            'model' => $model,
+         //   'model' => $model,
             'response'=>$error
         ]);
     
@@ -129,6 +129,7 @@ class SiteController extends Controller
      */
     public function actionLogout()
     {
+        $session = Yii::$app->session;
         $response = pull('user/api','
           <request method="user.logout">
             <user>

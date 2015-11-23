@@ -110,7 +110,15 @@ $session = \Yii::$app->session;
                         <div class="accordion-head col-xs-12"><a href="<?php echo Url::toRoute('/consultation/create') ?>">Consult a doctor</a></div>
                         <!--<div class="accordion-head col-xs-12"><a href="#">Search a doctor</a></div>-->
                         <div class="accordion-head col-xs-12"><a href="#">Make Payment</a></div>
-                        <div class="accordion-head col-xs-12"><a href="#">Manage Medical History</a></div>
+                        <div class="accordion-head col-xs-12"> 
+                            <p>Medical History</p><div class="arrow down"></div>
+                        </div>
+                        <div class="accordion-body col-xs-12  no-pad">
+                            <ul>
+                                <li><a href="<?php echo Url::toRoute('/account/medical') ?>">Add Medical History</a></li>
+                                <li><a href="#">Edit Medical History</a></li>                              
+                            </ul>                        
+                        </div>                        
                         <div class="accordion-head col-xs-12"><a href="#">View Transactions</a></div>
                         <div class="accordion-head col-xs-12"><a href="<?php echo Url::toRoute('/consultation/history') ?>">Consultation History</a></div>
                         <div class="accordion-head col-xs-12">
