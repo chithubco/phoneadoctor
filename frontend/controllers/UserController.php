@@ -469,6 +469,7 @@ class UserController extends Controller {
                         $xmlUserDetails['user']['patients']['create_date'] = (int) time();
                         $xmlUserDetails['user']['patients']['fname'] = $userFirstName;
                         $xmlUserDetails['user']['patients']['lname'] = $userLastName;
+                        $xmlUserDetails['user']['patients']['pubpid'] = $xmlUserDetails['user']['patients']['mobile_phone']; 
                         $model_patients->setAttributes($xmlUserDetails['user']['patients']);
                         $model_patients->validate();
                         if ($model_patients->getErrors()) {
