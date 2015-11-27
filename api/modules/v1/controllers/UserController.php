@@ -816,13 +816,18 @@ class UserController extends Controller {
             
         $user_exists = User::find()->where('id = ' . $xmlUserDetails['user']['id'])->one();
         
-        if($user_exists!=NULL){
+        if($user_exists!=NULL){            
             
             //Check if pin is already set
             if ($user_exists->password != NULL) {
                 $this->addLogEntry('user.create password', 'Failure', 9, 'Pin already set.');
                 $this->generateJsonResponce(array("response_code" => 113, "description" => 'You have already set your pin, please login to change the same.'), 'error', 400);
-            }            
+            }   
+            
+            if (!is_numeric($xmlUserDetails['user']['pin']) || strlen($xmlUserDetails['user']['pin']) <> 4) {
+                $this->addLogEntry('user.changePin', 'Failure', 9, 'PIN length/type error.');
+                $this->generateJsonResponce(array("response_code" => 113, "description" => 'PIN must consist of numbers only with a length of 4.'), 'error', 400);
+            } 
             
             $model = $this->findModel($this->sanitizeXML($xmlUserDetails['user']['id']));
             $model->password  = md5($this->sanitizeXML($xmlUserDetails['user']['pin']));                         
@@ -933,6 +938,10 @@ class UserController extends Controller {
             //check if user exist 
             $user_exists = User::find()->where('id = ' . $xmlUserDetails['user']['user_id'] . ' AND password LIKE "' . md5($xmlUserDetails['user']['old_pin']) . '"')->one();
             if ($user_exists) {
+                if (!is_numeric($xmlUserDetails['user']['new_pin']) || strlen($xmlUserDetails['user']['new_pin']) <> 4) {
+                    $this->addLogEntry('user.changePin', 'Failure', 9, 'PIN length/type error.');
+                    $this->generateJsonResponce(array("response_code" => 113, "description" => 'PIN must consist of numbers only with a length of 4.'), 'error', 400);
+                }                 
                 $id = $user_exists->id;
                 $model = User::findOne($id);
                 $model->password = md5($xmlUserDetails['user']['new_pin']);
