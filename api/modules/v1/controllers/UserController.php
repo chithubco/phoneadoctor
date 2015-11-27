@@ -1,8 +1,5 @@
 <?php
-
-namespace app\controllers;
-namespace frontend\controllers;
-//namespace api\modules\v1\controllers;
+namespace api\modules\v1\controllers;
 
 use Yii;
 use yii\db\Query;
@@ -22,9 +19,9 @@ use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use common\components\XmlDomConstruct;
 
-include_once("common/components/xmlToArray.php");
-include_once("common/components/XmlDomConstruct.php");
-include_once("common/components/services/Twilio.php");
+include_once("../../common/components/xmlToArray.php");
+include_once("../../common/components/XmlDomConstruct.php");
+include_once("../../common/components/services/Twilio.php");
 
 class UserController extends Controller {
 
@@ -72,11 +69,12 @@ class UserController extends Controller {
                 
                 case 'twilio_from_phone':
                     $this->twilio_from_phone = $setting->value;
-                    break; 
-                
+                    break;  
+
                 case 'call_center_phone':
                     $this->call_center_phone = $setting->value;
                     break;                    
+                
                 
                 default:
                     break;
@@ -148,9 +146,9 @@ class UserController extends Controller {
                 case 'user.getMedicalHistory':
                     $this->getMedicalHistory($xmlArray['request']);
                     break;  
-                case 'user.sendSMS':
-                    $this->sendSMS($xmlArray['request']);
-                    break;
+                /*case 'user.getConsultationHistory':
+                    $this->getConsultationHistory($xmlArray['request']);
+                    break;*/
                 case 'user.login':
                     $this->userLogin($xmlArray['request']);
                     break;                 
@@ -489,7 +487,7 @@ class UserController extends Controller {
                         $xmlUserDetails['user']['patients']['create_date'] = (int) time();
                         $xmlUserDetails['user']['patients']['fname'] = $userFirstName;
                         $xmlUserDetails['user']['patients']['lname'] = $userLastName;
-                        $xmlUserDetails['user']['patients']['pubpid'] = $xmlUserDetails['user']['patients']['mobile_phone']; 
+                        $xmlUserDetails['user']['patients']['pubpid'] = $xmlUserDetails['user']['patients']['mobile_phone'];
                         $model_patients->setAttributes($xmlUserDetails['user']['patients']);
                         $model_patients->validate();
                         if ($model_patients->getErrors()) {
@@ -498,7 +496,7 @@ class UserController extends Controller {
                             exit;
                         }
                         $model_patients->save(false);
-                        if($model_patients->email!=''){              
+                        if($model_patients->email!=''){
                             \Yii::$app->mailer->compose([
                                     'html' => 'welcome-html',
                                     'text' => 'welcome-text',
@@ -773,9 +771,9 @@ class UserController extends Controller {
             $accessAuthorised =  Yii::$app->AuthoriseUser->checkAuthKey();
             if($accessAuthorised){ 
                 $query = new Query;
-                $query->select('title, fname, lname,sex,DOB,marital_status,SS,pubpid,address,city,state,country,zipcode,mobile_phone,email,mothers_name,guardians_name,pharmacy')
+                   $query->select('title, fname, lname,sex,DOB,marital_status,SS,pubpid,address,city,state,country,zipcode,mobile_phone,email,mothers_name,guardians_name,pharmacy')
                         ->from('patient')
-                        ->where('user_id = ' . $xmlUserDetails['user']['id']);
+                        ->where('user_id = ' .	$xmlUserDetails['user']['id']);
                 $command = $query->createCommand();
                 $patient_exists = $command->queryOne();
                 //$patient_exists = Patient::find()->where('user_id = ' . $xmlUserDetails['user']['id'])->one();
@@ -811,7 +809,7 @@ class UserController extends Controller {
             $this->generateJsonResponce(array("response_code" => 113, "description" => 'Pin should be 4 digits.'), 'error', 400);            
         }else if (!is_numeric($xmlUserDetails['user']['pin'])) {            
             $this->addLogEntry('user.create password', 'Failure', 9, 'Pin not numeric.');
-            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Pin should be numbers only.'), 'error', 400);                        
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Pin should be numbers only.'), 'error', 400);            
         }else if (!isset($xmlUserDetails['user']['confirm_pin']) || trim($xmlUserDetails['user']['confirm_pin']) == '') {            
             $this->addLogEntry('user.changePin', 'Failure', 9, 'Confirm pin missing.');
             $this->generateJsonResponce(array("response_code" => 113, "description" => 'Confirm pin missing.'), 'error', 400);            
@@ -824,18 +822,18 @@ class UserController extends Controller {
             
         $user_exists = User::find()->where('id = ' . $xmlUserDetails['user']['id'])->one();
         
-        if($user_exists!=NULL){
+        if($user_exists!=NULL){            
             
             //Check if pin is already set
             if ($user_exists->password != NULL) {
                 $this->addLogEntry('user.create password', 'Failure', 9, 'Pin already set.');
                 $this->generateJsonResponce(array("response_code" => 113, "description" => 'You have already set your pin, please login to change the same.'), 'error', 400);
-            }    
+            }   
             
             if (!is_numeric($xmlUserDetails['user']['pin']) || strlen($xmlUserDetails['user']['pin']) <> 4) {
                 $this->addLogEntry('user.changePin', 'Failure', 9, 'PIN length/type error.');
                 $this->generateJsonResponce(array("response_code" => 113, "description" => 'PIN must consist of numbers only with a length of 4.'), 'error', 400);
-            }                        
+            } 
             
             $model = $this->findModel($this->sanitizeXML($xmlUserDetails['user']['id']));
             $model->password  = md5($this->sanitizeXML($xmlUserDetails['user']['pin']));                         
@@ -855,7 +853,7 @@ class UserController extends Controller {
                 $mail_tmp_body  = $mail_content->content;
                 $mail_body      = str_replace(array('{DATE}', '{PHONE}', '{PASSWORD}', '{USER}'),
                                               array(date('m-d-Y'), $patient_exists->mobile_phone, $this->sanitizeXML($xmlUserDetails['user']['pin']), $patient_exists->fname." ".$patient_exists->lname),
-                                              $mail_tmp_body);											 
+                                              $mail_tmp_body);                                           
                 
                 $this->sendSystemEmail($mail_body, $mail_title, $email);                    
                 }
@@ -973,7 +971,7 @@ class UserController extends Controller {
      * Returns    : Result success or failed
           
     public function appointmentNotification($userId,$appDate,$doctor,$sessionId) {
-        $officePhone = 0;
+
         if (!isset($appDate) || trim($appDate) == '') {
             $this->addLogEntry('consultation.appointmentNotification', 'Failure', 9, 'Date is missing.');
             return 'Date is missing.'; //$this->generateJsonResponce(array("response_code" => 113, "description" => 'Date is missing.'), 'error', 400);
@@ -993,9 +991,9 @@ class UserController extends Controller {
         $user_check = Patient::find()->where($UserCondition)->one();
         if ($user_check != NULL) {
             $userPhone = $user_check->mobile_phone;
-            $officePhone = (isset($this->call_center_phone) && $this->call_center_phone != NULL)?$this->call_center_phone:07003628677;
-            $twilio_message = "Hi ".$user_check->fname . " " . $user_check->lname."\n Your Phone A Doctor appointment with Dr. " . $doctor . " is scheduled for " . $appDate . "\n.Please call ".$officePhone." and present your session Id : " . $sessionId ." at the appointment time";
-            //---------------------- TWILIO ----------------------//                         
+
+            $twilio_message = "Phone a doctor: Appointment Notification\nHi ".$user_check->fname . " " . $user_check->lname."\n Your appointment with Dr " . $doctor . " is schedule on " . $appDate . "\n your session Id is: " . $sessionId;
+            //---------------------- TWILIO ----------------------//             
             $twillio = Yii::$app->Twillio;
             $message = $twillio->getClient()->account->sms_messages->create($this->twilio_from_phone, // From a valid Twilio number
                     $userPhone, // Text this number
@@ -1183,8 +1181,8 @@ class UserController extends Controller {
                         //$model->load($xmlUserDetails['user']['alergies']);
                         $model->validate();
                         if ($model->getErrors()) {
-                            $this->addLogEntry('user.medicals', 'Failure', 9, 'Correct the validation errors of allergies.');
-                            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Correct the validation errors of allergies.', 'errors' => $model->getErrors()), 'error', 400);
+                            $this->addLogEntry('user.medicals', 'Failure', 9, 'Correct the validation errors.');
+                            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Correct the validation errors.', 'errors' => $model->getErrors()), 'error', 400);
                             exit;
                         }
 
@@ -1199,12 +1197,12 @@ class UserController extends Controller {
                         //$model2->load($xmlUserDetails['user']['medications']);
                         $model2->validate();
                         if ($model2->getErrors()) {
-                            $this->addLogEntry('user.medicals', 'Failure', 9, 'Correct the validation errors of medications.');
-                            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Correct the validation errors of medications.', 'errors' => $model2->getErrors()), 'error', 400);
+                            $this->addLogEntry('user.medicals', 'Failure', 9, 'Correct the validation errors.');
+                            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Correct the validation errors.', 'errors' => $model2->getErrors()), 'error', 400);
                             exit;
                         }
                         $model2->save();
-                    }                    
+                    }
                     if (is_array($xmlUserDetails['user']['active_problems'])) {
                         $model3 = new PatientActiveProblems;
                         $xmlUserDetails['user']['active_problems']['pid']        = $patient_exists->pid;
@@ -1232,9 +1230,9 @@ class UserController extends Controller {
                 $this->generateJsonResponce(array("response_code" => 113, "description" => 'Your auth key is invalid.'), 'error', 400);
             }
         }
-    }  
-    
-    /*
+    }    
+  
+   /*
      * API Method : user.sendSMS
      * Purpose    : Send SMS to user
      * Returns    : Send SMS to User phone
@@ -1399,7 +1397,7 @@ public function generateJsonResponce($response){
         return ($phone_exist!=NULL)?true:false;       
     }
     
-     public function checkIfVerificationPhoneExist($userPhone){
+        public function checkIfVerificationPhoneExist($userPhone){
         
         $phone_length = strlen($userPhone);
         
