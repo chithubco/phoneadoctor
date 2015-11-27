@@ -9,6 +9,7 @@ use app\models\Patient;
 use app\models\VerifyPhone;
 use app\models\PatientAllergies;
 use app\models\PatientMedications;
+use app\models\PatientActiveProblems;
 use app\models\Settings;
 use app\models\Cms;
 use app\models\ApiLog;
@@ -33,6 +34,7 @@ class UserController extends Controller {
     public $twilio_from_phone;
     public $twilio_account_sid;
     public $twilio_auth_token;
+    public $call_center_phone;
     
     
    public function beforeAction($action) { 
@@ -68,6 +70,11 @@ class UserController extends Controller {
                 case 'twilio_from_phone':
                     $this->twilio_from_phone = $setting->value;
                     break;  
+
+                case 'call_center_phone':
+                    $this->call_center_phone = $setting->value;
+                    break;                    
+                
                 
                 default:
                     break;
@@ -764,10 +771,9 @@ class UserController extends Controller {
             $accessAuthorised =  Yii::$app->AuthoriseUser->checkAuthKey();
             if($accessAuthorised){ 
                 $query = new Query;
-                $query->select('fname, lname,sex,DOB,mobile_phone,email,skypeid')
+                   $query->select('title, fname, lname,sex,DOB,marital_status,SS,pubpid,address,city,state,country,zipcode,mobile_phone,email,mothers_name,guardians_name,pharmacy')
                         ->from('patient')
-                        ->where('user_id = ' . $xmlUserDetails['user']['id']);
-
+                        ->where('user_id = ' .$xmlUserDetails['user']['id']);
                 $command = $query->createCommand();
                 $patient_exists = $command->queryOne();
                 //$patient_exists = Patient::find()->where('user_id = ' . $xmlUserDetails['user']['id'])->one();
@@ -1197,6 +1203,20 @@ class UserController extends Controller {
                         }
                         $model2->save();
                     }
+                    if (is_array($xmlUserDetails['user']['active_problems'])) {
+                        $model3 = new PatientActiveProblems;
+                        $xmlUserDetails['user']['active_problems']['pid']        = $patient_exists->pid;
+                        $xmlUserDetails['user']['active_problems']['eid']        = 0;
+                        $model3->setAttributes($xmlUserDetails['user']['active_problems']);                        
+                        
+                        $model3->validate();
+                        if ($model3->getErrors()) {
+                            $this->addLogEntry('user.medicals', 'Failure', 9, 'Correct the validation errors of active problems.');
+                            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Correct the validation errors of active problems.', 'errors' => $model2->getErrors()), 'error', 400);
+                            exit;
+                        }
+                        $model3->save();
+                    }                    
 
                     $this->addLogEntry('user.medicals', 'Success', 3, 'User medicals successfully added. Username :- ' . $user_exists->username, $user_exists->id);
                     $this->generateJsonResponce(array("response_code" => 100, "description" => 'User medicals successfully added.'), 'ok', 200);
@@ -1208,6 +1228,41 @@ class UserController extends Controller {
             } else {
                 $this->addLogEntry('user.medicals', 'Failure', 9, 'User profile update auth key authentication failed for user :' . $xmlUserDetails['user']['userinfo']['id']);
                 $this->generateJsonResponce(array("response_code" => 113, "description" => 'Your auth key is invalid.'), 'error', 400);
+            }
+        }
+    }    
+  
+   /*
+     * API Method : user.sendSMS
+     * Purpose    : Send SMS to user
+     * Returns    : Send SMS to User phone
+     */
+
+    public function sendSMS($xmlUserDetails) {
+        
+        if (!isset($xmlUserDetails['user']['phone']) || trim($xmlUserDetails['user']['phone']) == '') {
+            $this->addLogEntry('user.sendSMS', 'Failure', 9, 'Phone number missing.');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Phone number missing.'), 'error', 400);
+        } elseif (!isset($xmlUserDetails['user']['message_text']) || trim($xmlUserDetails['user']['message_text']) == '') {
+            $this->addLogEntry('user.sendSMS', 'Failure', 9, 'Message text missing.');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Message text missing.'), 'error', 400);
+        }
+        if ($this->validatePhone($xmlUserDetails['user']['phone'])) {
+
+            $twilio_message = $xmlUserDetails['user']['message_text'];
+            //---------------------- TWILIO ----------------------//         
+            $twillio = Yii::$app->Twillio;
+            $message = $twillio->getClient()->account->sms_messages->create($this->twilio_from_phone, // From a valid Twilio number
+                    $xmlUserDetails['user']['phone'], // Text this number
+                    $twilio_message
+            );
+
+            if (isset($message->description) && ($message->description != NULL)) {
+                $this->addLogEntry('user.sendCode', 'Failure', 3, 'Attempt to send SMS with invalid phone number :- ' . $xmlUserDetails['user']['phone']);
+                $this->generateJsonResponce(array("response_code" => 113, "description" => $message->description), 'ok', 200);
+            } else {
+                $this->addLogEntry('user.sendCode', 'Success', 3, 'SMS send to phone :- ' . $xmlUserDetails['user']['phone']);
+                $this->generateJsonResponce(array("response_code" => 100, "description" => 'SMS sent successfully.'), 'ok', 200);
             }
         }
     }    
