@@ -301,13 +301,33 @@ class UserController extends Controller {
                     $this->addLogEntry('user.sendCode', 'Failure', 3, 'User signup verification attempt with invalid phone number :- ' . $xmlUserDetails['user']['phone']);
                     $this->generateJsonResponce(array("response_code" => 113, "description" => $message->description), 'ok', 200);
                 } else {
-                    $model = new VerifyPhone();
-                    $model->phone_no = $xmlUserDetails['user']['phone'];
-                    $model->verification_code = $code;
-                    $model->verified = 'NO';
-                    $model->save();
-                    $this->addLogEntry('user.sendCode', 'Success', 3, 'User signup verification code send to phone :- ' . $xmlUserDetails['user']['phone']);
-                    $this->generateJsonResponce(array("response_code" => 100, "description" => 'Verification code sent.'), 'ok', 200);
+                    $res = $this->checkIfVerificationPhoneExist($xmlUserDetails['user']['phone']);
+                    if($res){
+                        //Update verification table
+                        $model_verification = VerifyPhone::findOne($res);
+                        $model_verification->phone_no = $xmlUserDetails['user']['phone'];
+                        $model_verification->verification_code = $code;
+                        $model_verification->verified = 'NO';                        
+                        $model_patients->setAttributes($model_verification);                        
+                        if($model_patients->getErrors()){
+                            $this->addLogEntry('user.sendverification', 'Failure', 9, 'Correct the validation errors.');
+                            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Correct the validation errors.','errors'=>$model->getErrors()), 'error', 400);
+                            exit;
+                        }                        
+                        $model_verification->save(false);  
+                        $this->addLogEntry('user.sendCode', 'Success', 3, 'User signup verification code send to phone :- ' . $xmlUserDetails['user']['phone']);
+                        $this->generateJsonResponce(array("response_code" => 100, "description" => 'Verification code sent.'), 'ok', 200);                                                
+                        
+                    }else{
+                        //Add new entry
+                        $model = new VerifyPhone();
+                        $model->phone_no = $xmlUserDetails['user']['phone'];
+                        $model->verification_code = $code;
+                        $model->verified = 'NO';
+                        $model->save();
+                        $this->addLogEntry('user.sendCode', 'Success', 3, 'User signup verification code send to phone :- ' . $xmlUserDetails['user']['phone']);
+                        $this->generateJsonResponce(array("response_code" => 100, "description" => 'Verification code sent.'), 'ok', 200);                        
+                    }
                 }
             }
         }
@@ -460,6 +480,7 @@ class UserController extends Controller {
                         $xmlUserDetails['user']['patients']['create_date'] = (int) time();
                         $xmlUserDetails['user']['patients']['fname'] = $userFirstName;
                         $xmlUserDetails['user']['patients']['lname'] = $userLastName;
+                        $xmlUserDetails['user']['patients']['pubpid'] = $xmlUserDetails['user']['patients']['mobile_phone'];
                         $model_patients->setAttributes($xmlUserDetails['user']['patients']);
                         $model_patients->validate();
                         if ($model_patients->getErrors()) {
@@ -743,7 +764,7 @@ class UserController extends Controller {
             $accessAuthorised =  Yii::$app->AuthoriseUser->checkAuthKey();
             if($accessAuthorised){ 
                 $query = new Query;
-                $query->select('fname, lname,sex,DOB,mobile_phone,email')
+                $query->select('fname, lname,sex,DOB,mobile_phone,email,skypeid')
                         ->from('patient')
                         ->where('user_id = ' . $xmlUserDetails['user']['id']);
 
@@ -1023,7 +1044,7 @@ class UserController extends Controller {
             //Reset password        
             $model = User::findOne($userId);
             
-            $newPin = rand(10000, 99999);
+            $newPin = rand(1000, 9999);
             $model->password = md5($newPin);
             $model->save();
 
@@ -1310,6 +1331,51 @@ public function generateJsonResponce($response){
                 break;
         }        
         return ($phone_exist!=NULL)?true:false;       
+    }
+    
+        public function checkIfVerificationPhoneExist($userPhone){
+        
+        $phone_length = strlen($userPhone);
+        
+        switch ($phone_length) {
+            case 10:
+                $phone_exist = VerifyPhone::find()->where('phone_no LIKE "' . $userPhone . '" OR phone_no LIKE "0' . $userPhone . '" OR phone_no LIKE "234' . $userPhone . '" OR phone_no LIKE "2340' . $userPhone . '" OR phone_no LIKE "+234' . $userPhone . '" OR phone_no LIKE "+2340' . $userPhone . '"')->one();                    
+                break;
+            case 11:
+                $zero_stripped_phone=substr($userPhone,1,10);                
+                $phone_exist = VerifyPhone::find()->where('phone_no LIKE "' . $userPhone . '" OR phone_no LIKE "234' . $zero_stripped_phone . '" OR phone_no LIKE "234' . $userPhone . '" OR phone_no LIKE "+234' . $userPhone . '" OR phone_no LIKE "+234' . $zero_stripped_phone . '" OR phone_no LIKE "' . $zero_stripped_phone . '"')->one();                    
+                break;            
+            case 13: 
+                $code = substr($userPhone,0,3);                
+                $code_stripped_phone=substr($userPhone,3,10);
+                $phone_exist = VerifyPhone::find()->where('phone_no LIKE "' . $userPhone . '" OR phone_no LIKE "0' . $code_stripped_phone . '" OR phone_no LIKE "' . $code_stripped_phone . '" OR phone_no LIKE "'. $code .'0' . $code_stripped_phone . '" OR phone_no LIKE "'. $code . $code_stripped_phone . '" OR phone_no LIKE "+'. $code . $code_stripped_phone . '"')->one();                    
+                break; 
+            case 14:
+                $code = substr($userPhone,0,3);  
+                $plus_stripped_code = $plus_code = substr($userPhone,1,3); 
+                $plus_code = substr($userPhone,0,4); 
+                $code_stripped_phone=substr($userPhone,4,10);  
+                
+                $phone_exist = VerifyPhone::find()->where('phone_no LIKE "' . $userPhone . '" OR phone_no LIKE "0' . $code_stripped_phone . 
+                                '" OR phone_no LIKE "'. $code . $code_stripped_phone . '" OR phone_no LIKE "+'. $code . $code_stripped_phone . '" OR phone_no LIKE "' . $code_stripped_phone . 
+                                '" OR phone_no LIKE "'. $plus_stripped_code.$code_stripped_phone . '" OR phone_no LIKE "'. $plus_code .'0'. $code_stripped_phone . 
+                                '" OR phone_no LIKE "'. $code .'0'. $code_stripped_phone . '" OR phone_no LIKE "'. $plus_stripped_code .'0'. $code_stripped_phone . '"')->one();                    
+                break; 
+            case 15:
+                $plusStripped = substr($userPhone,1,14);                
+                $code = substr($userPhone,1,3);  
+                $code_stripped_phone=substr($userPhone,5,10);   
+                $plus_code = substr($userPhone,0,4);                 
+                $phone_exist = VerifyPhone::find()->where('phone_no LIKE "' . $userPhone . '" OR phone_no LIKE "0' .
+                                $code_stripped_phone . '" OR phone_no LIKE "'. $code . $code_stripped_phone . 
+                                '" OR phone_no LIKE "+'. $code . $code_stripped_phone . '" OR phone_no LIKE "'. $code .'0'. $code_stripped_phone . '" OR phone_no LIKE "' . 
+                                $code_stripped_phone . '" OR phone_no LIKE " ' . $plusStripped . '" OR phone_no LIKE "+'. $code .'0'. $code_stripped_phone . '" OR phone_no LIKE "' . $plus_code.$code_stripped_phone . '"')->one();                    
+                break;            
+            default:
+                $phone_exist = VerifyPhone::find()->where('phone_no LIKE "' . $userPhone . '"')->one();                    
+                break;
+        }        
+        return ($phone_exist!=NULL)?$phone_exist->id:false ;     
     }
 
 

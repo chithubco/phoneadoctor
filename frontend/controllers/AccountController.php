@@ -76,9 +76,6 @@ class AccountController extends \yii\web\Controller
                 ');
         $data = $response->body;
 
-        
-    
-
     
         if (\Yii::$app->request->isPost) {
         	
@@ -93,7 +90,7 @@ class AccountController extends \yii\web\Controller
 				  <password>'.$_POST['pin'].'</password>
 				  </userinfo>
 				  <patients>
-	   
+                                  <skypeid>'.$_POST['skypeid'].'</skypeid>
 				  <email></email>
 				  <security_que_value>test</security_que_value>
 				  <DOB>123456</DOB>
@@ -148,8 +145,9 @@ class AccountController extends \yii\web\Controller
         if (\Yii::$app->request->isPost) {//echo "<pre>";print_r($_POST);exit;
             
             $response = pull('user/api','
-                <request method="user.update">
+                <request method="user.addmedical">
                   <user>
+                  <password>'.$session['authkey'].'</password>
                 <userinfo>
                 <id>'.$session['id'].'</id>    
                 <auth_key>'.$session['authkey'].'</auth_key>  
@@ -186,12 +184,12 @@ class AccountController extends \yii\web\Controller
                   </user>
                 </request>
                 ');
-            echo $response;exit;
+            
             $model->file = UploadedFile::getInstance($model, 'file');
 
-        if ($model->validate()) {                
+        /*if ($model->validate()) {                
             $model->file->saveAs('pix/' .$session['id']. '.jpg');
-        }
+        }*/
             if($response->body->response_code==100){            
             
             return $this->redirect(Url::toRoute('/consultation/index'));

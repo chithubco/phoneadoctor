@@ -25,6 +25,10 @@ $this->title = 'Update Account Details';
 			Last Name:
 				<input type="text" name="lname" class="form-control" value="<?php echo $data->description->lname ?>">
 			</div>
+                        <div class="form-group">
+			Skype Id:
+				<input type="text" name="skypeid" class="form-control" value="<?php echo $data->description->skypeid ?>">
+			</div>            
 			<div class="form-group">
 			Sex:
 				<input type="text" name="sex" class="form-control" value="<?php echo $data->description->sex ?>">

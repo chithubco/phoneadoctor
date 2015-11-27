@@ -38,6 +38,9 @@ $this->params['breadcrumbs'][] = $this->title;
                             <input type="text" class="form-control email-adr bx" name="email" placeholder="Email Address">
                         </div>
 
+                        <div class="form-group">
+                            <input type="text" class="form-control full-name bx" name="skypeid" placeholder="Skype Id">
+                        </div>                        
 
                         
                         <div class="form-group">

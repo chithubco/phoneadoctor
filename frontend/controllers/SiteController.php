@@ -13,6 +13,7 @@ use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
+use app\models\VerifyPhone;
 use yii\helpers\Url;
 
 require_once("common/components/Send.php");
@@ -96,7 +97,7 @@ class SiteController extends Controller
           </user>
         </request>');
         
-        //var_dump($response->body);
+        var_dump($response->body);exit;
         
         $session = Yii::$app->session;
         if($response->body->response_code==100){
@@ -252,8 +253,8 @@ class SiteController extends Controller
      * @return mixed
      */
     public function actionSignup()
-    {
-        
+    {       
+        $session = Yii::$app->session;
         if($session['username'])
             return $this->redirect(Url::toRoute('/consultation/index'));
         $model = new SignupForm();
@@ -261,7 +262,7 @@ class SiteController extends Controller
         
          $resp='';
            
-        if($_POST['phone']){
+        if(isset($_POST['phone'])){
             //if (!$this->session->isActive)
             // open a session
             //$this->session->open();
@@ -289,6 +290,7 @@ class SiteController extends Controller
 
     public function actionSignup2()
     {
+        $session = Yii::$app->session;
         if($session['username'])
             return $this->redirect(Url::toRoute('/consultation/index'));
         $model = new SignupForm();
@@ -328,6 +330,7 @@ class SiteController extends Controller
 
     public function actionSignup3()
     {
+        $session = Yii::$app->session;
         if($session['username'])
             return $this->redirect(Url::toRoute('/consultation/index'));
         $model = new SignupForm();
@@ -354,6 +357,7 @@ class SiteController extends Controller
                   <patients>
                   <mobile_phone>'.$session['phone'].'</mobile_phone>    
                   <email>'.$_POST['email'].'</email>
+                  <skypeid>'.$_POST['skypeid'].'</skypeid>
                   <security_que_id>'.$_POST['question'].'</security_que_id>
                   <security_que_value>'.$_POST['answer'].'</security_que_value>
                   <DOB>'.$_POST['age'].'</DOB>
