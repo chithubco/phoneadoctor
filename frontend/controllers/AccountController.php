@@ -130,18 +130,6 @@ class AccountController extends \yii\web\Controller
         $model = new UploadForm();
 
     
-        /*$response = pull('user/api','
-                <request method="user.getMedicalHistory">
-                  <user>
-                  <id>'.$session['id'].'</id>    
-                  <auth_key>'.$session['authkey'].'</auth_key>    
-                  </user>
-                </request>
-                ');
-        $data = $response->body;  */     
-       
-
-    
         if (\Yii::$app->request->isPost) {//echo "<pre>";print_r($_POST);exit;
             
             $response = pull('user/api','
@@ -195,14 +183,48 @@ class AccountController extends \yii\web\Controller
             return $this->redirect(Url::toRoute('/consultation/index'));
             }
             $resp = $response->body->description;
-            //$session['phone'] = $_POST['phone'];
+            $data = $_POST;
             
-            //return $this->redirect('signup3');
+        }else{
+        $data ='';    
+        $response = pull('user/api','
+                <request method="user.getPatientAllergies">
+                  <user>
+                  <id>'.$session['id'].'</id>    
+                  <auth_key>'.$session['authkey'].'</auth_key>    
+                  </user>
+                </request>
+                ');
+        $patient_allergies = $response->body->description; 
 
+        $response = pull('user/api','
+                <request method="user.getPatientMedications">
+                  <user>
+                  <id>'.$session['id'].'</id>    
+                  <auth_key>'.$session['authkey'].'</auth_key>    
+                  </user>
+                </request>
+                ');
+        $patient_medications = $response->body->description; 
+            
+        $response = pull('user/api','
+                <request method="user.getPatientActiveProblems">
+                  <user>
+                  <id>'.$session['id'].'</id>    
+                  <auth_key>'.$session['authkey'].'</auth_key>    
+                  </user>
+                </request>
+                ');
+        $active_probs = $response->body->description; 
+        
         }
+        //echo "<pre>";print_r($data);exit;
         return $this->render('medical',[
             "error"=>$resp,
-            "data"=>$_POST,
+            "data"=>$data,
+            "patient_allergies"=>$patient_allergies,
+            "patient_medications"=>$patient_medications,
+            "active_problems"=>$active_probs,
             'model' => $model
             ]);
     }

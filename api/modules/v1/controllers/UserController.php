@@ -146,9 +146,15 @@ class UserController extends Controller {
                 case 'user.getMedicalHistory':
                     $this->getMedicalHistory($xmlArray['request']);
                     break;  
-                /*case 'user.getConsultationHistory':
-                    $this->getConsultationHistory($xmlArray['request']);
-                    break;*/
+                case 'user.getPatientAllergies':
+                    $this->getPatientAllergies($xmlArray['request']);
+                    break;   
+                case 'user.getPatientMedications':
+                    $this->getPatientMedications($xmlArray['request']);
+                    break;  
+                case 'user.getPatientActiveProblems':
+                    $this->getPatientActiveProblems($xmlArray['request']);
+                    break;
                 case 'user.login':
                     $this->userLogin($xmlArray['request']);
                     break;                 
@@ -681,11 +687,11 @@ class UserController extends Controller {
                 $patient_id = ($user_exists!=NULL)?$user_exists->pid:0;
                 
                 $query = new Query;
-                $query->select('pm.STR,pm.begin_date,pm.end_date,pm.prescription_id,pm.route,pm.dispense,
-                        pm.dose,pm.refill,pm.take_pills,pm.form,pa.allergy_type,pa.allergy,pa.begin_date,pa.end_date,pa.reaction,pa.severity,pa.location') 
+                $query->select('pm.STR,pm.begin_date,pm.end_date,pm.prescription_id,pm.route,pm.dispense,pa.pid as patient_id,
+                        pm.dose,pm.refill,pm.take_pills,pm.form,pa.allergy_type,pa.allergy,pa.begin_date,pa.end_date,pa.reaction,pa.severity,pa.location,actvpblm.code_text,actvpblm.begin_date,actvpblm.end_date,actvpblm.occurrence,actvpblm.referred_by,actvpblm.outcome,actvpblm.begin_date as pblm_begin_date,actvpblm.end_date as pblm_end_date') 
                     ->from('patient_medications pm')
-                    ->join('LEFT JOIN', 'patient_allergies pa',
-                                'pa.pid =pm.pid')   
+                    ->join('LEFT JOIN', 'patient_allergies pa','pa.pid =pm.pid')  
+                    ->join('LEFT JOIN', 'patient_active_problems actvpblm','actvpblm.pid =pm.pid')  
                     ->where('pm.pid = ' . $patient_id);
                 $command = $query->createCommand();                
                 $results = $command->queryAll();
@@ -702,6 +708,141 @@ class UserController extends Controller {
         } 
     }
     
+     /*
+     * API Method : consultation.getPatientAllergies
+     * Purpose    : get user medical details
+     * Returns    : User related ino*/
+    
+    
+    public function getPatientAllergies($xmlUserDetails) {
+        
+    if((!isset($xmlUserDetails['user']['auth_key']) || trim($xmlUserDetails['user']['auth_key']) == '')) {
+                
+            $this->addLogEntry('user.getPatientAllergies', 'Failure', 9, 'Auth key missing.');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Auth key missing.'), 'error', 400);
+
+        } elseif (!isset($xmlUserDetails['user']['id']) || trim($xmlUserDetails['user']['id']) == '') {            
+            $this->addLogEntry('user.getPatientAllergies', 'Failure', 9, 'User ID missing.');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'User ID missing.'), 'error', 400);            
+        }else {  
+            
+            //Authenticate access key before update
+            Yii::$app->AuthoriseUser->userId = $xmlUserDetails['user']['id'];
+            Yii::$app->AuthoriseUser->auth_key = $xmlUserDetails['user']['auth_key'];
+            $accessAuthorised =  Yii::$app->AuthoriseUser->checkAuthKey();
+            if($accessAuthorised){ 
+                $user_exists = Patient::find()->where('user_id LIKE "' . $xmlUserDetails['user']['id'] . '"')->one();                    
+                $patient_id = ($user_exists!=NULL)?$user_exists->pid:0;
+                
+                $query = new Query;
+                $query->select('pa.pid as patient_id,pa.allergy_type,pa.allergy,pa.begin_date,pa.end_date,pa.reaction,pa.severity,pa.location') 
+                    ->from('patient_allergies pa')                  
+                    ->where('pa.pid = ' . $patient_id);
+                $command = $query->createCommand();                
+                $results = $command->queryAll();
+                $history_data = ($results!=NULL)?$results:"No records found"; 
+                
+                $this->addLogEntry('user.getPatientAllergies', 'Success', 3, 'User Patient Allergies successfully returned. Username :- ' . $user_exists['fname'],$xmlUserDetails['user']['id']);
+                $this->generateJsonResponce(array("response_code" => 100, "description" => $history_data), 'error', 400);
+                
+            } else {
+                $this->addLogEntry('user.getPatientAllergies', 'Failure', 9, 'Fetch user info auth key authentication failed for user :' . $xmlUserDetails['user']['id']);
+                $this->generateJsonResponce(array("response_code" => 113, "description" => 'Your auth key is invalid.'), 'error', 400);
+            }
+            
+        } 
+    }
+    
+     /*
+     * API Method : consultation.getPatientMedications
+     * Purpose    : get user medical details
+     * Returns    : User related ino*/
+    
+    
+    public function getPatientMedications($xmlUserDetails) {
+        
+    if((!isset($xmlUserDetails['user']['auth_key']) || trim($xmlUserDetails['user']['auth_key']) == '')) {
+                
+            $this->addLogEntry('user.getPatientMedications', 'Failure', 9, 'Auth key missing.');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Auth key missing.'), 'error', 400);
+
+        } elseif (!isset($xmlUserDetails['user']['id']) || trim($xmlUserDetails['user']['id']) == '') {            
+            $this->addLogEntry('user.getPatientMedications', 'Failure', 9, 'User ID missing.');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'User ID missing.'), 'error', 400);            
+        }else {  
+            
+            //Authenticate access key before update
+            Yii::$app->AuthoriseUser->userId = $xmlUserDetails['user']['id'];
+            Yii::$app->AuthoriseUser->auth_key = $xmlUserDetails['user']['auth_key'];
+            $accessAuthorised =  Yii::$app->AuthoriseUser->checkAuthKey();
+            if($accessAuthorised){ 
+                $user_exists = Patient::find()->where('user_id LIKE "' . $xmlUserDetails['user']['id'] . '"')->one();                    
+                $patient_id = ($user_exists!=NULL)?$user_exists->pid:0;
+                
+                $query = new Query;
+                $query->select('pm.pid as patient_id,pm.STR,pm.route,pm.dose,pm.refill,pm.take_pills,pm.form') 
+                    ->from('patient_medications pm')                  
+                    ->where('pm.pid = ' . $patient_id);
+                $command = $query->createCommand();                
+                $results = $command->queryAll();
+                $history_data = ($results!=NULL)?$results:"No records found"; 
+                
+                $this->addLogEntry('user.getPatientMedications', 'Success', 3, 'User Patient medications successfully returned. Username :- ' . $user_exists['fname'],$xmlUserDetails['user']['id']);
+                $this->generateJsonResponce(array("response_code" => 100, "description" => $history_data), 'error', 400);
+                
+            } else {
+                $this->addLogEntry('user.getPatientMedications', 'Failure', 9, 'Fetch user info auth key authentication failed for user :' . $xmlUserDetails['user']['id']);
+                $this->generateJsonResponce(array("response_code" => 113, "description" => 'Your auth key is invalid.'), 'error', 400);
+            }
+            
+        } 
+    }
+  
+     /*
+     * API Method : consultation.getPatientActive_problems
+     * Purpose    : get user medical details
+     * Returns    : User related ino*/
+    
+    
+    public function getPatientActiveProblems($xmlUserDetails) {
+        
+    if((!isset($xmlUserDetails['user']['auth_key']) || trim($xmlUserDetails['user']['auth_key']) == '')) {
+                
+            $this->addLogEntry('user.getPatientActiveProblems', 'Failure', 9, 'Auth key missing.');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Auth key missing.'), 'error', 400);
+
+        } elseif (!isset($xmlUserDetails['user']['id']) || trim($xmlUserDetails['user']['id']) == '') {            
+            $this->addLogEntry('user.getPatientActiveProblems', 'Failure', 9, 'User ID missing.');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'User ID missing.'), 'error', 400);            
+        }else {  
+            
+            //Authenticate access key before update
+            Yii::$app->AuthoriseUser->userId = $xmlUserDetails['user']['id'];
+            Yii::$app->AuthoriseUser->auth_key = $xmlUserDetails['user']['auth_key'];
+            $accessAuthorised =  Yii::$app->AuthoriseUser->checkAuthKey();
+            if($accessAuthorised){ 
+                $user_exists = Patient::find()->where('user_id LIKE "' . $xmlUserDetails['user']['id'] . '"')->one();                    
+                $patient_id = ($user_exists!=NULL)?$user_exists->pid:0;
+                
+                $query = new Query;
+                $query->select('actvpblm.pid as patient_id,actvpblm.code,actvpblm.code_text,actvpblm.begin_date,actvpblm.end_date,actvpblm.occurrence,actvpblm.referred_by,actvpblm.outcome') 
+                    ->from('patient_active_problems actvpblm')                  
+                    ->where('actvpblm.pid = ' . $patient_id);
+                $command = $query->createCommand();                
+                $results = $command->queryAll();
+                $history_data = ($results!=NULL)?$results:"No records found"; 
+                
+                $this->addLogEntry('user.getPatientActiveProblems', 'Success', 3, 'User Patient medications successfully returned. Username :- ' . $user_exists['fname'],$xmlUserDetails['user']['id']);
+                $this->generateJsonResponce(array("response_code" => 100, "description" => $history_data), 'error', 400);
+                
+            } else {
+                $this->addLogEntry('user.getPatientActiveProblems', 'Failure', 9, 'Fetch user info auth key authentication failed for user :' . $xmlUserDetails['user']['id']);
+                $this->generateJsonResponce(array("response_code" => 113, "description" => 'Your auth key is invalid.'), 'error', 400);
+            }
+            
+        } 
+    }
+ 
      /*
      * API Method : consultation.getConsultationHistory
      * Purpose    : get user consultation details

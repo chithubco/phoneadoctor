@@ -47,154 +47,511 @@ $this->title = 'Add Medical Details';
     }
 </script>
 <!----------------MAIN CONTAINER--------------------------->
-<div class="col-sm-8 main-container consult-pg">
-	<!--toggle sidebar button-->
-	<p class="visible-xs">
-		<button type="button" class="btn btn-primary btn-xs" data-toggle="offcanvas"><i class="glyphicon glyphicon-chevron-left"></i></button>
-	</p>
-	
-	<h2>Add Medicals</h2>
-	<div class="cnt-blk">
-		<?php $form = ActiveForm::begin(['id' => 'form-consult','options' => ['enctype' => 'multipart/form-data']]); ?>
-			Alergies
-			<div class="form-group">			
-			Type:
-                        <select id="ddl1" name="allergy_type" class="stringInfoSpacing" onchange="configureDropDownLists(this,document.getElementById('ddl2'))">
-				<option value="-1" selected="selected">Type</option>
-				<option value="Environmental">Environmental</option>
-				<option value="Food" >Food</option>
-				</select>
-				
-			</div>
-			<div class="form-group">
-			Alergy:
-                        <select id="ddl2" name="allergy" class="stringInfoSpacing">
-				<option value="-1" selected="selected">Alergy</option>
-
-				</select>
-			</div>
-			<!--<div class="form-group">
-			Begin Date:
-				<input type="text" name="begin_date" class="form-control" >
-			</div>
-                        <div class="form-group">
-			End Date:
-				<input type="text" name="end_date" class="form-control" >
-			</div>-->
-                        <div class="form-group">
-			Reaction:
-				<input type="text" name="reaction" class="form-control" >
-			</div>	
-			<div class="form-group">
-			Severity:
-				<input type="text" name="severity" class="form-control" >
-			</div>
-                        <div class="form-group">
-			Location:
-				<input type="text" name="location" class="form-control" >
-			</div>	
-                        <div class="form-group">
-			STR:
-				<input type="text" name="STR" class="form-control" >
-			</div>	
-			<div class="form-group">
-			RXCUI:
-				<input type="text" name="RXCUI" class="form-control" >
-			</div>
-                        <div class="form-group">
-			CODE:
-				<input type="text" name="CODE" class="form-control" >
-			</div>  
-                        <div class="form-group">
-			ICDS:
-				<input type="text" name="ICDS" class="form-control" >
-			</div>	
-                        <div class="form-group">
-			Ocurrence:
-				<input type="text" name="ocurrence" class="form-control" >
-			</div>	
-			<div class="form-group">
-			Form:
-				<input type="text" name="form" class="form-control" >
-			</div>
-                        <div class="form-group">
-			Route:
-				<input type="text" name="route" class="form-control" >
-			</div>  
-                        <div class="form-group">
-			Code Text:
-				<input type="text" name="code_text" class="form-control" >
-			</div>	
-                        <div class="form-group">
-			Ocurrence:
-				<input type="text" name="ap_ocurrence" class="form-control" >
-			</div>	
-			<div class="form-group">
-			Outcome:
-				<input type="text" name="outcome" class="form-control" >
-			</div>
-                        <div class="form-group">
-			Referred By:
-				<input type="text" name="referred_by" class="form-control" >
-			</div>                        
-			<div class="form-group">		
-			<?php 
-   /* echo $form->field($model, 'file')->widget(FileInput::classname(), [
-        'options' => ['accept' => 'image/*'],
-    ]);
-		*/	?>
-			<!--<div class="form-group">				
-			Begin Date:	
-                            <div class="input-group date" id="datetimepicker2">
-                                    <span class="input-group-addon">
-                                            <span class="glyphicon glyphicon-calendar"></span>
-                                    </span>
-                                    <input type="text" class="form-control">
-                            </div>
+        
+           
+              <div class="col-sm-8 main-container medical-history">          
+          <!--toggle sidebar button-->
+          <p class="visible-xs">
+            <button type="button" class="btn btn-primary btn-xs" data-toggle="offcanvas"><i class="glyphicon glyphicon-chevron-left"></i></button>
+          </p> 
+          
+          <h2>Update , Edit or Delete your Medical history</h2>           
+          <div class="updt-del">
+             <ul class="nav nav-tabs">
+              <li class="active"><a data-toggle="tab" href="#step1">Allergies</a></li>
+              <li class=""><a data-toggle="tab" href="#step2">Medications</a></li>
+              <li class=""><a data-toggle="tab" href="#step3">Active problems</a></li>
+              <li class=""><a data-toggle="tab" href="#step4">Upload Files</a></li>
+            </ul>
+            
+            <div class="tab-content">
+              <div id="step1" class="tab-pane fade in active"> 
+              	 <button class="btn-default add" data-toggle="modal" data-target="#myModal1">Add</button>
+              	<ul>
+                	<li>
+                    	<div class="table-responsive">
+                        	<table class="table table-hover table-striped">
+                            	<thead>
+                                	<tr>
+                                    	<td>S.No</td>
+                                    	<td>Type</td>
+                                        <td>Location</td>
+                                        <td>Allergy</td>
+                                        <td>Reaction</td>
+                                        <td>Begin Date</td>
+                                        <td>End Date</td>
+                                        <td>Action</td>
+                                    </tr>
+                                </thead>
+                      <?php $i=1;
+                      if(is_array($patient_allergies)){
+                            foreach ($patient_allergies as $value) {                        
+                          ?>  
+                                <tr>
+                                    <td><?=$i;?></td>
+                                    <td><?=$value->allergy_type;?></td>
+                                    <td><?=$value->location;?></td>
+                                    <td><?=$value->allergy;?></td>
+                                    <td><?=$value->reaction;?></td>
+                                    <td><?=date('d-m-Y', strtotime($value->begin_date));?></td>
+                                    <td><?=date('d-m-Y', strtotime($value->end_date));?></td>
+                                    <td><a href="#" class="edit" data-toggle="modal" data-target="#myModal1"><i class="fa fa-edit"></i> </a>  <a href="#" class="delete"><i class="fa fa-trash"></i> </a></td>
+                                </tr>
+                        <?php $i++; } } else { ?>   
+                                <tr><td colspan="9" style="text-align: center"><?=$patient_allergies;?></td></tr>
+                         <?php } ?>
+                            </table>
                         </div>
-
-			
-			<div class="form-group">
-				<p>Scheduled for  a consultation</p>
-				<div class="col-sm-6 sm-no-pad-lt">
-					<div class="input-group date" id="datetimepicker2">
-						<span class="input-group-addon">
-							<span class="glyphicon glyphicon-calendar"></span>
-						</span>
-						<input type="text" class="form-control">
-					</div>
-				</div>
-				<div class="col-sm-6 sm-no-pad-rt">
-					<div class="input-group date" id="datetimepicker3">
-						<span class="input-group-addon">
-							<span class="glyphicon glyphicon-time"></span>
-						</span>
-						<input type="text" class="form-control">
-					</div>
-				</div>
-			</div>
-			
-			<!--
-			<div class="chrg-opt">
-				<p>Select available charging options</p>
-				<ul>
-					<li class="col-xs-4 col-lt-12">
-						<a href="#"><span><img src="<?php echo \Yii::getAlias('@web') ?>/images/free-minutes.png" alt="free minutes"></span> Free Minutes</a>
-					</li>
-					
-					<li class="col-xs-4 col-lt-12">
-						<a href="#"><span class="payg"><img src="<?php echo \Yii::getAlias('@web') ?>/images/payus.png" alt="payg"></span> PAYG</a>
-					</li>
-					
-					<li class="col-xs-4 col-lt-12">
-						<a href="#"><span><img src="<?php echo \Yii::getAlias('@web') ?>/images/premium.png" alt="Active subscription icon"></span>Active Subscription</a>
-					</li>
-					
-				</ul>
-			</div>
-			-->
-		<?= Html::submitButton('Update Account', ['class' => 'btn btn-default', 'name' => 'signup-button']) ?>
-                   
-                <?php ActiveForm::end(); ?>
+						
+                    </li>                    
+                </ul>               
+              </div>
+              
+              <div id="step2" class="tab-pane fade">
+              	<button class="btn-default add" data-toggle="modal" data-target="#myModal2">Add</button>	
+             	 <ul>
+                	<li>
+                    	<div class="table-responsive">
+                        	<table class="table table-hover table-striped">
+                            	<thead>
+                                	<tr>
+                                    	<td>S.No</td>
+                                        <td>Medication</td>
+                                        <td>Dose</td>
+                                        <td>Route</td>
+                                        <td>Form</td>
+                                       <!-- <td>Instructions</td>-->
+                                        <td>Action</td>
+                                    </tr>
+                                </thead>  
+                          <?php $i=1;
+                          if(is_array($patient_medications)){
+                            foreach ($patient_medications as $value) {                        
+                          ?>  
+                                <tr>
+                                    <td><?=$i;?></td>
+                                    <td><?=$value->STR;?></td>
+                                    <td><?=$value->dose;?></td>
+                                    <td><?=$value->route;?></td>
+                                    <td><?=$value->form;?></td>
+                                    <td><a href="#" class="edit" data-toggle="modal" data-target="#myModal1"><i class="fa fa-edit"></i> </a>  <a href="#" class="delete"><i class="fa fa-trash"></i> </a></td>
+                                </tr>
+                         <?php $i++; } } else { ?>   
+                                <tr><td colspan="9" style="text-align: center"><?=$patient_medications;?></td></tr>
+                         <?php } ?> 
+                                  
+                            </table>
+                        </div> 
+                      </li>                   	
+                </ul>
+              </div>
+              
+              <div id="step3" class="tab-pane fade"> 
+              	<button class="btn-default add" data-toggle="modal" data-target="#myModal3">Add</button>             
+                 <ul>
+                	<li>
+                    	<div class="table-responsive">
+                        	<table class="table table-hover table-striped">
+                            	<thead>
+                                	<tr>
+                                    	<td>S.No</td>
+                                        <td>Search</td>
+                                        <td>Problem</td>
+                                        <td>Occurance</td>
+                                        <td>Outcome</td>
+                                        <td>Referred by</td>
+                                        <td>Date Diagnosed</td>
+                                        <td>End Date</td>
+                                        <td>Action</td>
+                                    </tr>
+                                </thead>  
+                         <?php $i=1;
+                         if(is_array($active_problems)){
+                            foreach ($active_problems as $value) {                        
+                          ?>  
+                                <tr>
+                                    <td><?=$i;?></td>
+                                    <td><?=$value->code;?></td>
+                                    <td><?=$value->code_text;?></td>
+                                    <td><?=$value->occurrence;?></td>
+                                    <td><?=$value->outcome;?></td>
+                                    <td><?=$value->referred_by;?></td>
+                                    <td><?=date('d-m-Y', strtotime($value->begin_date));?></td>
+                                    <td><?=date('d-m-Y', strtotime($value->end_date));?></td>
+                                    <td><a href="#" class="edit" data-toggle="modal" data-target="#myModal1"><i class="fa fa-edit"></i> </a>  <a href="#" class="delete"><i class="fa fa-trash"></i> </a></td>
+                                </tr>
+                        <?php $i++; } } else { ?>   
+                                <tr><td colspan="9" style="text-align: center"><?=$active_problems;?></td></tr>
+                         <?php } ?>
+                            </table>
+                        </div>                    	
+                    </li>
+                </ul>
+              </div>
+              
+              
+             <div id="step4" class="tab-pane fade">               	           
+                 <form class="upld-frm">                 	
+                    <ul>
+                        <li>
+                            <img src="<?php echo \Yii::getAlias('@web') ?>/images/pdf-icon.png">                        	
+                            <i class="close">x</i>
+                        </li>
+                        <li>
+                        	<img src="<?php echo \Yii::getAlias('@web') ?>/images/doc-icon.png" />
+                        	<i class="close">x</i>    
+                        </li>
+                        <li>
+                           <img src="<?php echo \Yii::getAlias('@web') ?>/images/jpeg-icon.png" />
+                           <i class="close">x</i>
+                        </li>
+                     </ul>   
+                 	<input type="file" class="upd-btn">
+                    <input type="submit" value="submit" class="btn btn-default">
+                 </form>
+              </div>
+              <i class="clearfix"></i>
+             
+            </div>
+        </div>	
+        </div>
+	 <!----------------MAIN CONTAINER--------------------------->
+      </div><!--/row-->
 	</div>
-	<!----------------MAIN CONTAINER--------------------------->
+    
+ 
+
+<!---------------- Modal------------------->
+<div class="modal fade" id="myModal1" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Edit</h4>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="form-group">
+          	<div class="col-xs-6">
+                <label>Type</label>           
+                <select class="form-control">
+                    <option>select</option>
+                    <option></option>
+                </select>
+          	</div>
+          	<div class="col-xs-6">
+                <label>Allergy</label>           
+                <select class="form-control">
+                    <option>select</option>
+                    <option></option>
+                </select>
+            </div>
+            <i class="clearfix"></i>
+          </div>          
+          
+          <div class="form-group">
+            <div class="col-xs-6">
+                <label>Location</label>           
+                <select class="form-control">
+                    <option>select</option>
+                    <option></option>
+                </select> 
+            </div>
+          	<div class="col-xs-6">
+                <label>Reaction</label>           
+                <select class="form-control">
+                    <option>select</option>
+                    <option></option>
+                </select> 
+            </div>
+            <i class="clearfix"></i>
+          </div>
+          <div class="form-group col-xs-12">
+            <label>Severity</label>           
+            <select class="form-control">
+            	<option>select</option>
+                <option></option>
+            </select> 
+          </div>
+          
+          <div class="form-group">
+          	<div class="col-xs-6">
+                <label>Begin Date</label>	
+          		<div class="input-group date" id="datetimepicker2">
+                    <input type="text" class="form-control">
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div>
+          	 </div>	
+             <div class="col-xs-6">
+                <label>End Date</label>           
+                <div class="input-group date" id="date2">
+                    <input type="text" class="form-control">
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div> 
+             </div>
+             <i class="clearfix"></i>
+          </div>
+          
+           <div class="modal-footer">`
+            <button type="button" class="btn btn-primary">Save</button>
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>            
+           </div>
+          <i class="clearfix"></i>
+        </form>
+      </div>
+     
+    </div>
+  </div>
+</div>
+<!----------- /Modal-----------> 
+
+
+<!---------------- Modal2------------------->
+<div class="modal fade" id="myModal2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Edit</h4>
+      </div>
+      <div class="modal-body">
+<form>
+          <div class="form-group">
+          	<div class="col-xs-6">
+                <label>Medication</label>           
+                <input type="text" class="form-control" placeholder="Search">
+          	</div>
+          	<div class="col-xs-6">
+                <label>Dose</label>           
+                <input type="text" class="form-control">
+            </div>
+            <i class="clearfix"></i>
+          </div>          
+          
+          <div class="form-group">
+            <div class="col-xs-6">
+                <label>Route</label>           
+                <select class="form-control">
+                    <option>select</option>
+                    <option></option>
+                </select> 
+            </div>
+          	<div class="col-xs-6">
+                <label>Form</label>           
+                <select class="form-control">
+                    <option>select</option>
+                    <option></option>
+                </select> 
+            </div>
+            <i class="clearfix"></i>
+          </div>
+          <div class="form-group col-xs-12">
+            <label>Instructions</label>           
+            <select class="form-control">
+            	<option>select</option>
+                <option></option>
+            </select> 
+          </div>
+          
+          <div class="form-group">
+          	<div class="col-xs-6">
+                <label>Begin Date</label>	
+          		<div class="input-group date" id="mod2date1">
+                    <input type="text" class="form-control">
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div>
+          	 </div>	
+             <div class="col-xs-6">
+                <label>End Date</label>           
+                <div class="input-group date" id="mod2date2">
+                    <input type="text" class="form-control">
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div> 
+             </div>
+             <i class="clearfix"></i>
+          </div>
+           <div class="modal-footer">
+            <button type="button" class="btn btn-primary">Save</button>
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>            
+           </div>
+          <i class="clearfix"></i>
+        </form>
+      </div>
+     
+    </div>
+  </div>
+</div>
+
+<!----------- /Modal2----------->  
+
+
+<!---------------- Modal3------------------->
+<div class="modal fade" id="myModal3" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Edit</h4>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="form-group">
+          	<div class="col-xs-6">
+                <label>Search</label>           
+                <input type="text" class="form-control" placeholder="Search">
+          	</div>
+          	<div class="col-xs-6">
+                <label>Problem</label>           
+                <input type="text" class="form-control">
+            </div>
+            <i class="clearfix"></i>
+          </div>          
+          
+          <div class="form-group">
+            <div class="col-xs-6">
+                <label>Code Type</label>           
+                <input type="text" class="form-control">
+            </div>
+          	<div class="col-xs-6">
+                <label>Occurrence</label>           
+                <select class="form-control">
+                    <option>select</option>
+                    <option></option>
+                </select> 
+            </div>
+            <i class="clearfix"></i>
+          </div>
+          <div class="form-group">
+          	<div class="col-xs-6">
+                <label>Outcome</label>           
+                <select class="form-control">
+                    <option>select</option>
+                    <option></option>
+                </select> 
+            </div>
+            <div class="col-xs-6">
+                <label>Problem</label>           
+                <input type="text" class="form-control">
+            </div>
+            <i class="clearfix"></i>
+          </div>
+          
+          <div class="form-group">
+          	<div class="col-xs-6">
+                <label>Begin Date</label>	
+          		<div class="input-group date" id="mod3date1">
+                    <input type="text" class="form-control">
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div>
+          	 </div>	
+             <div class="col-xs-6">
+                <label>End Date</label>           
+                <div class="input-group date" id="mod3date2">
+                    <input type="text" class="form-control">
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div> 
+             </div>
+             <i class="clearfix"></i>
+          </div>
+           <div class="modal-footer">`
+            <button type="button" class="btn btn-primary">Save</button>
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>            
+           </div>
+          <i class="clearfix"></i>
+        </form>
+      </div>
+     
+    </div>
+  </div>
+</div>
+
+<!----------- /Modal3----------->  
+
+        <script type="text/javascript">
+		
+			$(function () {
+				$('#datetimepicker2').datetimepicker({
+					icons: {
+						time: "fa fa-clock-o",
+						date: "fa fa-calendar",
+						up: "fa fa-arrow-up",
+						down: "fa fa-arrow-down"
+						}
+				});
+				
+				$('#date2').datetimepicker({
+					icons: {
+						time: "fa fa-clock-o",
+						date: "fa fa-calendar",
+						up: "fa fa-arrow-up",
+						down: "fa fa-arrow-down"
+						}
+				});
+				
+				
+				$('#mod2date1').datetimepicker({
+					icons: {
+						time: "fa fa-clock-o",
+						date: "fa fa-calendar",
+						up: "fa fa-arrow-up",
+						down: "fa fa-arrow-down"
+						}
+				});
+				
+				$('#mod2date2').datetimepicker({
+					icons: {
+						time: "fa fa-clock-o",
+						date: "fa fa-calendar",
+						up: "fa fa-arrow-up",
+						down: "fa fa-arrow-down"
+						}
+				});
+				
+				$('#mod3date1').datetimepicker({
+					icons: {
+						time: "fa fa-clock-o",
+						date: "fa fa-calendar",
+						up: "fa fa-arrow-up",
+						down: "fa fa-arrow-down"
+						}
+				});
+				
+				$('#mod3date2').datetimepicker({
+					icons: {
+						time: "fa fa-clock-o",
+						date: "fa fa-calendar",
+						up: "fa fa-arrow-up",
+						down: "fa fa-arrow-down"
+						}
+				});
+				
+			});
+			
+            $(function () {
+                $('#datetimepicker3').datetimepicker({
+                    format: 'LT'
+                });
+            });
+        </script>
+        
+        
+        <script>
+		  $('#myModal1').modal(options);
+		  $('#myModal2').modal(options);
+		  $('#myModal3').modal(options);
+		</script>
+        
+    </div>
+</div>

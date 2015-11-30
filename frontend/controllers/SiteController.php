@@ -97,7 +97,7 @@ class SiteController extends Controller
           </user>
         </request>');
         
-        var_dump($response->body);exit;
+        //var_dump($response->body);exit;
         
         $session = Yii::$app->session;
         if($response->body->response_code==100){
