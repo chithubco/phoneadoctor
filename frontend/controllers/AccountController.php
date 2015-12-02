@@ -131,47 +131,55 @@ class AccountController extends \yii\web\Controller
 
     
         if (\Yii::$app->request->isPost) {//echo "<pre>";print_r($_POST);exit;
-            
-            $response = pull('user/api','
-                <request method="user.addmedical">
+           
+                $pull_string = '<request method="user.addmedical">
                   <user>
                   <password>'.$session['authkey'].'</password>
                 <userinfo>
                 <id>'.$session['id'].'</id>    
                 <auth_key>'.$session['authkey'].'</auth_key>  
-                </userinfo>
+                </userinfo>';
                   
-                <alergies>
+                if(isset($_POST['allergies'])&& $_POST['allergies']!=NULL){
+                 $pull_string .= '<alergies>
                 <allergy_type>'.$_POST['allergy_type'].'</allergy_type>
                 <allergy>'.$_POST['allergy'].'</allergy>
                
                 <reaction>'.$_POST['reaction'].'</reaction>
                 <severity>'.$_POST['severity'].'</severity>
                 <location>'.$_POST['location'].'</location>
-                </alergies>
+                <begin_date>'.date('Y-m-d',  strtotime($_POST['begin_date'])) .'</begin_date>
+                <end_date>'.date('Y-m-d', strtotime($_POST['end_date'])).'</end_date>
+                </alergies>';
+                }
                 
-                <medications>
-                <STR>'.$_POST['STR'].' STR</STR>    
-                <RXCUI>'.$_POST['RXCUI'].'</RXCUI>
-                <CODE>'.$_POST['CODE'].'</CODE>
-                <ICDS>'.$_POST['ICDS'].'</ICDS>
-
-                <ocurrence>'.$_POST['ocurrence'].'</ocurrence>
+                if(isset($_POST['medications']) && $_POST['medications']!= NULL){
+                $pull_string .= '<medications>
+                <eid>0</eid>    
+                <STR>'.$_POST['STR'].'</STR>
                 <form>'.$_POST['form'].'</form>
                 <route>'.$_POST['route'].'</route>
-                </medications>
+                <dose>'.$_POST['dose'].'</dose>
+                <begin_date>'.date('Y-m-d',  strtotime($_POST['begin_date'])) .'</begin_date>
+                <end_date>'.date('Y-m-d', strtotime($_POST['end_date'])).'</end_date>                    
+                </medications>';                
+                }
                 
-                <active_problems>
-                <code_text>'.$_POST['code_text'].'</code_text>    
-              
-                <occurrence>'.$_POST['ap_ocurrence'].'</occurrence>
-                <outcome>'.$_POST['outcome'].'</outcome>
-                <referred_by>'.$_POST['referred_by'].'</referred_by>
-                </active_problems>
-
-                  </user>
-                </request>
-                ');
+                if(isset($_POST['activeproblems']) && $_POST['activeproblems']!= NULL){
+                $pull_string .= '<active_problems>
+                <eid>0</eid>        
+                <code_text>'.$_POST['code_text'].'</code_text>
+                <occurrence>'.$_POST['occurrence'].'</occurrence>
+                <outcome>'.$_POST['outcome'].'</outcome>               
+                <begin_date>'.date('Y-m-d',  strtotime($_POST['begin_date'])) .'</begin_date>
+                <end_date>'.date('Y-m-d', strtotime($_POST['end_date'])).'</end_date>                    
+                </active_problems>';
+                }
+                
+                $pull_string .= ' </user>
+                </request>';
+            
+            $response = pull('user/api',$pull_string);
             
             $model->file = UploadedFile::getInstance($model, 'file');
 

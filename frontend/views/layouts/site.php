@@ -153,13 +153,13 @@ $session = \Yii::$app->session;
                 <script src="<?php echo \Yii::getAlias('@web') ?>/js/bootstrap.min.js"></script>
                 <script src="<?php echo \Yii::getAlias('@web') ?>/js/scripts.js"></script>
                 
-                <script src="<?php echo \Yii::getAlias('@web') ?>/js/moment-with-locales.js"></script>
-                <script src="<?php echo \Yii::getAlias('@web') ?>/js/bootstrap-datetimepicker.js"></script>
+               <!-- <script src="<?php //echo \Yii::getAlias('@web') ?>/js/moment-with-locales.js"></script>
+                <script src="<?php //echo \Yii::getAlias('@web') ?>/js/bootstrap-datetimepicker.js"></script>-->
                 
                 
                 <script type="text/javascript">
                 
-                $(function () {
+               /* $(function () {
                 $('#datetimepicker2').datetimepicker({
                 icons: {
                 time: "fa fa-clock-o",
@@ -174,7 +174,7 @@ $session = \Yii::$app->session;
                 $('#datetimepicker3').datetimepicker({
                 format: 'LT'
                 });
-                });
+                });*/
                 </script>
             </div>
         </div>

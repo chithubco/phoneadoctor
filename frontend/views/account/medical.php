@@ -227,23 +227,23 @@ $this->title = 'Add Medical Details';
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Edit</h4>
+        <h4 class="modal-title" id="myModalLabel">Add Allergies</h4>
       </div>
       <div class="modal-body">
-        <form>
+        <?php $form = ActiveForm::begin(['id' => 'form-allergy','options' => ['enctype' => 'multipart/form-data']]); ?>	
           <div class="form-group">
           	<div class="col-xs-6">
                 <label>Type</label>           
-                <select class="form-control">
-                    <option>select</option>
-                    <option></option>
+                <select id="ddl1" name="allergy_type" class="form-control" onchange="configureDropDownLists(this,document.getElementById('ddl2'))">
+				<option value="-1" selected="selected">Type</option>
+				<option value="Environmental">Environmental</option>
+				<option value="Food" >Food</option>                  
                 </select>
           	</div>
           	<div class="col-xs-6">
                 <label>Allergy</label>           
-                <select class="form-control">
-                    <option>select</option>
-                    <option></option>
+                <select class="form-control" id="ddl2" name="allergy">
+                    <option value="-1" selected="selected">Alergy</option>
                 </select>
             </div>
             <i class="clearfix"></i>
@@ -251,34 +251,37 @@ $this->title = 'Add Medical Details';
           
           <div class="form-group">
             <div class="col-xs-6">
-                <label>Location</label>           
-                <select class="form-control">
+                <label>Location</label>      
+                <select class="form-control" name="location">
                     <option>select</option>
-                    <option></option>
-                </select> 
+                    <option value="Skin">Skin</option>
+                    <option value="Local">Local</option>
+                    <option value="Abdominal">Abdominal</option>
+                    <option value="Systemic/Anaphylactic">Systemic/Anaphylactic</option>
+                </select>                                 
             </div>
           	<div class="col-xs-6">
                 <label>Reaction</label>           
-                <select class="form-control">
-                    <option>select</option>
-                    <option></option>
-                </select> 
+                <input type="text" class="form-control" name="reaction" value=""> 
             </div>
             <i class="clearfix"></i>
           </div>
           <div class="form-group col-xs-12">
             <label>Severity</label>           
-            <select class="form-control">
+            <select class="form-control" name="severity">
             	<option>select</option>
-                <option></option>
+                <option value="Very Mild">Very Mild</option>
+                <option value="Mild">Mild</option>
+                <option value="Moderate">Moderate</option>
+                <option value="Severe">Severe</option>
             </select> 
           </div>
           
           <div class="form-group">
           	<div class="col-xs-6">
                 <label>Begin Date</label>	
-          		<div class="input-group date" id="datetimepicker2">
-                    <input type="text" class="form-control">
+          		<div class="input-group date" id="allergy_datepicker_begin">
+                            <input type="text" name="begin_date" class="form-control">
                     <span class="input-group-addon">
                         <span class="glyphicon glyphicon-calendar"></span>
                     </span>
@@ -286,8 +289,8 @@ $this->title = 'Add Medical Details';
           	 </div>	
              <div class="col-xs-6">
                 <label>End Date</label>           
-                <div class="input-group date" id="date2">
-                    <input type="text" class="form-control">
+                <div class="input-group date" id="allergy_datepicker_end">
+                    <input type="text" name="end_date" class="form-control">
                     <span class="input-group-addon">
                         <span class="glyphicon glyphicon-calendar"></span>
                     </span>
@@ -296,14 +299,13 @@ $this->title = 'Add Medical Details';
              <i class="clearfix"></i>
           </div>
           
-           <div class="modal-footer">`
-            <button type="button" class="btn btn-primary">Save</button>
+           <div class="modal-footer">
+            <?= Html::submitButton('Add Allergies', ['class' => 'btn btn-primary', 'name' => 'allergies', 'value' => 'submit']) ?>
             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>            
            </div>
           <i class="clearfix"></i>
-        </form>
-      </div>
-     
+         <?php ActiveForm::end(); ?>          
+      </div>     
     </div>
   </div>
 </div>
@@ -316,18 +318,18 @@ $this->title = 'Add Medical Details';
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Edit</h4>
+        <h4 class="modal-title" id="myModalLabel">Add Medications</h4>
       </div>
       <div class="modal-body">
-<form>
+          <?php $form = ActiveForm::begin(['id' => 'form-medication','options' => ['enctype' => 'multipart/form-data']]); ?>	
           <div class="form-group">
           	<div class="col-xs-6">
                 <label>Medication</label>           
-                <input type="text" class="form-control" placeholder="Search">
+                <input type="text" name='STR' class="form-control" placeholder="Search">
           	</div>
           	<div class="col-xs-6">
                 <label>Dose</label>           
-                <input type="text" class="form-control">
+                <input type="text" name="dose" class="form-control" placeholder="Dosage">
             </div>
             <i class="clearfix"></i>
           </div>          
@@ -335,33 +337,24 @@ $this->title = 'Add Medical Details';
           <div class="form-group">
             <div class="col-xs-6">
                 <label>Route</label>           
-                <select class="form-control">
-                    <option>select</option>
-                    <option></option>
-                </select> 
+                <input type="text" name="route" class="form-control" placeholder="Mouth/left/eye..">
             </div>
           	<div class="col-xs-6">
                 <label>Form</label>           
-                <select class="form-control">
-                    <option>select</option>
-                    <option></option>
-                </select> 
+                <input type="text" name="form" class="form-control" placeholder="Capsules/pills..">
             </div>
             <i class="clearfix"></i>
           </div>
-          <div class="form-group col-xs-12">
+          <!--<div class="form-group col-xs-12">
             <label>Instructions</label>           
-            <select class="form-control">
-            	<option>select</option>
-                <option></option>
-            </select> 
-          </div>
+            <input type="text" name="dose" class="form-control"> 
+          </div>-->
           
           <div class="form-group">
           	<div class="col-xs-6">
                 <label>Begin Date</label>	
-          		<div class="input-group date" id="mod2date1">
-                    <input type="text" class="form-control">
+          		<div class="input-group date" id="medication_datepicker_begin">
+                            <input type="text" class="form-control" name="begin_date">
                     <span class="input-group-addon">
                         <span class="glyphicon glyphicon-calendar"></span>
                     </span>
@@ -369,8 +362,8 @@ $this->title = 'Add Medical Details';
           	 </div>	
              <div class="col-xs-6">
                 <label>End Date</label>           
-                <div class="input-group date" id="mod2date2">
-                    <input type="text" class="form-control">
+                <div class="input-group date" id="medication_datepicker_end">
+                    <input type="text" class="form-control" name="end_date">
                     <span class="input-group-addon">
                         <span class="glyphicon glyphicon-calendar"></span>
                     </span>
@@ -379,13 +372,12 @@ $this->title = 'Add Medical Details';
              <i class="clearfix"></i>
           </div>
            <div class="modal-footer">
-            <button type="button" class="btn btn-primary">Save</button>
+            <?= Html::submitButton('Add Medications', ['class' => 'btn btn-primary', 'name' => 'medications', 'value' => 'submit']) ?>
             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>            
            </div>
           <i class="clearfix"></i>
-        </form>
-      </div>
-     
+        <?php ActiveForm::end(); ?>  
+      </div>     
     </div>
   </div>
 </div>
@@ -396,162 +388,128 @@ $this->title = 'Add Medical Details';
 <!---------------- Modal3------------------->
 <div class="modal fade" id="myModal3" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
   <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Edit</h4>
-      </div>
-      <div class="modal-body">
-        <form>
-          <div class="form-group">
-          	<div class="col-xs-6">
-                <label>Search</label>           
-                <input type="text" class="form-control" placeholder="Search">
-          	</div>
-          	<div class="col-xs-6">
-                <label>Problem</label>           
-                <input type="text" class="form-control">
-            </div>
-            <i class="clearfix"></i>
-          </div>          
+      <div class="modal-content">
+          <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title" id="myModalLabel">Add Active Problems</h4>
+          </div>
+          <div class="modal-body">
+              <?php $form = ActiveForm::begin(['id' => 'form-consult','options' => ['enctype' => 'multipart/form-data']]); ?>	
+                  <!--  <div class="form-group">
+                          <div class="col-xs-6">
+                          <label>Search</label>           
+                          <input type="text" class="form-control" placeholder="Search">
+                          </div>
+                          <div class="col-xs-6">
+                          <label>Problem</label>           
+                          <input type="text" class="form-control">
+                      </div>
+                      <i class="clearfix"></i>
+                    </div>  -->        
+              
+                  <div class="form-group">
+                      <div class="col-xs-6">
+                          <label>Code Type</label>           
+                          <input type="text" name="code_type" class="form-control">
+                      </div>
+                      <div class="col-xs-6">
+                          <label>Problem</label>           
+                          <input type="text" name="code_text" class="form-control">
+                      </div>              
+                
+                      <i class="clearfix"></i>
+                  </div>
+                  <div class="form-group">
+                      <div class="col-xs-6">
+                          <label>Outcome</label>           
+                          <select class="form-control" name="outcome">
+                              <option value="Resolved">Resolved</option>
+                              <option value="Improved">Improved</option>
+                              <option value="Worse">Worse</option>
+                              <option value="Follow Up">Follow Up</option>                              
+                          </select> 
+                      </div>
+                      <div class="col-xs-6">
+                          <label>Occurrence</label>           
+                          <input type="text" name="occurrence" class="form-control">
+                      </div>
+                      <i class="clearfix"></i>
+                  </div>
+              
+                  <div class="form-group">
+                      <div class="col-xs-6">
+                          <label>Begin Date</label>	
+                          <div class="input-group date" id="activeprobs_datepicker_begin">
+                              <input type="text" class="form-control" name="begin_date" >
+                              <span class="input-group-addon">
+                                  <span class="glyphicon glyphicon-calendar"></span>
+                              </span>
+                          </div>
+                      </div>	
+                      <div class="col-xs-6">
+                          <label>End Date</label>           
+                          <div class="input-group date" id="activeprobs_datepicker_end">
+                              <input type="text" class="form-control" name="end_date" >
+                              <span class="input-group-addon">
+                                  <span class="glyphicon glyphicon-calendar"></span>
+                              </span>
+                          </div> 
+                      </div>
+                      <i class="clearfix"></i>
+                  </div>
+                  <div class="modal-footer">`
+                      <?= Html::submitButton('Add', ['class' => 'btn btn-primary', 'name' => 'activeproblems', 'value' => 'submit']) ?>
+                      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>            
+                  </div>
+                  <i class="clearfix"></i>
+               <?php ActiveForm::end(); ?>
+          </div>
           
-          <div class="form-group">
-            <div class="col-xs-6">
-                <label>Code Type</label>           
-                <input type="text" class="form-control">
-            </div>
-          	<div class="col-xs-6">
-                <label>Occurrence</label>           
-                <select class="form-control">
-                    <option>select</option>
-                    <option></option>
-                </select> 
-            </div>
-            <i class="clearfix"></i>
-          </div>
-          <div class="form-group">
-          	<div class="col-xs-6">
-                <label>Outcome</label>           
-                <select class="form-control">
-                    <option>select</option>
-                    <option></option>
-                </select> 
-            </div>
-            <div class="col-xs-6">
-                <label>Problem</label>           
-                <input type="text" class="form-control">
-            </div>
-            <i class="clearfix"></i>
-          </div>
-          
-          <div class="form-group">
-          	<div class="col-xs-6">
-                <label>Begin Date</label>	
-          		<div class="input-group date" id="mod3date1">
-                    <input type="text" class="form-control">
-                    <span class="input-group-addon">
-                        <span class="glyphicon glyphicon-calendar"></span>
-                    </span>
-                </div>
-          	 </div>	
-             <div class="col-xs-6">
-                <label>End Date</label>           
-                <div class="input-group date" id="mod3date2">
-                    <input type="text" class="form-control">
-                    <span class="input-group-addon">
-                        <span class="glyphicon glyphicon-calendar"></span>
-                    </span>
-                </div> 
-             </div>
-             <i class="clearfix"></i>
-          </div>
-           <div class="modal-footer">`
-            <button type="button" class="btn btn-primary">Save</button>
-            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>            
-           </div>
-          <i class="clearfix"></i>
-        </form>
       </div>
-     
-    </div>
   </div>
 </div>
 
 <!----------- /Modal3----------->  
-
-        <script type="text/javascript">
-		
-			$(function () {
-				$('#datetimepicker2').datetimepicker({
-					icons: {
-						time: "fa fa-clock-o",
-						date: "fa fa-calendar",
-						up: "fa fa-arrow-up",
-						down: "fa fa-arrow-down"
-						}
-				});
-				
-				$('#date2').datetimepicker({
-					icons: {
-						time: "fa fa-clock-o",
-						date: "fa fa-calendar",
-						up: "fa fa-arrow-up",
-						down: "fa fa-arrow-down"
-						}
-				});
-				
-				
-				$('#mod2date1').datetimepicker({
-					icons: {
-						time: "fa fa-clock-o",
-						date: "fa fa-calendar",
-						up: "fa fa-arrow-up",
-						down: "fa fa-arrow-down"
-						}
-				});
-				
-				$('#mod2date2').datetimepicker({
-					icons: {
-						time: "fa fa-clock-o",
-						date: "fa fa-calendar",
-						up: "fa fa-arrow-up",
-						down: "fa fa-arrow-down"
-						}
-				});
-				
-				$('#mod3date1').datetimepicker({
-					icons: {
-						time: "fa fa-clock-o",
-						date: "fa fa-calendar",
-						up: "fa fa-arrow-up",
-						down: "fa fa-arrow-down"
-						}
-				});
-				
-				$('#mod3date2').datetimepicker({
-					icons: {
-						time: "fa fa-clock-o",
-						date: "fa fa-calendar",
-						up: "fa fa-arrow-up",
-						down: "fa fa-arrow-down"
-						}
-				});
-				
-			});
-			
-            $(function () {
-                $('#datetimepicker3').datetimepicker({
-                    format: 'LT'
-                });
-            });
-        </script>
+    
+    
+<script src="<?php echo \Yii::getAlias('@web') ?>/js/jquery.min.js"></script>
+<script src="<?php echo \Yii::getAlias('@web') ?>/js/moment-with-locales.js"></script>
+<script src="<?php echo \Yii::getAlias('@web') ?>/js/bootstrap-datetimepicker.js"></script>
+    
+<script>
+    $('#myModal1').modal(options);
+    $('#myModal2').modal(options);
+    $('#myModal3').modal(options);
+</script>
+    
+<script type="text/javascript">
+    var $j = jQuery.noConflict();
+    $j(function () {
+        $j('#allergy_datepicker_begin').datetimepicker({
+            format: 'DD-MM-YYYY'
+        });
         
+        $j('#allergy_datepicker_end').datetimepicker({
+            format: 'DD-MM-YYYY'
+        }); 
         
-        <script>
-		  $('#myModal1').modal(options);
-		  $('#myModal2').modal(options);
-		  $('#myModal3').modal(options);
-		</script>
+        $j('#medication_datepicker_begin').datetimepicker({
+            format: 'DD-MM-YYYY'
+        });
+        
+        $j('#medication_datepicker_end').datetimepicker({
+            format: 'DD-MM-YYYY'
+        });          
+        
+        $j('#activeprobs_datepicker_begin').datetimepicker({
+            format: 'DD-MM-YYYY'
+        }); 
+        
+        $j('#activeprobs_datepicker_end').datetimepicker({
+            format: 'DD-MM-YYYY'
+        }); 
+    });
+</script>                
         
     </div>
 </div>
