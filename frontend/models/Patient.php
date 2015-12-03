@@ -31,6 +31,7 @@ use Yii;
  * @property string $mobile_phone
  * @property string $work_phone
  * @property string $email
+ * @property string $skypeid
  * @property string $mothers_name
  * @property string $guardians_name
  * @property string $emer_contact
@@ -81,7 +82,7 @@ class Patient extends \yii\db\ActiveRecord
             [['create_date', 'update_date', 'DOB'], 'safe'],
             [['image', 'qrcode'], 'string'],
             [['title', 'sex', 'zipcode', 'language', 'employer_postal_code'], 'string', 'max' => 10],
-            [['fname', 'lname', 'email'], 'string', 'max' => 60],
+            [['fname', 'lname', 'email','skypeid'], 'string', 'max' => 60],
             [['mname', 'marital_status', 'SS', 'pubpid', 'drivers_license', 'city', 'state', 'country', 'mothers_name', 'guardians_name', 'emer_contact', 'provider', 'pharmacy', 'hipaa_notice', 'race', 'ethnicity', 'occupation', 'employer_name', 'employer_address', 'employer_city', 'employer_state', 'employer_country'], 'string', 'max' => 40],
             [['address'], 'string', 'max' => 80],
             [['home_phone', 'mobile_phone', 'work_phone', 'emer_phone'], 'string', 'max' => 15]
@@ -118,6 +119,7 @@ class Patient extends \yii\db\ActiveRecord
             'mobile_phone' => 'mobile phone #',
             'work_phone' => 'work phone #',
             'email' => 'email',
+            'skypeid' => 'Skype Id',
             'mothers_name' => 'mother name',
             'guardians_name' => 'guardians name',
             'emer_contact' => 'emergency contact',
