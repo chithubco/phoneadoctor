@@ -735,7 +735,7 @@ class UserController extends Controller {
                 $patient_id = ($user_exists!=NULL)?$user_exists->pid:0;
                 
                 $query = new Query;
-                $query->select('pa.pid as patient_id,pa.allergy_type,pa.allergy,pa.begin_date,pa.end_date,pa.reaction,pa.severity,pa.location') 
+                $query->select('pa.id,pa.pid as patient_id,pa.allergy_type,pa.allergy,pa.begin_date,pa.end_date,pa.reaction,pa.severity,pa.location') 
                     ->from('patient_allergies pa')                  
                     ->where('pa.pid = ' . $patient_id);
                 $command = $query->createCommand();                
@@ -780,7 +780,7 @@ class UserController extends Controller {
                 $patient_id = ($user_exists!=NULL)?$user_exists->pid:0;
                 
                 $query = new Query;
-                $query->select('pm.pid as patient_id,pm.STR,pm.route,pm.dose,pm.refill,pm.take_pills,pm.form') 
+                $query->select('pm.id,pm.pid as patient_id,pm.STR,pm.route,pm.dose,pm.refill,pm.take_pills,pm.form,pm.begin_date,pm.end_date') 
                     ->from('patient_medications pm')                  
                     ->where('pm.pid = ' . $patient_id);
                 $command = $query->createCommand();                
@@ -825,7 +825,7 @@ class UserController extends Controller {
                 $patient_id = ($user_exists!=NULL)?$user_exists->pid:0;
                 
                 $query = new Query;
-                $query->select('actvpblm.pid as patient_id,actvpblm.code,actvpblm.code_text,actvpblm.begin_date,actvpblm.end_date,actvpblm.occurrence,actvpblm.referred_by,actvpblm.outcome') 
+                $query->select('actvpblm.id,actvpblm.pid as patient_id,actvpblm.code,actvpblm.code_text,actvpblm.begin_date,actvpblm.end_date,actvpblm.occurrence,actvpblm.referred_by,actvpblm.outcome') 
                     ->from('patient_active_problems actvpblm')                  
                     ->where('actvpblm.pid = ' . $patient_id);
                 $command = $query->createCommand();                
@@ -1316,7 +1316,11 @@ class UserController extends Controller {
             if ($accessAuthorised) {
                 if ($user_exists) {
                     if (is_array($xmlUserDetails['user']['alergies'])) {
-                        $model = new PatientAllergies;
+                        if(isset($xmlUserDetails['user']['alergies']['id']) && $xmlUserDetails['user']['alergies']['id']!= NULL)
+                            $model = PatientAllergies::findOne($xmlUserDetails['user']['alergies']['id']);  
+                        else
+                            $model = new PatientAllergies;
+                        
                         $xmlUserDetails['user']['alergies']['pid']        = $patient_exists->pid;
                         $model->setAttributes($xmlUserDetails['user']['alergies']);
                         //$model->load($xmlUserDetails['user']['alergies']);
@@ -1331,7 +1335,11 @@ class UserController extends Controller {
                     }
 
                     if (is_array($xmlUserDetails['user']['medications'])) {
-                        $model2 = new PatientMedications;
+                        
+                        if(isset($xmlUserDetails['user']['medications']['id']) && $xmlUserDetails['user']['medications']['id']!= NULL)
+                            $model2 = PatientMedications::findOne($xmlUserDetails['user']['medications']['id']);  
+                        else
+                            $model2 = new PatientMedications;                        
                         $xmlUserDetails['user']['medications']['pid']        = $patient_exists->pid;
                         $xmlUserDetails['user']['medications']['uid']        = $xmlUserDetails['user']['userinfo']['id'];
                         $model2->setAttributes($xmlUserDetails['user']['medications']);                        
@@ -1345,7 +1353,12 @@ class UserController extends Controller {
                         $model2->save();
                     }
                     if (is_array($xmlUserDetails['user']['active_problems'])) {
-                        $model3 = new PatientActiveProblems;
+                        
+                        if(isset($xmlUserDetails['user']['active_problems']['id']) && $xmlUserDetails['user']['active_problems']['id']!= NULL)
+                            $model3 = PatientActiveProblems::findOne($xmlUserDetails['user']['active_problems']['id']);  
+                        else
+                            $model3 = new PatientActiveProblems;                         
+                        
                         $xmlUserDetails['user']['active_problems']['pid']        = $patient_exists->pid;
                         $xmlUserDetails['user']['active_problems']['eid']        = 0;
                         $model3->setAttributes($xmlUserDetails['user']['active_problems']);                        
@@ -1372,6 +1385,7 @@ class UserController extends Controller {
             }
         }
     }    
+    
   
    /*
      * API Method : user.sendSMS

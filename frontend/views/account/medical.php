@@ -44,7 +44,9 @@ $this->title = 'Add Medical Details';
         opt.value = value;
         opt.text = text;
         ddl.options.add(opt);
-    }
+    }   
+
+
 </script>
 <!----------------MAIN CONTAINER--------------------------->
         
@@ -66,7 +68,7 @@ $this->title = 'Add Medical Details';
             
             <div class="tab-content">
               <div id="step1" class="tab-pane fade in active"> 
-              	 <button class="btn-default add" data-toggle="modal" data-target="#myModal1">Add</button>
+              	 <button class="btn-default add" id="add_allergies" data-toggle="modal" data-target="#myModal1">Add</button>
               	<ul>
                 	<li>
                     	<div class="table-responsive">
@@ -95,7 +97,12 @@ $this->title = 'Add Medical Details';
                                     <td><?=$value->reaction;?></td>
                                     <td><?=date('d-m-Y', strtotime($value->begin_date));?></td>
                                     <td><?=date('d-m-Y', strtotime($value->end_date));?></td>
-                                    <td><a href="#" class="edit" data-toggle="modal" data-target="#myModal1"><i class="fa fa-edit"></i> </a>  <a href="#" class="delete"><i class="fa fa-trash"></i> </a></td>
+                                    <td><a href="#" class="edit" id="edit_allergy" data-toggle="modal" data-target="#myModal1" data-id="<?=$value->id;?>" data-reaction="<?=$value->reaction;?>" data-allergytype="<?=$value->allergy_type;?>"
+                           data-allergy="<?=$value->allergy;?>" data-location="<?=$value->location;?>" data-severity="<?=$value->severity;?>" data-begindate="<?=date('d-m-Y', strtotime($value->begin_date));?>" data-enddate="<?=date('d-m-Y', strtotime($value->end_date));?>" >
+                                        <i class="fa fa-edit"></i> </a> 
+                                        <a href="#" class="delete">
+                                        <i class="fa fa-trash"></i> </a>
+                                    </td>
                                 </tr>
                         <?php $i++; } } else { ?>   
                                 <tr><td colspan="9" style="text-align: center"><?=$patient_allergies;?></td></tr>
@@ -108,7 +115,7 @@ $this->title = 'Add Medical Details';
               </div>
               
               <div id="step2" class="tab-pane fade">
-              	<button class="btn-default add" data-toggle="modal" data-target="#myModal2">Add</button>	
+              	<button class="btn-default add" id="add_medication" data-toggle="modal" data-target="#myModal2">Add</button>	
              	 <ul>
                 	<li>
                     	<div class="table-responsive">
@@ -134,7 +141,10 @@ $this->title = 'Add Medical Details';
                                     <td><?=$value->dose;?></td>
                                     <td><?=$value->route;?></td>
                                     <td><?=$value->form;?></td>
-                                    <td><a href="#" class="edit" data-toggle="modal" data-target="#myModal1"><i class="fa fa-edit"></i> </a>  <a href="#" class="delete"><i class="fa fa-trash"></i> </a></td>
+                                    <td><a href="#" class="edit" id="edit_medications" data-toggle="modal" data-target="#myModal2" data-id="<?=$value->id;?>" data-str="<?=$value->STR;?>" data-dose="<?=$value->dose;?>"
+                           data-route="<?=$value->route;?>" data-form="<?=$value->form;?>" data-begindate="<?=date('d-m-Y', strtotime($value->begin_date));?>" data-enddate="<?=date('d-m-Y', strtotime($value->end_date));?>"><i class="fa fa-edit"></i> </a>  
+                                        
+                                        <a href="#" class="delete"><i class="fa fa-trash"></i> </a></td>
                                 </tr>
                          <?php $i++; } } else { ?>   
                                 <tr><td colspan="9" style="text-align: center"><?=$patient_medications;?></td></tr>
@@ -147,7 +157,7 @@ $this->title = 'Add Medical Details';
               </div>
               
               <div id="step3" class="tab-pane fade"> 
-              	<button class="btn-default add" data-toggle="modal" data-target="#myModal3">Add</button>             
+              	<button class="btn-default add"  id="add_activeproblems" data-toggle="modal" data-target="#myModal3">Add</button>             
                  <ul>
                 	<li>
                     	<div class="table-responsive">
@@ -178,7 +188,10 @@ $this->title = 'Add Medical Details';
                                     <td><?=$value->referred_by;?></td>
                                     <td><?=date('d-m-Y', strtotime($value->begin_date));?></td>
                                     <td><?=date('d-m-Y', strtotime($value->end_date));?></td>
-                                    <td><a href="#" class="edit" data-toggle="modal" data-target="#myModal1"><i class="fa fa-edit"></i> </a>  <a href="#" class="delete"><i class="fa fa-trash"></i> </a></td>
+                                    <td><a href="#" class="edit" id="edit_activeproblems" data-toggle="modal" data-target="#myModal3" data-id="<?=$value->id;?>" data-code="<?=$value->code;?>" data-code_text="<?=$value->code_text;?>"
+                           data-occurrence="<?=$value->occurrence;?>" data-outcome="<?=$value->outcome;?>" data-referred_by="<?=$value->referred_by;?>" data-begindate="<?=date('d-m-Y', strtotime($value->begin_date));?>" data-enddate="<?=date('d-m-Y', strtotime($value->end_date));?>">
+                                        <i class="fa fa-edit"></i> </a>  
+                                        <a href="#" class="delete"><i class="fa fa-trash"></i> </a></td>
                                 </tr>
                         <?php $i++; } } else { ?>   
                                 <tr><td colspan="9" style="text-align: center"><?=$active_problems;?></td></tr>
@@ -243,7 +256,7 @@ $this->title = 'Add Medical Details';
           	<div class="col-xs-6">
                 <label>Allergy</label>           
                 <select class="form-control" id="ddl2" name="allergy">
-                    <option value="-1" selected="selected">Alergy</option>
+                    <option value="-1" selected="selected">Allergy</option>
                 </select>
             </div>
             <i class="clearfix"></i>
@@ -252,7 +265,7 @@ $this->title = 'Add Medical Details';
           <div class="form-group">
             <div class="col-xs-6">
                 <label>Location</label>      
-                <select class="form-control" name="location">
+                <select id="ddl_location" class="form-control" name="location">
                     <option>select</option>
                     <option value="Skin">Skin</option>
                     <option value="Local">Local</option>
@@ -262,13 +275,13 @@ $this->title = 'Add Medical Details';
             </div>
           	<div class="col-xs-6">
                 <label>Reaction</label>           
-                <input type="text" class="form-control" name="reaction" value=""> 
+                <input type="text" id="al_reaction" class="form-control" name="reaction" value=""> 
             </div>
             <i class="clearfix"></i>
           </div>
           <div class="form-group col-xs-12">
             <label>Severity</label>           
-            <select class="form-control" name="severity">
+            <select id="ddl_severity" class="form-control" name="severity">
             	<option>select</option>
                 <option value="Very Mild">Very Mild</option>
                 <option value="Mild">Mild</option>
@@ -281,7 +294,7 @@ $this->title = 'Add Medical Details';
           	<div class="col-xs-6">
                 <label>Begin Date</label>	
           		<div class="input-group date" id="allergy_datepicker_begin">
-                            <input type="text" name="begin_date" class="form-control">
+                            <input id="txt_al_datepicker_begin" type="text" value="" name="begin_date" class="form-control">
                     <span class="input-group-addon">
                         <span class="glyphicon glyphicon-calendar"></span>
                     </span>
@@ -290,17 +303,18 @@ $this->title = 'Add Medical Details';
              <div class="col-xs-6">
                 <label>End Date</label>           
                 <div class="input-group date" id="allergy_datepicker_end">
-                    <input type="text" name="end_date" class="form-control">
+                    <input id="txt_al_datepicker_end" type="text" value="" name="end_date" class="form-control">
                     <span class="input-group-addon">
                         <span class="glyphicon glyphicon-calendar"></span>
                     </span>
                 </div> 
              </div>
              <i class="clearfix"></i>
+             <input type="hidden" name="allergyid" id="al_id">
           </div>
           
            <div class="modal-footer">
-            <?= Html::submitButton('Add Allergies', ['class' => 'btn btn-primary', 'name' => 'allergies', 'value' => 'submit']) ?>
+            <?= Html::submitButton('Add Allergies', ['class' => 'btn btn-primary','id' =>'submit_allergies', 'name' => 'allergies', 'value' => 'submit']) ?>
             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>            
            </div>
           <i class="clearfix"></i>
@@ -325,11 +339,11 @@ $this->title = 'Add Medical Details';
           <div class="form-group">
           	<div class="col-xs-6">
                 <label>Medication</label>           
-                <input type="text" name='STR' class="form-control" placeholder="Search">
+                <input type="text" name='STR' id="txt_str" class="form-control" placeholder="Search">
           	</div>
           	<div class="col-xs-6">
                 <label>Dose</label>           
-                <input type="text" name="dose" class="form-control" placeholder="Dosage">
+                <input type="text" name="dose" id="txt_dose" class="form-control" placeholder="Dosage">
             </div>
             <i class="clearfix"></i>
           </div>          
@@ -337,11 +351,11 @@ $this->title = 'Add Medical Details';
           <div class="form-group">
             <div class="col-xs-6">
                 <label>Route</label>           
-                <input type="text" name="route" class="form-control" placeholder="Mouth/left/eye..">
+                <input type="text" name="route" id="txt_route" class="form-control" placeholder="Mouth/left/eye..">
             </div>
           	<div class="col-xs-6">
                 <label>Form</label>           
-                <input type="text" name="form" class="form-control" placeholder="Capsules/pills..">
+                <input type="text" name="form" id="txt_form" class="form-control" placeholder="Capsules/pills..">
             </div>
             <i class="clearfix"></i>
           </div>
@@ -354,7 +368,7 @@ $this->title = 'Add Medical Details';
           	<div class="col-xs-6">
                 <label>Begin Date</label>	
           		<div class="input-group date" id="medication_datepicker_begin">
-                            <input type="text" class="form-control" name="begin_date">
+                            <input type="text" id="txt_md_datepicker_begin" class="form-control" name="begin_date">
                     <span class="input-group-addon">
                         <span class="glyphicon glyphicon-calendar"></span>
                     </span>
@@ -363,16 +377,17 @@ $this->title = 'Add Medical Details';
              <div class="col-xs-6">
                 <label>End Date</label>           
                 <div class="input-group date" id="medication_datepicker_end">
-                    <input type="text" class="form-control" name="end_date">
+                    <input type="text" id="txt_md_datepicker_end" class="form-control" name="end_date">
                     <span class="input-group-addon">
                         <span class="glyphicon glyphicon-calendar"></span>
                     </span>
                 </div> 
+                <input type="hidden" name="medicationid" id="md_id">
              </div>
              <i class="clearfix"></i>
           </div>
            <div class="modal-footer">
-            <?= Html::submitButton('Add Medications', ['class' => 'btn btn-primary', 'name' => 'medications', 'value' => 'submit']) ?>
+            <?= Html::submitButton('Add Medications', ['class' => 'btn btn-primary','id'=>'submit_medications','name' => 'medications', 'value' => 'submit']) ?>
             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>            
            </div>
           <i class="clearfix"></i>
@@ -410,11 +425,11 @@ $this->title = 'Add Medical Details';
                   <div class="form-group">
                       <div class="col-xs-6">
                           <label>Code Type</label>           
-                          <input type="text" name="code_type" class="form-control">
+                          <input type="text" id="txt_code_type" name="code_type" class="form-control">
                       </div>
                       <div class="col-xs-6">
                           <label>Problem</label>           
-                          <input type="text" name="code_text" class="form-control">
+                          <input type="text" id="txt_code_text" name="code_text" class="form-control">
                       </div>              
                 
                       <i class="clearfix"></i>
@@ -422,7 +437,7 @@ $this->title = 'Add Medical Details';
                   <div class="form-group">
                       <div class="col-xs-6">
                           <label>Outcome</label>           
-                          <select class="form-control" name="outcome">
+                          <select id="ddl_outcome" class="form-control" name="outcome">
                               <option value="Resolved">Resolved</option>
                               <option value="Improved">Improved</option>
                               <option value="Worse">Worse</option>
@@ -431,7 +446,7 @@ $this->title = 'Add Medical Details';
                       </div>
                       <div class="col-xs-6">
                           <label>Occurrence</label>           
-                          <input type="text" name="occurrence" class="form-control">
+                          <input type="text" id="txt_occurrence" name="occurrence" class="form-control">
                       </div>
                       <i class="clearfix"></i>
                   </div>
@@ -440,7 +455,7 @@ $this->title = 'Add Medical Details';
                       <div class="col-xs-6">
                           <label>Begin Date</label>	
                           <div class="input-group date" id="activeprobs_datepicker_begin">
-                              <input type="text" class="form-control" name="begin_date" >
+                              <input id="txt_ap_datepicker_begin" type="text" class="form-control" name="begin_date" >
                               <span class="input-group-addon">
                                   <span class="glyphicon glyphicon-calendar"></span>
                               </span>
@@ -449,16 +464,17 @@ $this->title = 'Add Medical Details';
                       <div class="col-xs-6">
                           <label>End Date</label>           
                           <div class="input-group date" id="activeprobs_datepicker_end">
-                              <input type="text" class="form-control" name="end_date" >
+                              <input id="txt_ap_datepicker_end" type="text" class="form-control" name="end_date" >
                               <span class="input-group-addon">
                                   <span class="glyphicon glyphicon-calendar"></span>
                               </span>
                           </div> 
+                          <input type="hidden" name="problemid" id="ap_id">
                       </div>
                       <i class="clearfix"></i>
                   </div>
-                  <div class="modal-footer">`
-                      <?= Html::submitButton('Add', ['class' => 'btn btn-primary', 'name' => 'activeproblems', 'value' => 'submit']) ?>
+                  <div class="modal-footer">
+                      <?= Html::submitButton('Add', ['class' => 'btn btn-primary', 'name' => 'activeproblems', 'id'=>'submit_activeproblems', 'value' => 'submit']) ?>
                       <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>            
                   </div>
                   <i class="clearfix"></i>
@@ -476,14 +492,9 @@ $this->title = 'Add Medical Details';
 <script src="<?php echo \Yii::getAlias('@web') ?>/js/moment-with-locales.js"></script>
 <script src="<?php echo \Yii::getAlias('@web') ?>/js/bootstrap-datetimepicker.js"></script>
     
-<script>
-    $('#myModal1').modal(options);
-    $('#myModal2').modal(options);
-    $('#myModal3').modal(options);
-</script>
-    
 <script type="text/javascript">
-    var $j = jQuery.noConflict();
+    var $j = jQuery.noConflict();  
+    
     $j(function () {
         $j('#allergy_datepicker_begin').datetimepicker({
             format: 'DD-MM-YYYY'
@@ -509,6 +520,95 @@ $this->title = 'Add Medical Details';
             format: 'DD-MM-YYYY'
         }); 
     });
+    
+    //Add Allergies
+    $j(document).on("click", "#add_allergies", function () { 
+
+        $j("#myModal1 #al_id").val('');
+        $j("#myModal1 #ddl1").val('-1');        
+        $j("#myModal1 #ddl2").val('Allergy'); 
+        $j("#myModal1 #ddl_location").val('select'); 
+        $j("#myModal1 #al_reaction").val(''); 
+        $j("#myModal1 #ddl_severity").val('select'); 
+        $j("#myModal1 #txt_al_datepicker_begin").val('');
+        $j("#myModal1 #txt_al_datepicker_end").val('');        
+        $j('#submit_allergies').text('Add Allergies').button("refresh");
+        
+    });
+    
+    //Edit Allergies
+    $j(document).on("click", "#edit_allergy", function () { 
+       
+        $j("#myModal1 #al_id").val($j(this).data('id'));
+        $j("#myModal1 #ddl1").val($j(this).data('allergytype'));
+        $('#ddl2').empty();
+        createOption(ddl2, $j(this).data('allergy'),$j(this).data('allergy'));       
+        //configureDropDownLists($j(this).data('allergytype'),'ddl2')
+        $j("#myModal1 #ddl2").val($j(this).data('allergy'));
+        $j("#myModal1 #ddl_location").val($j(this).data('location'));
+        $j("#myModal1 #al_reaction").val($j(this).data('reaction')); 
+        $j("#myModal1 #ddl_severity").val($j(this).data('severity'));
+        $j("#myModal1 #txt_al_datepicker_begin").val($j(this).data('begindate'));
+        $j("#myModal1 #txt_al_datepicker_end").val($j(this).data('enddate'));        
+        $j('#submit_allergies').text('Update Allergies').button("refresh");
+        
+    });
+    
+    //Add Medications
+    $j(document).on("click", "#add_medication", function () { 
+
+        $j("#myModal2 #md_id").val('');
+        $j("#myModal2 #txt_str").val('');        
+        $j("#myModal2 #txt_dose").val(''); 
+        $j("#myModal2 #txt_route").val(''); 
+        $j("#myModal2 #txt_md_datepicker_begin").val('');
+        $j("#myModal2 #txt_md_datepicker_end").val('');        
+        $j('#submit_medications').text('Add Medications').button("refresh");
+        
+    });
+    
+    //Edit Medications    
+    $j(document).on("click", "#edit_medications", function () {        
+
+        $j("#myModal2 #md_id").val($j(this).data('id'));        
+        $j("#myModal2 #txt_str").val($j(this).data('str'));
+        $j("#myModal2 #txt_dose").val($j(this).data('dose')); 
+        $j("#myModal2 #txt_route").val($j(this).data('route'));
+        $j("#myModal2 #txt_form").val($j(this).data('form'));
+        $j("#myModal2 #txt_md_datepicker_begin").val($j(this).data('begindate'));
+        $j("#myModal2 #txt_md_datepicker_end").val($j(this).data('enddate'));        
+        $j('#submit_medications').text('Update Medications').button("refresh");
+        
+    });    
+    
+    //Add Active Problems
+    $j(document).on("click", "#add_activeproblems", function () { 
+
+        $j("#myModal3 #ap_id").val('');
+        $j("#myModal3 #txt_code_type").val('');        
+        $j("#myModal3 #txt_code_text").val(''); 
+        $j("#myModal3 #ddl_outcome").val(''); 
+        $j("#myModal3 #txt_occurrence").val(''); 
+        $j("#myModal3 #txt_ap_datepicker_begin").val('');
+        $j("#myModal3 #txt_ap_datepicker_end").val('');        
+        $j('#submit_activeproblems').text('Add Active Problems').button("refresh");
+        
+    });
+    
+    //Edit Active Problems    
+    $j(document).on("click", "#edit_activeproblems", function () {        
+
+        $j("#myModal3 #ap_id").val($j(this).data('id'));        
+        $j("#myModal3 #txt_code_type").val($j(this).data('code'));
+        $j("#myModal3 #txt_code_text").val($j(this).data('code_text')); 
+        $j("#myModal3 #ddl_outcome").val($j(this).data('outcome'));
+        $j("#myModal3 #txt_occurrence").val($j(this).data('occurrence'));
+        $j("#myModal3 #txt_ap_datepicker_begin").val($j(this).data('begindate'));
+        $j("#myModal3 #txt_ap_datepicker_end").val($j(this).data('enddate'));        
+        $j('#submit_activeproblems').text('Update Active Problems').button("refresh");
+        
+    });     
+    
 </script>                
         
     </div>

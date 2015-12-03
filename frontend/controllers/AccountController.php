@@ -141,8 +141,11 @@ class AccountController extends \yii\web\Controller
                 </userinfo>';
                   
                 if(isset($_POST['allergies'])&& $_POST['allergies']!=NULL){
-                 $pull_string .= '<alergies>
-                <allergy_type>'.$_POST['allergy_type'].'</allergy_type>
+                $pull_string .= '<alergies>';
+                    if(isset($_POST['allergyid'])&& $_POST['allergyid']!=NULL){
+                       $pull_string .= '<id>'.$_POST['allergyid'].'</id>';
+                    }
+                $pull_string .= '<allergy_type>'.$_POST['allergy_type'].'</allergy_type>
                 <allergy>'.$_POST['allergy'].'</allergy>
                
                 <reaction>'.$_POST['reaction'].'</reaction>
@@ -154,8 +157,11 @@ class AccountController extends \yii\web\Controller
                 }
                 
                 if(isset($_POST['medications']) && $_POST['medications']!= NULL){
-                $pull_string .= '<medications>
-                <eid>0</eid>    
+                $pull_string .= '<medications>';
+                    if(isset($_POST['medicationid'])&& $_POST['medicationid']!=NULL){
+                       $pull_string .= '<id>'.$_POST['medicationid'].'</id>';
+                    }
+                $pull_string .= '<eid>0</eid>    
                 <STR>'.$_POST['STR'].'</STR>
                 <form>'.$_POST['form'].'</form>
                 <route>'.$_POST['route'].'</route>
@@ -166,8 +172,11 @@ class AccountController extends \yii\web\Controller
                 }
                 
                 if(isset($_POST['activeproblems']) && $_POST['activeproblems']!= NULL){
-                $pull_string .= '<active_problems>
-                <eid>0</eid>        
+                $pull_string .= '<active_problems>';
+                    if(isset($_POST['problemid'])&& $_POST['problemid']!=NULL){
+                       $pull_string .= '<id>'.$_POST['problemid'].'</id>';
+                    }                             
+                $pull_string .= '<eid>0</eid>        
                 <code_text>'.$_POST['code_text'].'</code_text>
                 <occurrence>'.$_POST['occurrence'].'</occurrence>
                 <outcome>'.$_POST['outcome'].'</outcome>               
@@ -188,7 +197,7 @@ class AccountController extends \yii\web\Controller
         }*/
             if($response->body->response_code==100){            
             
-            return $this->redirect(Url::toRoute('/consultation/index'));
+            return $this->redirect(Url::toRoute('/account/medical'));
             }
             $resp = $response->body->description;
             $data = $_POST;
