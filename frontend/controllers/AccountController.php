@@ -122,6 +122,100 @@ class AccountController extends \yii\web\Controller
             'model' => $model
         	]);
     }
+    
+public function actionDelete_allergy()
+    { 
+        $session = \Yii::$app->session;
+        $resp='';
+        
+
+        if(isset($_POST) && $_POST['id']!= NULL){
+            
+            $response = pull('user/api','
+                <request method="user.deleteAllergies">
+                  <user>
+                  <allergies> 
+                  <id>'.$_POST['id'].'</id>
+                  </allergies>
+                  </user>
+                </request>
+                ');
+            
+            if($response->body->response_code==100){
+                echo 1;
+                exit;
+            }else{
+                $resp = $response->body->description;
+                echo $resp;
+                exit;
+            }
+        }
+       return $this->render('medical',[
+            ]);
+    }    
+    
+public function actionDelete_medication()
+    { 
+        $session = \Yii::$app->session;
+        $resp='';
+        
+
+        if(isset($_POST) && $_POST['id']!= NULL){
+            
+            $response = pull('user/api','
+                <request method="user.deleteMedication">
+                  <user>
+                  <medication> 
+                  <id>'.$_POST['id'].'</id>
+                  </medication>
+                  </user>
+                </request>
+                ');
+            
+            if($response->body->response_code==100){
+                echo 1;
+                exit;
+            }else{
+                $resp = $response->body->description;
+                echo $resp;
+                exit;
+            }
+        }
+       return $this->render('medical',[
+            ]);
+    }  
+
+public function actionDelete_active_problem()
+    { 
+        $session = \Yii::$app->session;
+        $resp='';
+        
+
+        if(isset($_POST) && $_POST['id']!= NULL){
+            
+            $response = pull('user/api','
+                <request method="user.deleteActiveproblems">
+                  <user>
+                  <activeproblem> 
+                  <id>'.$_POST['id'].'</id>
+                  </activeproblem>
+                  </user>
+                </request>
+                ');
+            
+            if($response->body->response_code==100){
+                echo 1;
+                exit;
+            }else{
+                $resp = $response->body->description;
+                echo $resp;
+                exit;
+            }
+        }
+       return $this->render('medical',[
+            ]);
+    }    
+    
 
     public function actionMedical()
     {

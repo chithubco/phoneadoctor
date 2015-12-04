@@ -1,6 +1,7 @@
 <?php
 /* @var $this yii\web\View */
 use yii\helpers\Html;
+use yii\helpers\Url;
 //use yii\bootstrap\ActiveForm;
 use kartik\widgets\ActiveForm;
 use kartik\widgets\FileInput;
@@ -72,9 +73,9 @@ $this->title = 'Add Medical Details';
               	<ul>
                 	<li>
                     	<div class="table-responsive">
-                        	<table class="table table-hover table-striped">
+                        	<table class="table table-hover table-striped" id="tbl_allergies">
                             	<thead>
-                                	<tr>
+                                    <tr>
                                     	<td>S.No</td>
                                     	<td>Type</td>
                                         <td>Location</td>
@@ -89,7 +90,7 @@ $this->title = 'Add Medical Details';
                       if(is_array($patient_allergies)){
                             foreach ($patient_allergies as $value) {                        
                           ?>  
-                                <tr>
+                                <tr id="row_<?php echo $value->id; ?>">
                                     <td><?=$i;?></td>
                                     <td><?=$value->allergy_type;?></td>
                                     <td><?=$value->location;?></td>
@@ -100,7 +101,7 @@ $this->title = 'Add Medical Details';
                                     <td><a href="#" class="edit" id="edit_allergy" data-toggle="modal" data-target="#myModal1" data-id="<?=$value->id;?>" data-reaction="<?=$value->reaction;?>" data-allergytype="<?=$value->allergy_type;?>"
                            data-allergy="<?=$value->allergy;?>" data-location="<?=$value->location;?>" data-severity="<?=$value->severity;?>" data-begindate="<?=date('d-m-Y', strtotime($value->begin_date));?>" data-enddate="<?=date('d-m-Y', strtotime($value->end_date));?>" >
                                         <i class="fa fa-edit"></i> </a> 
-                                        <a href="#" class="delete">
+                                        <a href="#" data-id="<?=$value->id;?>" class="delete del_allergy">
                                         <i class="fa fa-trash"></i> </a>
                                     </td>
                                 </tr>
@@ -118,8 +119,8 @@ $this->title = 'Add Medical Details';
               	<button class="btn-default add" id="add_medication" data-toggle="modal" data-target="#myModal2">Add</button>	
              	 <ul>
                 	<li>
-                    	<div class="table-responsive">
-                        	<table class="table table-hover table-striped">
+                            <div class="table-responsive">
+                        	<table class="table table-hover table-striped" id="tbl_medication">
                             	<thead>
                                 	<tr>
                                     	<td>S.No</td>
@@ -135,7 +136,7 @@ $this->title = 'Add Medical Details';
                           if(is_array($patient_medications)){
                             foreach ($patient_medications as $value) {                        
                           ?>  
-                                <tr>
+                                <tr id="row_<?php echo $value->id;?>">
                                     <td><?=$i;?></td>
                                     <td><?=$value->STR;?></td>
                                     <td><?=$value->dose;?></td>
@@ -144,7 +145,7 @@ $this->title = 'Add Medical Details';
                                     <td><a href="#" class="edit" id="edit_medications" data-toggle="modal" data-target="#myModal2" data-id="<?=$value->id;?>" data-str="<?=$value->STR;?>" data-dose="<?=$value->dose;?>"
                            data-route="<?=$value->route;?>" data-form="<?=$value->form;?>" data-begindate="<?=date('d-m-Y', strtotime($value->begin_date));?>" data-enddate="<?=date('d-m-Y', strtotime($value->end_date));?>"><i class="fa fa-edit"></i> </a>  
                                         
-                                        <a href="#" class="delete"><i class="fa fa-trash"></i> </a></td>
+                                        <a href="#" data-id="<?=$value->id;?>" class="delete del_medication"><i class="fa fa-trash"></i> </a></td>
                                 </tr>
                          <?php $i++; } } else { ?>   
                                 <tr><td colspan="9" style="text-align: center"><?=$patient_medications;?></td></tr>
@@ -161,7 +162,7 @@ $this->title = 'Add Medical Details';
                  <ul>
                 	<li>
                     	<div class="table-responsive">
-                        	<table class="table table-hover table-striped">
+                        	<table class="table table-hover table-striped" id="tbl_active_problems">
                             	<thead>
                                 	<tr>
                                     	<td>S.No</td>
@@ -179,7 +180,7 @@ $this->title = 'Add Medical Details';
                          if(is_array($active_problems)){
                             foreach ($active_problems as $value) {                        
                           ?>  
-                                <tr>
+                                <tr id="row_<?php echo $value->id;?>">
                                     <td><?=$i;?></td>
                                     <td><?=$value->code;?></td>
                                     <td><?=$value->code_text;?></td>
@@ -191,7 +192,7 @@ $this->title = 'Add Medical Details';
                                     <td><a href="#" class="edit" id="edit_activeproblems" data-toggle="modal" data-target="#myModal3" data-id="<?=$value->id;?>" data-code="<?=$value->code;?>" data-code_text="<?=$value->code_text;?>"
                            data-occurrence="<?=$value->occurrence;?>" data-outcome="<?=$value->outcome;?>" data-referred_by="<?=$value->referred_by;?>" data-begindate="<?=date('d-m-Y', strtotime($value->begin_date));?>" data-enddate="<?=date('d-m-Y', strtotime($value->end_date));?>">
                                         <i class="fa fa-edit"></i> </a>  
-                                        <a href="#" class="delete"><i class="fa fa-trash"></i> </a></td>
+                                        <a href="#" data-id="<?=$value->id;?>" class="delete del_active_problem"><i class="fa fa-trash"></i> </a></td>
                                 </tr>
                         <?php $i++; } } else { ?>   
                                 <tr><td colspan="9" style="text-align: center"><?=$active_problems;?></td></tr>
@@ -608,6 +609,80 @@ $this->title = 'Add Medical Details';
         $j('#submit_activeproblems').text('Update Active Problems').button("refresh");
         
     });     
+    
+    $j(document).on("click", ".del_allergy", function () {    
+        if (window.confirm('Are you sure you want to delete this item?')){
+          //alert($j(this).data('id'));
+          var Id = $j(this).data('id');     
+            $j.ajax({
+                    type: "POST", 		
+                    url: '<?php echo Url::toRoute('/account/delete_allergy') ?>', 
+                    async: false,
+                    data: {id : $j(this).data('id')},                 
+                    success: function (response) {
+                       if(response==1){
+                           $j('table#tbl_allergies tr#row_'+Id).remove();
+                       }else{
+                           alert(response);
+                       }                       
+                    }                  
+                });         
+     }
+     else{     
+        return false;
+     }
+     });
+     
+     
+    $j(document).on("click", ".del_medication", function () {    
+        if (window.confirm('Are you sure you want to delete this item?')){
+          //alert($j(this).data('id'));
+          var Id = $j(this).data('id');     
+            $j.ajax({
+                    type: "POST", 		
+                    url: '<?php echo Url::toRoute('/account/delete_medication') ?>', 
+                    async: false,
+                    data: {id : $j(this).data('id')},                 
+                    success: function (response) {
+                       if(response==1){
+                           $j('table#tbl_medication tr#row_'+Id).remove();
+                       }else{
+                           alert(response);
+                       }                       
+                    }                  
+                });         
+     }
+     else{     
+        return false;
+     }     
+     
+    });
+    
+    $j(document).on("click", ".del_active_problem", function () {    
+        if (window.confirm('Are you sure you want to delete this item?')){
+          //alert($j(this).data('id'));
+          var Id = $j(this).data('id');     
+            $j.ajax({
+                    type: "POST", 		
+                    url: '<?php echo Url::toRoute('/account/delete_active_problem') ?>', 
+                    async: false,
+                    data: {id : $j(this).data('id')},                 
+                    success: function (response) {
+                       if(response==1){
+                           $j('table#tbl_active_problems tr#row_'+Id).remove();
+                       }else{
+                           alert(response);
+                       }                       
+                    }                  
+                });         
+     }
+     else{     
+        return false;
+     }     
+     
+    });    
+    
+    
     
 </script>                
         

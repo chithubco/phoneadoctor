@@ -164,7 +164,12 @@ class UserController extends Controller {
                 case 'user.addmedical':
                     $this->addMedicals($xmlArray['request']);
                     break;               
-                
+                case 'user.deleteAllergies':
+                    $this->deleteAllergies($xmlArray['request']);
+                    break;   
+                case 'user.deleteMedication':
+                    $this->deleteMedication($xmlArray['request']);
+                    break;                
                 default:
                    $this->generateJsonResponce(array("response_code" => 999, "description" => 'Unknown method.'), 'error', 400);
                     break;
@@ -1384,9 +1389,94 @@ class UserController extends Controller {
                 $this->generateJsonResponce(array("response_code" => 113, "description" => 'Your auth key is invalid.'), 'error', 400);
             }
         }
-    }    
+    }   
     
-  
+       /*
+     * API Method : user.delete allergies
+     * Purpose    : delete user allergies
+     * Returns    : success message 
+     */
+
+    public function deleteAllergies($xmlUserDetails) {
+        
+        if (!isset($xmlUserDetails['user']['allergies']['id']) || trim($xmlUserDetails['user']['allergies']['id']) == '') {
+            $this->addLogEntry('user.deleteallergies', 'Failure', 9, 'Allergy ID missing.');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Allergy ID missing.'), 'error', 400);
+        } 
+        if ($xmlUserDetails['user']['allergies']['id']!=NULL) {
+
+            \Yii::$app
+                ->db
+                ->createCommand()
+                ->delete('patient_allergies', ['id' => $xmlUserDetails['user']['allergies']['id']])
+                ->execute();
+            
+                $this->addLogEntry('user.deleteallergies', 'Failure', 3, 'Allergy deleted');
+                $this->generateJsonResponce(array("response_code" => 100, "description" => 'Allergy deleted'), 'ok', 200);
+            
+        }else {
+                $this->addLogEntry('user.deleteallergies', 'Faliure', 3, 'Allergy Id missing');
+                $this->generateJsonResponce(array("response_code" => 113, "description" => 'Allergy Id missing'), 'ok', 200);
+            }
+    }
+   
+       /*
+     * API Method : user.delete medication
+     * Purpose    : delete user medication
+     * Returns    : success message 
+     */
+
+    public function deleteMedication($xmlUserDetails) {
+        
+        if (!isset($xmlUserDetails['user']['medication']['id']) || trim($xmlUserDetails['user']['medication']['id']) == '') {
+            $this->addLogEntry('user.deletemedication', 'Failure', 9, 'Allergy ID missing.');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Allergy ID missing.'), 'error', 400);
+        } 
+        if ($xmlUserDetails['user']['medication']['id']!=NULL) {
+
+            \Yii::$app
+                ->db
+                ->createCommand()
+                ->delete('patient_medications', ['id' => $xmlUserDetails['user']['medication']['id']])
+                ->execute();
+            
+                $this->addLogEntry('user.deletemedication', 'Failure', 3, 'Medication deleted');
+                $this->generateJsonResponce(array("response_code" => 100, "description" => 'Medication deleted'), 'ok', 200);
+            
+        }else {
+                $this->addLogEntry('user.deletemedication', 'Faliure', 3, 'Medication Id missing');
+                $this->generateJsonResponce(array("response_code" => 113, "description" => 'Medication Id missing'), 'ok', 200);
+            }
+    } 
+
+     /*
+     * API Method : user.delete activeproblem
+     * Purpose    : delete user activeproblem
+     * Returns    : success message 
+     */
+
+    public function deleteActiveproblems($xmlUserDetails) {
+        
+        if (!isset($xmlUserDetails['user']['activeproblem']['id']) || trim($xmlUserDetails['user']['activeproblem']['id']) == '') {
+            $this->addLogEntry('user.deleteactiveproblem', 'Failure', 9, 'Allergy ID missing.');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Allergy ID missing.'), 'error', 400);
+        } 
+        if ($xmlUserDetails['user']['activeproblem']['id']!=NULL) {
+
+            \Yii::$app
+                ->db
+                ->createCommand()
+                ->delete('patient_active_problems', ['id' => $xmlUserDetails['user']['activeproblem']['id']])
+                ->execute();
+            
+                $this->addLogEntry('user.deleteactiveproblem', 'Failure', 3, 'activeproblem deleted');
+                $this->generateJsonResponce(array("response_code" => 100, "description" => 'activeproblem deleted'), 'ok', 200);
+            
+        }else {
+                $this->addLogEntry('user.deleteactiveproblem', 'Faliure', 3, 'activeproblem Id missing');
+                $this->generateJsonResponce(array("response_code" => 113, "description" => 'Activeproblem Id missing'), 'ok', 200);
+            }
+    }
    /*
      * API Method : user.sendSMS
      * Purpose    : Send SMS to user
@@ -1416,7 +1506,7 @@ class UserController extends Controller {
                 $this->addLogEntry('user.sendCode', 'Failure', 3, 'Attempt to send SMS with invalid phone number :- ' . $xmlUserDetails['user']['phone']);
                 $this->generateJsonResponce(array("response_code" => 113, "description" => $message->description), 'ok', 200);
             } else {
-                $this->addLogEntry('user.sendCode', 'Success', 3, 'SMS send to phone :- ' . $xmlUserDetails['user']['phone']);
+                $this->addLogEntry('user.sendCode', 'Success', 9, 'SMS send to phone :- ' . $xmlUserDetails['user']['phone']);
                 $this->generateJsonResponce(array("response_code" => 100, "description" => 'SMS sent successfully.'), 'ok', 200);
             }
         }
