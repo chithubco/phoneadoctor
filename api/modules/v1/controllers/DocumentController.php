@@ -7,6 +7,7 @@ use common\models\Users;
 use app\models\Settings;
 use app\models\ApiLog;
 use common\models\Transactions;
+use app\models\PatientDocuments;
 use common\models\PaymentAttempts;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -15,6 +16,7 @@ use common\components\XmlDomConstruct;
 
 include_once("../../common/components/xmlToArray.php");
 include_once("../../common/components/XmlDomConstruct.php");
+
 
 class DocumentController extends Controller
 {
@@ -90,15 +92,14 @@ class DocumentController extends Controller
     public function actionApi(){
         
         $requestMethod =  Yii::$app->REST->get_request_method();
-        $connectionType = Yii::$app->REST->get_connection_type();      
-        //var_dump($_REQUEST);          
+        $connectionType = Yii::$app->REST->get_connection_type();                
        
         //use php://input to get the raw $_POST results
         $xmlInput = file_get_contents('php://input');
 
         //parse the incoming XML to array
-        $xmlArray = $_POST;
-        //echo'<pre>';print_r($xmlInput);echo'</pre>';
+        $xmlArray = xml2array($xmlInput);
+        //echo'<pre>';print_r($xmlArray);echo'</pre>';
 
         if (!isset($xmlArray['request']) || !isset($xmlArray['request_attr'])) {
             $this->generateJsonResponce(array("response_code" => 112, "description" => 'Invalid request, please check your input.'), 'error', 400);
@@ -108,9 +109,9 @@ class DocumentController extends Controller
             $this->generateJsonResponce(array("response_code" => 111, "description" => 'Insecure connection.'), 'error', 406);
         }*/ else {  
             //determine the method
-            switch ($xmlArray['method']) {
+            switch ($xmlArray['request_attr']['method']) {
                 case 'document.create':
-                    $this->upload($xmlArray,$_FILES);
+                    $this->upload($xmlArray['request']);
                     break;
                 default:
                    $this->generateJsonResponce(array("response_code" => 999, "description" => 'Unknown method.'), 'error', 400);
@@ -145,34 +146,36 @@ class DocumentController extends Controller
      * Purpose    : Create a user
      * Returns    : Result of insert operation
      */
-       public function upload($xmldocumentDetails,$file) {
+public function upload($xmldocumentDetails) {
 
       //check the mandatory fields
  
-        if (!isset($xmldocumentDetails['uid']) || trim($xmldocumentDetails['uid']) == '') {
+        if (!isset($xmldocumentDetails['user']['id']) || trim($xmldocumentDetails['user']['id']) == '') {
             
             $this->addLogEntry('document.create', 'Failure', 9, 'document user id missing.');
             $this->generateJsonResponce(array("response_code" => 113, "description" => 'document user id missing.'), 'error', 400);
             
-        }else if (!isset($xmldocumentDetails['authkey']) || trim($xmldocumentDetails['authkey']) == '') {
+        }else if (!isset($xmldocumentDetails['user']['auth_key']) || trim($xmldocumentDetails['user']['auth_key']) == '') {
             
             $this->addLogEntry('document.create', 'Failure', 9, 'Auth key missing.');
             $this->generateJsonResponce(array("response_code" => 113, "description" => 'Auth key missing.'), 'error', 400);
             
-        }else if (!isset($file['name']) || trim($file['name']) == '') {
+        }else if (!isset($xmldocumentDetails['document']['name']) || trim($xmldocumentDetails['document']['name']) == '') {
             
             $this->addLogEntry('document.create', 'Failure', 9, 'File title missing.');
             $this->generateJsonResponce(array("response_code" => 113, "description" => 'File title missing.'), 'error', 400);
             
         }else {
-            $postdata = fopen( $_FILES[ 'data' ][ 'tmp_name' ], "r" );
+            //echo "<pre>";print_r($xmldocumentDetails['document']);exit;
+            //$_FILES = $xmldocumentDetails['document'];
+            $postdata = fopen($xmldocumentDetails['document']['tmp_name'], "r");
         /* Get file extension */
-        $title = $_FILES[ 'data' ][ 'name' ];
-        $extension = substr( $_FILES[ 'data' ][ 'name' ], strrpos( $_FILES[ 'data' ][ 'name' ], '.' ) );
-        if(!is_dir($this->folder."/".$xmldocumentDetails['uid']))
-            mkdir($this->folder."/".$xmldocumentDetails['uid']);
-        if(!is_dir($this->folder."/".$xmldocumentDetails['uid']."/uploaddoc"))
-            mkdir($this->folder."/".$xmldocumentDetails['uid']."/uploaddoc");
+        $title = $xmldocumentDetails['document']['name'];
+        $extension = substr( $xmldocumentDetails['document'][ 'name' ], strrpos( $xmldocumentDetails['document'][ 'name' ], '.' ) );
+        if(!is_dir($this->folder."/".$xmldocumentDetails['user']['id']))
+            mkdir($this->folder."/".$xmldocumentDetails['user']['id']);
+        if(!is_dir($this->folder."/".$xmldocumentDetails['user']['id']."/uploaddoc"))
+            mkdir($this->folder."/".$xmldocumentDetails['user']['id']."/uploaddoc");
         /* Generate unique name */
         $filename = $this->folder."/".$xmldocumentDetails['uid']."/uploaddoc/".$title. uniqid() . $extension;
 
@@ -189,12 +192,16 @@ class DocumentController extends Controller
         fclose( $postdata );
 
         /* the result object that is sent to client*/
-        $model = new PatientDocuments;
-                        $model->load($xmlUserDetails);
+                        $model =  new PatientDocuments;
                         $model->title = $title;
+                        $model->docType = $xmldocumentDetails['document']['type'];
+                        $model->date = (int) time();
+                        $model->url = Url::toRoute($filename);                        
+                        $model->uid = $xmldocumentDetails['user']['id'];
+                        
                         $model->validate();
                         if($model->getErrors()){
-                            $this->addLogEntry('user.medicals', 'Failure', 9, 'Correct the validation errors.');
+                            $this->addLogEntry('document.create', 'Failure', 9, 'Correct the validation errors.');
                         $this->generateJsonResponce(array("response_code" => 113, "description" => 'Correct the validation errors.','errors'=>$model->getErrors()), 'error', 400);
                         exit;
                         }
@@ -202,8 +209,8 @@ class DocumentController extends Controller
                         $model->save();
         
                
-                $this->addLogEntry('payment.create', 'Success', 3, 'payment successfully created. Username :- ' . $name, $model->id);
-                $this->generateJsonResponce(array("response_code" => 100, "description" => 'payment successfully created.'), 'ok', 200);               
+                $this->addLogEntry('document.create', 'Success', 3, 'File uploaded successfully');
+                $this->generateJsonResponce(array("response_code" => 100, "description" => 'File uploaded successfully.'), 'ok', 200);               
                 exit;
             
          }
@@ -227,7 +234,7 @@ class DocumentController extends Controller
         $date   = date("Y-m-d H:i:s");
         
         $api_log = new ApiLog;
-        $api_log->api_method_id             = 1;//$this->api_methods[$api_method];
+        $api_log->api_method             = $api_method;//$this->api_methods[$api_method];
         $api_log->type                      = $type;
         $api_log->api_log_description_id    = $log_description;
         $api_log->notes                     = $notes;
@@ -294,3 +301,4 @@ public function generateJsonResponce($response){
     
        
 }
+

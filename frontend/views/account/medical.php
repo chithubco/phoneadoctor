@@ -15,17 +15,30 @@ $this->title = 'Add Medical Details';
     //var names = new Array('John', 'David', 'Sarah');
 
     switch (ddl1.value) {
-        case 'Environmental':
-            ddl2.options.length = 0;
+        case 'Environmental':      
+            $("#ddl2").remove();
+            var allergy_drop_down ='<select class="form-control" id="ddl2" name="allergy"><option value="-1" selected="selected">Allergy</option>';            
+            for (i = 0; i < Food.length; i++) {            
+               allergy_drop_down +='<option value="'+Environmental[i]+'">'+Environmental[i]+'</option>';  //createOption(ddl2, Food[i], Food[i]);
+            } 
+             allergy_drop_down +='<select>';
+            $("#input_allergy").append(allergy_drop_down);            
+            /*ddl2.options.length = 0;
             for (i = 0; i < Environmental.length; i++) {
                 createOption(ddl2, Environmental[i], Environmental[i]);
-            }
+            }*/
             break;
         case 'Food':
-            ddl2.options.length = 0; 
-        for (i = 0; i < Food.length; i++) {
+            $("#ddl2").remove();
+            var allergy_drop_down ='<select class="form-control" id="ddl2" name="allergy"><option value="-1" selected="selected">Allergy</option>';            
+            for (i = 0; i < Food.length; i++) {            
+               allergy_drop_down +='<option value="'+Food[i]+'">'+Food[i]+'</option>';  //createOption(ddl2, Food[i], Food[i]);
+            } 
+             allergy_drop_down +='<select>';
+            $("#input_allergy").append(allergy_drop_down);   
+            /* for (i = 0; i < Food.length; i++) {
             createOption(ddl2, Food[i], Food[i]);
-            }
+            }*/
             break;
         case 'Names':
             ddl2.options.length = 0;
@@ -33,6 +46,10 @@ $this->title = 'Add Medical Details';
                 createOption(ddl2, names[i], names[i]);
             }
             break;
+        case 'Drug':
+            $("#ddl2").remove();   
+            $("#input_allergy").append('<input id="ddl2" class="form-control" name = "allergy"  type="text" />');
+            break;            
             default:
                 ddl2.options.length = 0;
             break;
@@ -204,11 +221,11 @@ $this->title = 'Add Medical Details';
               </div>
               
               
-             <div id="step4" class="tab-pane fade">               	           
-                 <form class="upld-frm">                 	
+             <div id="step4" class="tab-pane fade">     
+                <?php $form = ActiveForm::begin(['id' => 'form-upload', 'options' => ['enctype' => 'multipart/form-data','class'=>'upld-frm']]); ?>	                                       	
                     <ul>
                         <li>
-                            <img src="<?php echo \Yii::getAlias('@web') ?>/images/pdf-icon.png">                        	
+                            <img src="<?php echo \Yii::getAlias('@web') ?>/images/pdf-icon.png">test.png
                             <i class="close">x</i>
                         </li>
                         <li>
@@ -220,9 +237,10 @@ $this->title = 'Add Medical Details';
                            <i class="close">x</i>
                         </li>
                      </ul>   
-                 	<input type="file" class="upd-btn">
-                    <input type="submit" value="submit" class="btn btn-default">
-                 </form>
+                 	<input type="file" name="doc" class="upd-btn">
+                        <?= Html::submitButton('Upload', ['class' => 'btn btn-primary','id' =>'patient_doc', 'name' => 'patient_doc', 'value' => 'submit']) ?>
+                   
+                 <?php ActiveForm::end(); ?>  
               </div>
               <i class="clearfix"></i>
              
@@ -252,13 +270,16 @@ $this->title = 'Add Medical Details';
 				<option value="-1" selected="selected">Type</option>
 				<option value="Environmental">Environmental</option>
 				<option value="Food" >Food</option>                  
+                                <option value="Drug" >Drug</option>   
                 </select>
           	</div>
           	<div class="col-xs-6">
-                <label>Allergy</label>           
+                <label>Allergy</label> 
+                <div id="input_allergy">
                 <select class="form-control" id="ddl2" name="allergy">
                     <option value="-1" selected="selected">Allergy</option>
                 </select>
+                </div>
             </div>
             <i class="clearfix"></i>
           </div>          
@@ -527,7 +548,10 @@ $this->title = 'Add Medical Details';
 
         $j("#myModal1 #al_id").val('');
         $j("#myModal1 #ddl1").val('-1');        
-        $j("#myModal1 #ddl2").val('Allergy'); 
+        $("#ddl2").remove();
+        var allergy_drop_down ='<select class="form-control" id="ddl2" name="allergy"><option value="-1" selected="selected">Allergy</option><select>';   
+        $("#input_allergy").append(allergy_drop_down);           
+        //$j("#myModal1 #ddl2").val('Allergy'); 
         $j("#myModal1 #ddl_location").val('select'); 
         $j("#myModal1 #al_reaction").val(''); 
         $j("#myModal1 #ddl_severity").val('select'); 
@@ -538,14 +562,22 @@ $this->title = 'Add Medical Details';
     });
     
     //Edit Allergies
-    $j(document).on("click", "#edit_allergy", function () { 
-       
+    $j(document).on("click", "#edit_allergy", function () {        
         $j("#myModal1 #al_id").val($j(this).data('id'));
         $j("#myModal1 #ddl1").val($j(this).data('allergytype'));
         $('#ddl2').empty();
-        createOption(ddl2, $j(this).data('allergy'),$j(this).data('allergy'));       
-        //configureDropDownLists($j(this).data('allergytype'),'ddl2')
-        $j("#myModal1 #ddl2").val($j(this).data('allergy'));
+        if($j(this).data('allergytype')=='Drug'){
+            $("#ddl2").remove();   
+            $("#input_allergy").append('<input id="ddl2" class="form-control" name = "allergy" value="'+$j(this).data('allergy')+'"  type="text" />'); 
+        }else{
+            $("#ddl2").remove();   
+            var allergy_drop_down ='<select class="form-control" id="ddl2" name="allergy"><option value="-1" selected="selected">Allergy</option> <option selected="selected" value="'+$j(this).data('allergy')+'">'+$j(this).data('allergy')+'</option></select>';            
+            $("#input_allergy").append(allergy_drop_down);                              
+        }
+        
+        //configureDropDownLists($j(this).data('allergytype'),$j(this).data('allergy'))
+        
+        //$j("#myModal1 #input_allergy #ddl2").val($j(this).data('allergy'));
         $j("#myModal1 #ddl_location").val($j(this).data('location'));
         $j("#myModal1 #al_reaction").val($j(this).data('reaction')); 
         $j("#myModal1 #ddl_severity").val($j(this).data('severity'));

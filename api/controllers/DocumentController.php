@@ -8,6 +8,7 @@ use Yii;
 use common\models\Users;
 use app\models\Settings;
 use app\models\ApiLog;
+use app\models\PatientDocuments;
 use common\models\Transactions;
 use common\models\PaymentAttempts;
 use yii\web\Controller;
@@ -112,7 +113,7 @@ class DocumentController extends Controller
             //determine the method
             switch ($xmlArray['method']) {
                 case 'document.create':
-                    $this->upload($xmlArray,$_FILES);
+                    $this->upload($xmlArray);
                     break;
                 default:
                    $this->generateJsonResponce(array("response_code" => 999, "description" => 'Unknown method.'), 'error', 400);
@@ -147,21 +148,21 @@ class DocumentController extends Controller
      * Purpose    : Create a user
      * Returns    : Result of insert operation
      */
-       public function upload($xmldocumentDetails,$file) {
+       public function upload($xmldocumentDetails) {
 
       //check the mandatory fields
  
-        if (!isset($xmldocumentDetails['uid']) || trim($xmldocumentDetails['uid']) == '') {
+        if (!isset($xmldocumentDetails['user']['id']) || trim($xmldocumentDetails['user']['id']) == '') {
             
             $this->addLogEntry('document.create', 'Failure', 9, 'document user id missing.');
             $this->generateJsonResponce(array("response_code" => 113, "description" => 'document user id missing.'), 'error', 400);
             
-        }else if (!isset($xmldocumentDetails['authkey']) || trim($xmldocumentDetails['authkey']) == '') {
+        }else if (!isset($xmldocumentDetails['user']['auth_key']) || trim($xmldocumentDetails['user']['auth_key']) == '') {
             
             $this->addLogEntry('document.create', 'Failure', 9, 'Auth key missing.');
             $this->generateJsonResponce(array("response_code" => 113, "description" => 'Auth key missing.'), 'error', 400);
             
-        }else if (!isset($file['name']) || trim($file['name']) == '') {
+        }else if (!isset($xmldocumentDetails['user']['document']['name']) || trim($xmldocumentDetails['user']['document']['name']) == '') {
             
             $this->addLogEntry('document.create', 'Failure', 9, 'File title missing.');
             $this->generateJsonResponce(array("response_code" => 113, "description" => 'File title missing.'), 'error', 400);

@@ -217,127 +217,156 @@ public function actionDelete_active_problem()
     }    
     
 
-    public function actionMedical()
-    {
+    public function actionMedical() {
         $session = \Yii::$app->session;
-        $resp='';
+        $resp = '';
         $model = new UploadForm();
 
-    
-        if (\Yii::$app->request->isPost) {//echo "<pre>";print_r($_POST);exit;
-           
+
+        if (\Yii::$app->request->isPost) {//echo "<pre>";print_r($_FILES);exit;
+            
+            if (isset($_POST['patient_doc']) && $_POST['patient_doc'] != NULL) {
+                //Document Upload
+                $response = pull('document/api', '
+                <request method="document.create">
+                  <user>
+                  <id>' . $session['id'] . '</id>    
+                  <auth_key>' . $session['authkey'] . '</auth_key>    
+                  </user>
+                  <document>
+                  <name>' . $_FILES['doc']['name'] . '</name>
+                  <type>' . $_FILES['doc']['type'] . '</type>
+                  <tmp_name>' . $_FILES['doc']['tmp_name'] . '</tmp_name>
+                  <error>' . $_FILES['doc']['error'] . '</error>
+                  <size>' . $_FILES['doc']['size'] . '</size>
+                  </document>
+                </request>');
+                
+                /*$patient_medications ='';
+                 $active_probs = '';
+                $patient_allergies = $response->body->description;*/
+                
+            } else {
+                //Text Data
                 $pull_string = '<request method="user.addmedical">
                   <user>
-                  <password>'.$session['authkey'].'</password>
+                  <password>' . $session['authkey'] . '</password>
                 <userinfo>
-                <id>'.$session['id'].'</id>    
-                <auth_key>'.$session['authkey'].'</auth_key>  
+                <id>' . $session['id'] . '</id>    
+                <auth_key>' . $session['authkey'] . '</auth_key>  
                 </userinfo>';
-                  
-                if(isset($_POST['allergies'])&& $_POST['allergies']!=NULL){
-                $pull_string .= '<alergies>';
-                    if(isset($_POST['allergyid'])&& $_POST['allergyid']!=NULL){
-                       $pull_string .= '<id>'.$_POST['allergyid'].'</id>';
+
+                //Patient Allergies
+                if (isset($_POST['allergies']) && $_POST['allergies'] != NULL) {
+                    
+                    $pull_string .= '<alergies>';
+                    if (isset($_POST['allergyid']) && $_POST['allergyid'] != NULL) {
+                        $pull_string .= '<id>' . $_POST['allergyid'] . '</id>';
                     }
-                $pull_string .= '<allergy_type>'.$_POST['allergy_type'].'</allergy_type>
-                <allergy>'.$_POST['allergy'].'</allergy>
-               
-                <reaction>'.$_POST['reaction'].'</reaction>
-                <severity>'.$_POST['severity'].'</severity>
-                <location>'.$_POST['location'].'</location>
-                <begin_date>'.date('Y-m-d',  strtotime($_POST['begin_date'])) .'</begin_date>
-                <end_date>'.date('Y-m-d', strtotime($_POST['end_date'])).'</end_date>
-                </alergies>';
+                    $pull_string .= '<allergy_type>' . $_POST['allergy_type'] . '</allergy_type>
+                                <allergy>' . $_POST['allergy'] . '</allergy>               
+                                <reaction>' . $_POST['reaction'] . '</reaction>
+                                <severity>' . $_POST['severity'] . '</severity>
+                                <location>' . $_POST['location'] . '</location>
+                                <begin_date>' . date('Y-m-d', strtotime($_POST['begin_date'])) . '</begin_date>
+                                <end_date>' . date('Y-m-d', strtotime($_POST['end_date'])) . '</end_date>
+                                </alergies>';
                 }
                 
-                if(isset($_POST['medications']) && $_POST['medications']!= NULL){
-                $pull_string .= '<medications>';
-                    if(isset($_POST['medicationid'])&& $_POST['medicationid']!=NULL){
-                       $pull_string .= '<id>'.$_POST['medicationid'].'</id>';
+                //Patient Medications
+                if (isset($_POST['medications']) && $_POST['medications'] != NULL) {
+                    
+                    $pull_string .= '<medications>';
+                    if (isset($_POST['medicationid']) && $_POST['medicationid'] != NULL) {
+                        $pull_string .= '<id>' . $_POST['medicationid'] . '</id>';
                     }
-                $pull_string .= '<eid>0</eid>    
-                <STR>'.$_POST['STR'].'</STR>
-                <form>'.$_POST['form'].'</form>
-                <route>'.$_POST['route'].'</route>
-                <dose>'.$_POST['dose'].'</dose>
-                <begin_date>'.date('Y-m-d',  strtotime($_POST['begin_date'])) .'</begin_date>
-                <end_date>'.date('Y-m-d', strtotime($_POST['end_date'])).'</end_date>                    
-                </medications>';                
+                    $pull_string .= '<eid>0</eid>    
+                                <STR>' . $_POST['STR'] . '</STR>
+                                <form>' . $_POST['form'] . '</form>
+                                <route>' . $_POST['route'] . '</route>
+                                <dose>' . $_POST['dose'] . '</dose>
+                                <begin_date>' . date('Y-m-d', strtotime($_POST['begin_date'])) . '</begin_date>
+                                <end_date>' . date('Y-m-d', strtotime($_POST['end_date'])) . '</end_date>                    
+                                </medications>';
                 }
                 
-                if(isset($_POST['activeproblems']) && $_POST['activeproblems']!= NULL){
-                $pull_string .= '<active_problems>';
-                    if(isset($_POST['problemid'])&& $_POST['problemid']!=NULL){
-                       $pull_string .= '<id>'.$_POST['problemid'].'</id>';
-                    }                             
-                $pull_string .= '<eid>0</eid>        
-                <code_text>'.$_POST['code_text'].'</code_text>
-                <occurrence>'.$_POST['occurrence'].'</occurrence>
-                <outcome>'.$_POST['outcome'].'</outcome>               
-                <begin_date>'.date('Y-m-d',  strtotime($_POST['begin_date'])) .'</begin_date>
-                <end_date>'.date('Y-m-d', strtotime($_POST['end_date'])).'</end_date>                    
-                </active_problems>';
+                //Active Problems
+                if (isset($_POST['activeproblems']) && $_POST['activeproblems'] != NULL) {
+                    
+                    $pull_string .= '<active_problems>';
+                    if (isset($_POST['problemid']) && $_POST['problemid'] != NULL) {
+                        $pull_string .= '<id>' . $_POST['problemid'] . '</id>';
+                    }
+                    
+                    $pull_string .= '<eid>0</eid>        
+                                <code_text>' . $_POST['code_text'] . '</code_text>
+                                <occurrence>' . $_POST['occurrence'] . '</occurrence>
+                                <outcome>' . $_POST['outcome'] . '</outcome>               
+                                <begin_date>' . date('Y-m-d', strtotime($_POST['begin_date'])) . '</begin_date>
+                                <end_date>' . date('Y-m-d', strtotime($_POST['end_date'])) . '</end_date>                    
+                                </active_problems>';
                 }
                 
+
                 $pull_string .= ' </user>
                 </request>';
-            
-            $response = pull('user/api',$pull_string);
-            
-            $model->file = UploadedFile::getInstance($model, 'file');
 
-        /*if ($model->validate()) {                
-            $model->file->saveAs('pix/' .$session['id']. '.jpg');
-        }*/
-            if($response->body->response_code==100){            
-            
-            return $this->redirect(Url::toRoute('/account/medical'));
+                $response = pull('user/api', $pull_string);
+            }
+
+            //$model->file = UploadedFile::getInstance($model, 'file');
+
+            /* if ($model->validate()) {                
+              $model->file->saveAs('pix/' .$session['id']. '.jpg');
+              } */
+            if ($response->body->response_code == 100) {
+
+                return $this->redirect(Url::toRoute('/account/medical'));
             }
             $resp = $response->body->description;
             $data = $_POST;
             
-        }else{
-        $data ='';    
-        $response = pull('user/api','
+        } else {
+            $data = '';
+            $response = pull('user/api', '
                 <request method="user.getPatientAllergies">
                   <user>
-                  <id>'.$session['id'].'</id>    
-                  <auth_key>'.$session['authkey'].'</auth_key>    
+                  <id>' . $session['id'] . '</id>    
+                  <auth_key>' . $session['authkey'] . '</auth_key>    
                   </user>
                 </request>
                 ');
-        $patient_allergies = $response->body->description; 
+            $patient_allergies = $response->body->description;
 
-        $response = pull('user/api','
+            $response = pull('user/api', '
                 <request method="user.getPatientMedications">
                   <user>
-                  <id>'.$session['id'].'</id>    
-                  <auth_key>'.$session['authkey'].'</auth_key>    
+                  <id>' . $session['id'] . '</id>    
+                  <auth_key>' . $session['authkey'] . '</auth_key>    
                   </user>
                 </request>
                 ');
-        $patient_medications = $response->body->description; 
-            
-        $response = pull('user/api','
+            $patient_medications = $response->body->description;
+
+            $response = pull('user/api', '
                 <request method="user.getPatientActiveProblems">
                   <user>
-                  <id>'.$session['id'].'</id>    
-                  <auth_key>'.$session['authkey'].'</auth_key>    
+                  <id>' . $session['id'] . '</id>    
+                  <auth_key>' . $session['authkey'] . '</auth_key>    
                   </user>
                 </request>
                 ');
-        $active_probs = $response->body->description; 
-        
+            $active_probs = $response->body->description;
         }
-        //echo "<pre>";print_r($data);exit;
-        return $this->render('medical',[
-            "error"=>$resp,
-            "data"=>$data,
-            "patient_allergies"=>$patient_allergies,
-            "patient_medications"=>$patient_medications,
-            "active_problems"=>$active_probs,
-            'model' => $model
-            ]);
+        //echo "<pre>";print_r($patient_medications);exit;
+        return $this->render('medical', [
+                    "error" => $resp,
+                    "data" => $data,
+                    "patient_allergies" => $patient_allergies,
+                    "patient_medications" => $patient_medications,
+                    "active_problems" => $active_probs,
+                    'model' => $model
+                ]);
     }
 
     public function actionDetails()
