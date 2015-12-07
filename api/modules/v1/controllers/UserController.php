@@ -10,6 +10,7 @@ use app\models\VerifyPhone;
 use app\models\PatientAllergies;
 use app\models\PatientMedications;
 use app\models\PatientActiveProblems;
+use app\models\PatientDocuments;
 use app\models\Settings;
 use app\models\Cms;
 use app\models\ApiLog;
@@ -155,6 +156,9 @@ class UserController extends Controller {
                 case 'user.getPatientActiveProblems':
                     $this->getPatientActiveProblems($xmlArray['request']);
                     break;
+                case 'user.getPatientDocs':
+                    $this->getPatientDocs($xmlArray['request']);
+                    break;  
                 case 'user.login':
                     $this->userLogin($xmlArray['request']);
                     break;                 
@@ -169,7 +173,10 @@ class UserController extends Controller {
                     break;   
                 case 'user.deleteMedication':
                     $this->deleteMedication($xmlArray['request']);
-                    break;                
+                    break;  
+                case 'user.deletePatientdoc':
+                    $this->deletePatientdoc($xmlArray['request']);
+                    break;                 
                 default:
                    $this->generateJsonResponce(array("response_code" => 999, "description" => 'Unknown method.'), 'error', 400);
                     break;
@@ -847,6 +854,49 @@ class UserController extends Controller {
             
         } 
     }
+    
+     /*
+     * API Method : user.getPatientDocs
+     * Purpose    : get patient docs
+     * Returns    : User related ino*/
+    
+    
+    public function getPatientDocs($xmlUserDetails) {
+        
+    if((!isset($xmlUserDetails['user']['auth_key']) || trim($xmlUserDetails['user']['auth_key']) == '')) {
+                
+            $this->addLogEntry('user.getPatientActiveProblems', 'Failure', 9, 'Auth key missing.');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Auth key missing.'), 'error', 400);
+
+        } elseif (!isset($xmlUserDetails['user']['id']) || trim($xmlUserDetails['user']['id']) == '') {            
+            $this->addLogEntry('user.getPatientActiveProblems', 'Failure', 9, 'User ID missing.');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'User ID missing.'), 'error', 400);            
+        }else {  
+            
+            //Authenticate access key before update
+            Yii::$app->AuthoriseUser->userId = $xmlUserDetails['user']['id'];
+            Yii::$app->AuthoriseUser->auth_key = $xmlUserDetails['user']['auth_key'];
+            $accessAuthorised =  Yii::$app->AuthoriseUser->checkAuthKey();
+            if($accessAuthorised){           
+                
+                $query = new Query;
+                $query->select('id,docType,name,url,title') 
+                    ->from('patient_documents')                  
+                    ->where('uid = ' . $xmlUserDetails['user']['id']);
+                $command = $query->createCommand();                
+                $results = $command->queryAll();
+                $history_data = ($results!=NULL)?$results:"No records found"; 
+                
+                $this->addLogEntry('user.getPatientDocs', 'Success', 3, 'User Patient document successfully returned. Username :- ' .$xmlUserDetails['user']['id']);
+                $this->generateJsonResponce(array("response_code" => 100, "description" => $history_data), 'error', 400);
+                
+            } else {
+                $this->addLogEntry('user.getPatientDocs', 'Failure', 9, 'Fetch user info auth key authentication failed for user :' . $xmlUserDetails['user']['id']);
+                $this->generateJsonResponce(array("response_code" => 113, "description" => 'Your auth key is invalid.'), 'error', 400);
+            }
+            
+        } 
+    }    
  
      /*
      * API Method : consultation.getConsultationHistory
@@ -1440,7 +1490,7 @@ class UserController extends Controller {
                 ->delete('patient_medications', ['id' => $xmlUserDetails['user']['medication']['id']])
                 ->execute();
             
-                $this->addLogEntry('user.deletemedication', 'Failure', 3, 'Medication deleted');
+                $this->addLogEntry('user.deletemedication', 'Success', 3, 'Medication deleted');
                 $this->generateJsonResponce(array("response_code" => 100, "description" => 'Medication deleted'), 'ok', 200);
             
         }else {
@@ -1469,7 +1519,7 @@ class UserController extends Controller {
                 ->delete('patient_active_problems', ['id' => $xmlUserDetails['user']['activeproblem']['id']])
                 ->execute();
             
-                $this->addLogEntry('user.deleteactiveproblem', 'Failure', 3, 'activeproblem deleted');
+                $this->addLogEntry('user.deleteactiveproblem', 'Success', 3, 'activeproblem deleted');
                 $this->generateJsonResponce(array("response_code" => 100, "description" => 'activeproblem deleted'), 'ok', 200);
             
         }else {
@@ -1477,6 +1527,35 @@ class UserController extends Controller {
                 $this->generateJsonResponce(array("response_code" => 113, "description" => 'Activeproblem Id missing'), 'ok', 200);
             }
     }
+    
+     /*
+     * API Method : user.delete patient_doc
+     * Purpose    : delete patient doc
+     * Returns    : success message 
+     */
+
+    public function deletePatientdoc($xmlUserDetails) {
+        
+        if (!isset($xmlUserDetails['user']['patient_doc']['id']) || trim($xmlUserDetails['user']['patient_doc']['id']) == '') {
+            $this->addLogEntry('user.deletepatient_doc', 'Failure', 9, 'Document ID missing.');
+            $this->generateJsonResponce(array("response_code" => 113, "description" => 'Document ID missing.'), 'error', 400);
+        } 
+        if ($xmlUserDetails['user']['patient_doc']['id']!=NULL) {
+
+            \Yii::$app
+                ->db
+                ->createCommand()
+                ->delete('patient_documents', ['id' => $xmlUserDetails['user']['patient_doc']['id']])
+                ->execute();
+            
+                $this->addLogEntry('user.deletepatient_doc', 'Success', 3, 'patient Doc deleted');
+                $this->generateJsonResponce(array("response_code" => 100, "description" => 'Patient Doc deleted'), 'ok', 200);
+            
+        }else {
+                $this->addLogEntry('user.deletepatient_doc', 'Faliure', 3, 'patient_doc Id missing');
+                $this->generateJsonResponce(array("response_code" => 113, "description" => 'Patient Doc Id missing'), 'ok', 200);
+            }
+    }    
    /*
      * API Method : user.sendSMS
      * Purpose    : Send SMS to user

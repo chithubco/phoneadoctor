@@ -4,6 +4,9 @@ namespace frontend\controllers;
 
 use yii\helpers\Url;
 use common\models\UploadForm;
+use app\models\PatientAllergies;
+use app\models\PatientMedications;
+use app\models\PatientActiveProblems;
 use yii\web\UploadedFile;
 require_once("common/components/Send.php");
 require_once("common/components/checkLogin.php");
@@ -216,11 +219,41 @@ public function actionDelete_active_problem()
             ]);
     }    
     
+public function actionDelete_patient_doc()
+    { 
+        $session = \Yii::$app->session;
+        $resp='';
+        
+
+        if(isset($_POST) && $_POST['id']!= NULL){
+            
+            $response = pull('user/api','
+                <request method="user.deletePatientdoc">
+                  <user>
+                  <patient_doc> 
+                  <id>'.$_POST['id'].'</id>
+                  </patient_doc>
+                  </user>
+                </request>
+                ');
+            
+            if($response->body->response_code==100){
+                echo 1;
+                exit;
+            }else{
+                $resp = $response->body->description;
+                echo $resp;
+                exit;
+            }
+        }
+       return $this->render('medical',[
+            ]);
+    }    
 
     public function actionMedical() {
         $session = \Yii::$app->session;
         $resp = '';
-        $model = new UploadForm();
+        $model = new PatientMedications;
 
 
         if (\Yii::$app->request->isPost) {//echo "<pre>";print_r($_FILES);exit;
@@ -357,14 +390,25 @@ public function actionDelete_active_problem()
                 </request>
                 ');
             $active_probs = $response->body->description;
+            
+            $response = pull('user/api', '
+                <request method="user.getPatientDocs">
+                  <user>
+                  <id>' . $session['id'] . '</id>    
+                  <auth_key>' . $session['authkey'] . '</auth_key>    
+                  </user>
+                </request>
+                ');
+            $patient_docs = $response->body->description;            
         }
-        //echo "<pre>";print_r($patient_medications);exit;
+        //echo "<pre>";print_r($patient_docs);exit;
         return $this->render('medical', [
                     "error" => $resp,
                     "data" => $data,
                     "patient_allergies" => $patient_allergies,
                     "patient_medications" => $patient_medications,
                     "active_problems" => $active_probs,
+                    "patient_docs"=>$patient_docs,
                     'model' => $model
                 ]);
     }

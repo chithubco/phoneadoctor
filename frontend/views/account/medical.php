@@ -2,6 +2,7 @@
 /* @var $this yii\web\View */
 use yii\helpers\Html;
 use yii\helpers\Url;
+use yii\jui\AutoComplete;
 //use yii\bootstrap\ActiveForm;
 use kartik\widgets\ActiveForm;
 use kartik\widgets\FileInput;
@@ -223,19 +224,43 @@ $this->title = 'Add Medical Details';
               
              <div id="step4" class="tab-pane fade">     
                 <?php $form = ActiveForm::begin(['id' => 'form-upload', 'options' => ['enctype' => 'multipart/form-data','class'=>'upld-frm']]); ?>	                                       	
-                    <ul>
-                        <li>
-                            <img src="<?php echo \Yii::getAlias('@web') ?>/images/pdf-icon.png">test.png
-                            <i class="close">x</i>
+                 <ul id="patient_docs">
+                    <?php  if(is_array($patient_docs)){
+                      foreach ($patient_docs as $value) {                          
+                        $type = explode("/", $value->docType);
+                        $doc_type =  end($type);
+                        switch ($doc_type) {
+                            case 'jpeg':
+                            case 'png':    
+                                $icon_image = \Yii::getAlias('@web')."/images/jpeg-icon.png";
+                                break;
+                            case 'pdf':    
+                                $icon_image = \Yii::getAlias('@web')."/images/pdf-icon.png";
+                                break; 
+                            default:
+                                $icon_image = \Yii::getAlias('@web')."/images/doc-icon.png";
+                                break;                                 
+                            }?>
+                        <li id="li_<?=$value->id;?>">
+                            <img src="<?php echo $icon_image; ?>"><br>
+                            <?php echo $value->title;?>
+                            <i class="close del_patient_docs" data-id="<?=$value->id;?>" >x</i>
+                        </li>
+                         <?php } } ?>  
+                                      
+                        
+                       <!-- <li>
+                            <img src="<?php //echo \Yii::getAlias('@web') ?>/images/pdf-icon.png">
+                        <i class="close">x</i>
                         </li>
                         <li>
-                        	<img src="<?php echo \Yii::getAlias('@web') ?>/images/doc-icon.png" />
-                        	<i class="close">x</i>    
+                            <img src="<?php //echo \Yii::getAlias('@web') ?>/images/doc-icon.png" />
+                             
                         </li>
                         <li>
-                           <img src="<?php echo \Yii::getAlias('@web') ?>/images/jpeg-icon.png" />
-                           <i class="close">x</i>
-                        </li>
+                           <img src="<?php //echo \Yii::getAlias('@web') ?>/images/jpeg-icon.png" />
+                          
+                        </li>-->
                      </ul>   
                  	<input type="file" name="doc" class="upd-btn">
                         <?= Html::submitButton('Upload', ['class' => 'btn btn-primary','id' =>'patient_doc', 'name' => 'patient_doc', 'value' => 'submit']) ?>
@@ -360,7 +385,8 @@ $this->title = 'Add Medical Details';
           <?php $form = ActiveForm::begin(['id' => 'form-medication','options' => ['enctype' => 'multipart/form-data']]); ?>	
           <div class="form-group">
           	<div class="col-xs-6">
-                <label>Medication</label>           
+                <label>Medication</label>                                
+                <?php//  echo \yii\jui\AutoComplete::widget(['name' => 'country','class'=>'form-control','clientOptions' => ['source' => ['USA', 'RUS'], ], ]);?>                 
                 <input type="text" name='STR' id="txt_str" class="form-control" placeholder="Search">
           	</div>
           	<div class="col-xs-6">
@@ -557,7 +583,7 @@ $this->title = 'Add Medical Details';
         $j("#myModal1 #ddl_severity").val('select'); 
         $j("#myModal1 #txt_al_datepicker_begin").val('');
         $j("#myModal1 #txt_al_datepicker_end").val('');        
-        $j('#submit_allergies').text('Add Allergies').button("refresh");
+        $j('#submit_allergies').text('Add Allergies');
         
     });
     
@@ -583,7 +609,7 @@ $this->title = 'Add Medical Details';
         $j("#myModal1 #ddl_severity").val($j(this).data('severity'));
         $j("#myModal1 #txt_al_datepicker_begin").val($j(this).data('begindate'));
         $j("#myModal1 #txt_al_datepicker_end").val($j(this).data('enddate'));        
-        $j('#submit_allergies').text('Update Allergies').button("refresh");
+        $j('#submit_allergies').text('Update Allergies');
         
     });
     
@@ -596,7 +622,7 @@ $this->title = 'Add Medical Details';
         $j("#myModal2 #txt_route").val(''); 
         $j("#myModal2 #txt_md_datepicker_begin").val('');
         $j("#myModal2 #txt_md_datepicker_end").val('');        
-        $j('#submit_medications').text('Add Medications').button("refresh");
+        $j('#submit_medications').text('Add Medications');
         
     });
     
@@ -610,7 +636,7 @@ $this->title = 'Add Medical Details';
         $j("#myModal2 #txt_form").val($j(this).data('form'));
         $j("#myModal2 #txt_md_datepicker_begin").val($j(this).data('begindate'));
         $j("#myModal2 #txt_md_datepicker_end").val($j(this).data('enddate'));        
-        $j('#submit_medications').text('Update Medications').button("refresh");
+        $j('#submit_medications').text('Update Medications');
         
     });    
     
@@ -624,7 +650,7 @@ $this->title = 'Add Medical Details';
         $j("#myModal3 #txt_occurrence").val(''); 
         $j("#myModal3 #txt_ap_datepicker_begin").val('');
         $j("#myModal3 #txt_ap_datepicker_end").val('');        
-        $j('#submit_activeproblems').text('Add Active Problems').button("refresh");
+        $j('#submit_activeproblems').text('Add Active Problems');
         
     });
     
@@ -638,7 +664,7 @@ $this->title = 'Add Medical Details';
         $j("#myModal3 #txt_occurrence").val($j(this).data('occurrence'));
         $j("#myModal3 #txt_ap_datepicker_begin").val($j(this).data('begindate'));
         $j("#myModal3 #txt_ap_datepicker_end").val($j(this).data('enddate'));        
-        $j('#submit_activeproblems').text('Update Active Problems').button("refresh");
+        $j('#submit_activeproblems').text('Update Active Problems');
         
     });     
     
@@ -713,6 +739,32 @@ $this->title = 'Add Medical Details';
      }     
      
     });    
+    
+    $j(document).on("click", ".del_patient_docs", function () {    
+        if (window.confirm('Are you sure you want to delete this file?')){
+          //alert($j(this).data('id'));
+          var Id = $j(this).data('id');     
+            $j.ajax({
+                    type: "POST", 		
+                    url: '<?php echo Url::toRoute('/account/delete_patient_doc') ?>', 
+                    async: false,
+                    data: {id : $j(this).data('id')},                 
+                    success: function (response) {
+                       if(response==1){
+                           alert('File deleted successfully.');
+                           location.reload(true);
+                           $j('div#step4 ui#patient_docs li#li_'+Id).remove();
+                       }else{
+                           alert(response);
+                       }                       
+                    }                  
+                });         
+     }
+     else{     
+        return false;
+     }     
+     
+    });        
     
     
     

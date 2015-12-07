@@ -3,7 +3,9 @@
 namespace api\modules\v1\controllers;
 
 use Yii;
+use yii\helpers\Url;
 use common\models\Users;
+use app\models\Patient;
 use app\models\Settings;
 use app\models\ApiLog;
 use common\models\Transactions;
@@ -28,8 +30,8 @@ class DocumentController extends Controller
     public $currencyLabel       = 'N';  
     public $twilio_from_phone;
     public $twilio_account_sid;
-    public $twilio_auth_token;
-    public $folder = "../gaiaehr/sites/default/patients";
+    public $twilio_auth_token;   
+    public $folder = "/home/devphoneadoctorc/public_html/portal/sites/default/patients";
 
     
     
@@ -146,75 +148,79 @@ class DocumentController extends Controller
      * Purpose    : Create a user
      * Returns    : Result of insert operation
      */
-public function upload($xmldocumentDetails) {
+  public function upload($xmldocumentDetails) {
 
-      //check the mandatory fields
- 
+        //check the mandatory fields
+
         if (!isset($xmldocumentDetails['user']['id']) || trim($xmldocumentDetails['user']['id']) == '') {
-            
+
             $this->addLogEntry('document.create', 'Failure', 9, 'document user id missing.');
             $this->generateJsonResponce(array("response_code" => 113, "description" => 'document user id missing.'), 'error', 400);
-            
-        }else if (!isset($xmldocumentDetails['user']['auth_key']) || trim($xmldocumentDetails['user']['auth_key']) == '') {
-            
+        } else if (!isset($xmldocumentDetails['user']['auth_key']) || trim($xmldocumentDetails['user']['auth_key']) == '') {
+
             $this->addLogEntry('document.create', 'Failure', 9, 'Auth key missing.');
             $this->generateJsonResponce(array("response_code" => 113, "description" => 'Auth key missing.'), 'error', 400);
-            
-        }else if (!isset($xmldocumentDetails['document']['name']) || trim($xmldocumentDetails['document']['name']) == '') {
-            
+        } else if (!isset($xmldocumentDetails['document']['name']) || trim($xmldocumentDetails['document']['name']) == '') {
+
             $this->addLogEntry('document.create', 'Failure', 9, 'File title missing.');
             $this->generateJsonResponce(array("response_code" => 113, "description" => 'File title missing.'), 'error', 400);
-            
-        }else {
-            //echo "<pre>";print_r($xmldocumentDetails['document']);exit;
+        } else {
+
             //$_FILES = $xmldocumentDetails['document'];
             $postdata = fopen($xmldocumentDetails['document']['tmp_name'], "r");
-        /* Get file extension */
-        $title = $xmldocumentDetails['document']['name'];
-        $extension = substr( $xmldocumentDetails['document'][ 'name' ], strrpos( $xmldocumentDetails['document'][ 'name' ], '.' ) );
-        if(!is_dir($this->folder."/".$xmldocumentDetails['user']['id']))
-            mkdir($this->folder."/".$xmldocumentDetails['user']['id']);
-        if(!is_dir($this->folder."/".$xmldocumentDetails['user']['id']."/uploaddoc"))
-            mkdir($this->folder."/".$xmldocumentDetails['user']['id']."/uploaddoc");
-        /* Generate unique name */
-        $filename = $this->folder."/".$xmldocumentDetails['uid']."/uploaddoc/".$title. uniqid() . $extension;
+            /* Get file extension */
+            $title = $xmldocumentDetails['document']['name'];
+            $extension = substr($xmldocumentDetails['document']['name'], strrpos($xmldocumentDetails['document']['name'], '.'));
+            if (!is_dir($this->folder . "/" . $xmldocumentDetails['user']['id']))
+                mkdir($this->folder . "/" . $xmldocumentDetails['user']['id']);
+            if (!is_dir($this->folder . "/" . $xmldocumentDetails['user']['id'] . "/uploaddoc"))
+                mkdir($this->folder . "/" . $xmldocumentDetails['user']['id'] . "/uploaddoc");
+            /* Generate unique name */
+            $unique_name = uniqid() . $extension;
+            $filename = $this->folder . "/" . $xmldocumentDetails['user']['id'] . "/uploaddoc/" . $unique_name;
 
-        /* Open a file for writing */
-        $fp = fopen( $filename, "w" );
+            /* Open a file for writing */
+            $fp = fopen($filename, "w");
 
-        /* Read the data 1 KB at a time
-          and write to the file */
-        while( $data = fread( $postdata, 1024 ) )
-            fwrite( $fp, $data );
+            /* Read the data 1 KB at a time
+              and write to the file */
+            while ($data = fread($postdata, 1024))
+                fwrite($fp, $data);
 
-        /* Close the streams */
-        fclose( $fp );
-        fclose( $postdata );
+            /* Close the streams */
+            fclose($fp);
+            fclose($postdata);
 
-        /* the result object that is sent to client*/
-                        $model =  new PatientDocuments;
-                        $model->title = $title;
-                        $model->docType = $xmldocumentDetails['document']['type'];
-                        $model->date = (int) time();
-                        $model->url = Url::toRoute($filename);                        
-                        $model->uid = $xmldocumentDetails['user']['id'];
-                        
-                        $model->validate();
-                        if($model->getErrors()){
-                            $this->addLogEntry('document.create', 'Failure', 9, 'Correct the validation errors.');
-                        $this->generateJsonResponce(array("response_code" => 113, "description" => 'Correct the validation errors.','errors'=>$model->getErrors()), 'error', 400);
-                        exit;
-                        }
-                        
-                        $model->save();
-        
-               
-                $this->addLogEntry('document.create', 'Success', 3, 'File uploaded successfully');
-                $this->generateJsonResponce(array("response_code" => 100, "description" => 'File uploaded successfully.'), 'ok', 200);               
+            /* the result object that is sent to client */
+            $user_exists = Patient::find()->where('user_id LIKE "' . $xmldocumentDetails['user']['id'] . '"')->one();
+            $patient_id = ($user_exists != NULL) ? $user_exists->pid : 0;
+
+            $model = new PatientDocuments;
+            $model->eid = 0;
+            $model->pid = $patient_id;
+            $model->name = $unique_name;
+            $model->title = $title;
+            $model->docType = $xmldocumentDetails['document']['type'];//'UploadDoc';
+            $model->date = date('Y-m-d H:i:s');
+            $model->url = 'http://174.142.92.198/portal/sites/default/patients/' . $xmldocumentDetails['user']['id'] . "/uploaddoc/" . $unique_name;
+            $model->uid = $xmldocumentDetails['user']['id'];
+            $model->hash = sha1($unique_name);
+
+            $model->validate();
+            if ($model->getErrors()) {
+                $this->addLogEntry('document.create', 'Failure', 9, 'Correct the validation errors.');
+                $this->generateJsonResponce(array("response_code" => 113, "description" => 'Correct the validation errors.', 'errors' => $model->getErrors()), 'error', 400);
                 exit;
-            
-         }
-       }
+            }
+
+            $model->save();
+
+            $this->addLogEntry('document.create', 'Success', 3, 'File uploaded successfully');
+            $this->generateJsonResponce(array("response_code" => 100, "description" => 'File uploaded successfully.'), 'ok', 200);
+            $this->redirect(Url::toRoute('/account/medical/#step4'));
+            exit;
+        }
+    }
        
         
 
