@@ -1,12 +1,13 @@
 <?php
 
 namespace frontend\controllers;
-
+use yii\db\Query;
 use yii\helpers\Url;
 use common\models\UploadForm;
 use app\models\PatientAllergies;
 use app\models\PatientMedications;
 use app\models\PatientActiveProblems;
+use app\models\Rxnconso;
 use yii\web\UploadedFile;
 require_once("common/components/Send.php");
 require_once("common/components/checkLogin.php");
@@ -248,7 +249,27 @@ public function actionDelete_patient_doc()
         }
        return $this->render('medical',[
             ]);
-    }    
+    }   
+   
+    public function actionGetstr(){
+        
+        $search_val = $_REQUEST['query'];       
+        $query = new Query;
+        $query->select('STR') 
+            ->from('rxnconso')
+            ->where('(SAB = "RXNORM") AND STR LIKE "%'.$search_val.'%"')
+            ->groupBy('RXCUI')
+            ->limit(100);
+        
+        $command = $query->createCommand();                
+        $results = $command->queryAll();    
+        foreach ($results as $value) {
+            $str_res[] = $value['STR'];
+        }
+        $str_data = ($str_res!=NULL)?$str_res:"No results found";  
+        
+        return json_encode($str_data);
+    }
 
     public function actionMedical() {
         $session = \Yii::$app->session;

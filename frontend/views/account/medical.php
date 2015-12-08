@@ -2,12 +2,15 @@
 /* @var $this yii\web\View */
 use yii\helpers\Html;
 use yii\helpers\Url;
-use yii\jui\AutoComplete;
+
+/*use yii\jui\AutoComplete;
+use yii\web\JsExpression;*/
 //use yii\bootstrap\ActiveForm;
 use kartik\widgets\ActiveForm;
 use kartik\widgets\FileInput;
 $this->title = 'Add Medical Details';
 ?>
+<link href="<?php echo \Yii::getAlias('@web') ?>/css/auto_complete.css" rel="stylesheet" />
 <script type="text/javascript">
      function configureDropDownLists(ddl1,ddl2) {
      
@@ -76,7 +79,7 @@ $this->title = 'Add Medical Details';
             <button type="button" class="btn btn-primary btn-xs" data-toggle="offcanvas"><i class="glyphicon glyphicon-chevron-left"></i></button>
           </p> 
           
-          <h2>Update , Edit or Delete your Medical history</h2>           
+          <h2>Update , Edit or Delete your Medical history</h2>              
           <div class="updt-del">
              <ul class="nav nav-tabs">
               <li class="active"><a data-toggle="tab" href="#step1">Allergies</a></li>
@@ -385,9 +388,8 @@ $this->title = 'Add Medical Details';
           <?php $form = ActiveForm::begin(['id' => 'form-medication','options' => ['enctype' => 'multipart/form-data']]); ?>	
           <div class="form-group">
           	<div class="col-xs-6">
-                <label>Medication</label>                                
-                <?php//  echo \yii\jui\AutoComplete::widget(['name' => 'country','class'=>'form-control','clientOptions' => ['source' => ['USA', 'RUS'], ], ]);?>                 
-                <input type="text" name='STR' id="txt_str" class="form-control" placeholder="Search">
+                <label>Medication</label> 
+                    <input type="text" name='STR' id="STR" class="form-control" placeholder="Search">               
           	</div>
           	<div class="col-xs-6">
                 <label>Dose</label>           
@@ -539,6 +541,7 @@ $this->title = 'Add Medical Details';
 <script src="<?php echo \Yii::getAlias('@web') ?>/js/jquery.min.js"></script>
 <script src="<?php echo \Yii::getAlias('@web') ?>/js/moment-with-locales.js"></script>
 <script src="<?php echo \Yii::getAlias('@web') ?>/js/bootstrap-datetimepicker.js"></script>
+<script src="<?php echo \Yii::getAlias('@web') ?>/js/typeahead.js"></script>
     
 <script type="text/javascript">
     var $j = jQuery.noConflict();  
@@ -617,7 +620,7 @@ $this->title = 'Add Medical Details';
     $j(document).on("click", "#add_medication", function () { 
 
         $j("#myModal2 #md_id").val('');
-        $j("#myModal2 #txt_str").val('');        
+        $j("#myModal2 #STR").val('');        
         $j("#myModal2 #txt_dose").val(''); 
         $j("#myModal2 #txt_route").val(''); 
         $j("#myModal2 #txt_md_datepicker_begin").val('');
@@ -630,7 +633,7 @@ $this->title = 'Add Medical Details';
     $j(document).on("click", "#edit_medications", function () {        
 
         $j("#myModal2 #md_id").val($j(this).data('id'));        
-        $j("#myModal2 #txt_str").val($j(this).data('str'));
+        $j("#myModal2 #STR").val($j(this).data('str'));
         $j("#myModal2 #txt_dose").val($j(this).data('dose')); 
         $j("#myModal2 #txt_route").val($j(this).data('route'));
         $j("#myModal2 #txt_form").val($j(this).data('form'));
@@ -751,9 +754,7 @@ $this->title = 'Add Medical Details';
                     data: {id : $j(this).data('id')},                 
                     success: function (response) {
                        if(response==1){
-                           alert('File deleted successfully.');
-                           location.reload(true);
-                           $j('div#step4 ui#patient_docs li#li_'+Id).remove();
+                           $j('#li_'+Id).remove();
                        }else{
                            alert(response);
                        }                       
@@ -766,7 +767,20 @@ $this->title = 'Add Medical Details';
      
     });        
     
-    
+
+$j(document).ready(function(){
+
+    $j("#STR").typeahead({
+        name : 'search',
+        valueKey: 'STR',
+        limit:10,        
+        remote: {
+            url : '<?php echo Url::toRoute('/account/getstr') ?>?query=%QUERY'
+        }
+        
+    });
+});
+
     
 </script>                
         

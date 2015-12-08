@@ -967,7 +967,7 @@ class UserController extends Controller {
             $accessAuthorised =  Yii::$app->AuthoriseUser->checkAuthKey();
             if($accessAuthorised){ 
                 $query = new Query;
-                   $query->select('title, fname, lname,sex,DOB,marital_status,SS,pubpid,address,city,state,country,zipcode,mobile_phone,email,mothers_name,guardians_name,pharmacy')
+                   $query->select('title, fname, lname,sex,DOB,marital_status,SS,pubpid,address,city,state,country,zipcode,mobile_phone,email,mothers_name,guardians_name,pharmacy,skypeid')
                         ->from('patient')
                         ->where('user_id = ' .$xmlUserDetails['user']['id']);
                 $command = $query->createCommand();
