@@ -56,7 +56,7 @@ $this->title = 'Update Account Details';
                                   <div class="form-group col-sm-6 col-xs-12">
                                     <label >Date of Birth</label>
                                     <div class="input-group date dob" id="datepicker_dob">
-                                        <input id="txt_datepicker_dob" type="text" name="DOB" class="form-control" value="<?php echo $data->description->DOB ?>" placeholder="Date of Birth">
+                                        <input id="txt_datepicker_dob" type="text" name="DOB" class="form-control" value="<?php echo date('d-m-Y', strtotime($data->description->DOB)); ?>" placeholder="Date of Birth">
                                         <span class="input-group-addon">
                                             <span class="glyphicon glyphicon-calendar"></span>
                                         </span>
