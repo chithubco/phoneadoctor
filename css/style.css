@@ -136,6 +136,7 @@ header{padding-top:108px;}
 .consult-pg .cnt-blk .chrg-opt ul li span.payg img{padding-top:14px;}
 .consult-pg .cnt-blk .chrg-opt ul li a{font-family: 'Roboto', sans-serif; font-size:13px; color:#3a3a3a; font-weight:normal; text-align:center; text-decoration:none;}
 .consult-pg .cnt-blk .chrg-opt p{margin-bottom:42px;}
+.consult-pg .cnt-blk .form-control.selectpicker > option{padding:5px 10px;}
 
 /*====================================CONSULTATION HISTORY PAGE=================================*/
 .consultation-history {background:#consultation-history;}
@@ -267,7 +268,7 @@ header{padding-top:108px;}
 /*=======================EDIT USER INFORMATION==================================*/
 .edit-info .btn-grp{width:195px; margin:50px auto 15px;}
 .edit-info .form-inline{background:#f2f2f2; padding:50px 25px 0 25px;}
-.edit-info label{font-family: 'Roboto', sans-serif; font-size:13px; color:#5b5b5b; font-weight:normal; padding-right:40px;}
+.edit-info label{font-family: 'Roboto', sans-serif; font-size:13px; color:#5b5b5b; font-weight:normal; padding-right:0px;}
 .edit-info .can-btn {background:#f6f6f6; border-radius:0; border:1px solid #e9e9e9; font-family: 'Roboto', sans-serif; font-size:13px; color:#5b5b5b; font-weight:normal; padding:5px 20px;}
 .edit-info .upd-btn{background:#6d9ce5; border-radius:0; font-family: 'Roboto', sans-serif; font-size:13px; color:#fff; font-weight:normal; padding:5px 20px;}
 .edit-info .panel-default{border:0; border-bottom:1px solid #eee;}
@@ -275,6 +276,14 @@ header{padding-top:108px;}
 .edit-info .panel-default > .panel-heading h4{font-family: 'Roboto', sans-serif; font-size:15px; color:#095ad8; font-weight:normal;}
 .edit-info .panel-default > .panel-heading h4 >span{float:right; font-family: 'Roboto', sans-serif; font-size:13px; color:#424242; font-weight:normal;}
 .edit-info .panel-default > .panel-heading h4 i{padding-left:20px;}
+
+.edit-info .form-group{margin-bottom:15px;}
+.edit-info .form-group .form-control{width:100%;}
+.edit-info .radio-inline{ padding-left:40px;}
+.edit-info .btn{background:#6e9de6; font-family: 'Roboto', sans-serif; font-size:14px; color:#fff; font-weight:normal; border:1px solid #6e9de6; margin:10px 0 0 0; border-radius:0; padding:5px 25px;}
+.edit-info .form-group label{width:100%;}
+.edit-info .form-group .dob{width:100%;}
+
 /*-------------pop up--------------*/
 .edit-box .modal-content{max-width:380px; border:1px solid #ebecef; background:#f6f7f8; padding:30px; position:absolute; top:50%; left:50%; margin-top:-50px; border-radius:5px; margin-left:-190px; width:100%;}
 .edit-box .modal-footer{text-align:center; border:0;}

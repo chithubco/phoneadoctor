@@ -1,103 +1,147 @@
 <?php
-/* @var $this yii\web\View */
 use yii\helpers\Html;
-//use yii\bootstrap\ActiveForm;
+use yii\helpers\Url;
 use kartik\widgets\ActiveForm;
 use kartik\widgets\FileInput;
 $this->title = 'Update Account Details';
 ?>
 <!----------------MAIN CONTAINER--------------------------->
-<div class="col-sm-8 main-container consult-pg">
+<div class="container">
+    <div class="row row-offcanvas row-offcanvas-left ">
 	<!--toggle sidebar button-->
 	<p class="visible-xs">
 		<button type="button" class="btn btn-primary btn-xs" data-toggle="offcanvas"><i class="glyphicon glyphicon-chevron-left"></i></button>
 	</p>
 	
-	<h2>Update Account</h2>
-	<div class="cnt-blk">
-		<?php $form = ActiveForm::begin(['id' => 'form-consult','options' => ['enctype' => 'multipart/form-data']]); ?>
-			
-			<div class="form-group">
-			First Name:
-				<input type="text" name="fname" class="form-control" value="<?php echo $data->description->fname ?>">
-			</div>
-			<div class="form-group">
-			Last Name:
-				<input type="text" name="lname" class="form-control" value="<?php echo $data->description->lname ?>">
-			</div>
-                        <div class="form-group">
-			Skype Id:
-				<input type="text" name="skypeid" class="form-control" value="<?php echo $data->description->skypeid ?>">
-			</div>            
-			<div class="form-group">
-			Sex:
-				<input type="text" name="sex" class="form-control" value="<?php echo $data->description->sex ?>">
-			</div>
-			<div class="form-group">
-				<textarea class="form-control txt-area" name="address" placeholder="Type your address here"><?php echo $data->description->address ?></textarea>
-			</div>
-			<div class="form-group">
-			City:
-				<input type="text" name="city" class="form-control" value="<?php echo $data->description->city ?>">
-			</div>
-			<div class="form-group">
-			State:
-				<input type="text" name="state" class="form-control" value="<?php echo $data->description->state ?>">
-			</div>
-			<?php
-			
+        <div class="col-sm-8 main-container mk-donation edit-info">          
+          <!--toggle sidebar button-->
+          <p class="visible-xs">
+            <button type="button" class="btn btn-primary btn-xs" data-toggle="offcanvas"><i class="glyphicon glyphicon-chevron-left"></i></button>
+          </p> 
+          
+          <h2>edit your information</h2> 
+            
+            <div class="row">
+            <div class="col-lg-12">
+                <!--<div class="panel-group" id="accordion">-->
+                <div class="panel-group2">	                    
+                	<!-- /.panel -->
+                    <div class="panel panel-default">                        
+                       
+                            <div class="panel-body">                              
+                               <form class="form-inline">
+                                  <div class="form-group col-sm-6 col-xs-12">
+                                    <label for="exampleInputName2">First Name</label>
+                                    <input type="text" class="form-control"  placeholder="First Name" value="<?php echo $data->description->fname ?>">
+                                  </div>
+                                  <div class="form-group col-sm-6 col-xs-12">
+                                    <label >Last Name</label>
+                                    <input type="text" class="form-control" placeholder="Last Name" value="<?php echo $data->description->lname ?>">
+                                  </div>
+                                  <div class="form-group col-sm-6 col-xs-12">
+                                    <label >Sex</label>
+                                    <div class="radio">
+                                      <label>
+                                        <input type="radio" name="optionsRadios" id="optionsRadios1" value="Male" <?php if($data->description->sex=='Male'){ ?> checked <?php } ?>>
+                                        Male
+                                      </label>
+                                    </div>
+                                    <div class="radio">
+                                      <label>
+                                        <input type="radio" name="optionsRadios" id="optionsRadios2" value="Female" <?php if($data->description->sex=='Female'){ ?>checked <?php } ?>>
+                                        Female
+                                      </label>
+                                    </div>
+                                  </div>
+                                  <div class="form-group col-sm-6 col-xs-12">
+                                    <label >Date of Birth</label>
+                                    <div class="input-group date dob" id="datepicker_dob">
+                                        <input id="txt_datepicker_dob" type="text" name="DOB" class="form-control" value="<?php echo $data->description->DOB ?>" placeholder="Date of Birth">
+                                        <span class="input-group-addon">
+                                            <span class="glyphicon glyphicon-calendar"></span>
+                                        </span>
+                                    </div>
+                                  </div>
+                                  <div class="form-group col-sm-6 col-xs-12">
+                                    <label >Marital Status</label>
+                                    <select class="form-control" placeholder="Marital Status"> 
+                                        <option <?php if($data->description->marital_status =='Single' ){ ?>selected <?php }?>>Single</option>
+                                        <option <?php if($data->description->marital_status =='Married' ){ ?>selected <?php }?>>Married</option>
+                                        <option <?php if($data->description->marital_status =='Divorced' ){ ?>selected <?php }?>>Divorced</option>
+                                        <option <?php if($data->description->marital_status =='Separated' ){ ?>selected <?php }?>>Separated</option>
+                                        <option <?php if($data->description->marital_status =='Widow' ){ ?>selected <?php }?>>Widow</option>
+                                    </select>
+                                  </div>
+                                  <div class="form-group col-sm-6 col-xs-12">
+                                    <label >Address</label>
+                                    <input type="text" class="form-control" placeholder="Address" value="<?php echo $data->description->address ?>">
+                                  </div>
+                                  <div class="form-group col-sm-6 col-xs-12">
+                                    <label >City</label>
+                                    <input type="text" class="form-control" placeholder="City" value="<?php echo $data->description->city ?>">
+                                  </div>
+                                  <div class="form-group col-sm-6 col-xs-12">
+                                    <label >State</label>
+                                    <input type="text" class="form-control" placeholder="State" value="<?php echo $data->description->state ?>">
+                                  </div>
+                                  <div class="form-group col-sm-6 col-xs-12">
+                                    <label >Country</label>
+                                    <input type="text" class="form-control" placeholder="Country" value="<?php echo $data->description->country ?>">
+                                  </div>
+                                  <div class="form-group col-sm-6 col-xs-12">
+                                    <label >Zipcode</label>
+                                    <input type="text" class="form-control" placeholder="Zipcode" value="<?php echo $data->description->zipcode ?>">
+                                  </div>
+                                  <div class="form-group col-sm-6 col-xs-12">
+                                    <label >Email</label>
+                                    <input type="text" class="form-control" placeholder="Email" value="<?php echo $data->description->email ?>">
+                                  </div>
+                                  <div class="form-group col-sm-6 col-xs-12">
+                                    <label >Guardians Name</label>
+                                    <input type="text" class="form-control" placeholder="Guardians Name" value="<?php echo $data->description->guardians_name ?>">
+                                  </div>
+                                  <div class="form-group col-sm-6 col-xs-12">
+                                    <label >Skypeid</label>
+                                    <input type="text" class="form-control" placeholder="Skypeid" value="<?php echo $data->description->skypeid ?>">
+                                  </div>
+                                  
+                                  <div class="form-group col-sm-6 col-xs-12">
+                                    <label >Photo</label>
+                                    <input type="file" class="upld-fld">
+                                    <i class="clearfix"></i>
+                                  </div>
+                                  <div class="clearfix"></div>
+                                  <div class="btn-grp">
+                                    <div class="col-xs-6">
+                                    	<a href="#" class="btn btn-default sbt-btn" data-toggle="modal" data-target="#popup2">Submit</a>
+                                     </div>   
+                                    <div class="col-xs-6">
+                                      <a href="#" class="btn btn-default upd-btn" data-toggle="modal" data-target="#popup" >Update</a>
+                                    </div>
+                                    <i class="clearfix"></i>
+                                  </div>                                 
+                                </form>
+                            </div>                       
+                    </div>
 
-   
-    echo $form->field($model, 'file')->widget(FileInput::classname(), [
-        'options' => ['accept' => 'image/*'],
-    ]);
-			?>
-			<div class="form-group">
-			Pin:
-				<input type="password" name="pin" class="form-control">
-			</div>
-			<!--
-			<div class="form-group">
-				<p>Scheduled for  a consultation</p>
-				<div class="col-sm-6 sm-no-pad-lt">
-					<div class="input-group date" id="datetimepicker2">
-						<span class="input-group-addon">
-							<span class="glyphicon glyphicon-calendar"></span>
-						</span>
-						<input type="text" class="form-control">
-					</div>
-				</div>
-				<div class="col-sm-6 sm-no-pad-rt">
-					<div class="input-group date" id="datetimepicker3">
-						<span class="input-group-addon">
-							<span class="glyphicon glyphicon-time"></span>
-						</span>
-						<input type="text" class="form-control">
-					</div>
-				</div>
-			</div>
-			
-			<!--
-			<div class="chrg-opt">
-				<p>Select available charging options</p>
-				<ul>
-					<li class="col-xs-4 col-lt-12">
-						<a href="#"><span><img src="<?php echo \Yii::getAlias('@web') ?>/images/free-minutes.png" alt="free minutes"></span> Free Minutes</a>
-					</li>
-					
-					<li class="col-xs-4 col-lt-12">
-						<a href="#"><span class="payg"><img src="<?php echo \Yii::getAlias('@web') ?>/images/payus.png" alt="payg"></span> PAYG</a>
-					</li>
-					
-					<li class="col-xs-4 col-lt-12">
-						<a href="#"><span><img src="<?php echo \Yii::getAlias('@web') ?>/images/premium.png" alt="Active subscription icon"></span>Active Subscription</a>
-					</li>
-					
-				</ul>
-			</div>
-			-->
-		<?= Html::submitButton('Update Account', ['class' => 'btn btn-default', 'name' => 'signup-button']) ?>
-                   
-                <?php ActiveForm::end(); ?>
-	</div>
-	<!----------------MAIN CONTAINER--------------------------->
+                </div>
+                <!-- /.panel-group -->
+            </div>
+            <!-- /.col-lg-12 -->
+        </div>
+        </div>
+</div>
+</div>
+
+<script src="<?php echo \Yii::getAlias('@web') ?>/js/jquery.min.js"></script>
+<script src="<?php echo \Yii::getAlias('@web') ?>/js/moment-with-locales.js"></script>
+<script src="<?php echo \Yii::getAlias('@web') ?>/js/bootstrap-datetimepicker.js"></script>
+<script type="text/javascript">
+    var $j = jQuery.noConflict();  
+    
+    $j(function () {
+        $j('#datepicker_dob').datetimepicker({
+            format: 'DD-MM-YYYY'
+        });
+    });
+</script>

@@ -106,9 +106,9 @@ class AccountController extends \yii\web\Controller
                 ');
             $model->file = UploadedFile::getInstance($model, 'file');
 
-        if ($model->validate()) {                
+        /*if ($model->validate()) {                
             $model->file->saveAs('pix/' .$session['id']. '.jpg');
-        }
+        }*/
             if($response->body->response_code==100){
             
             
@@ -352,7 +352,9 @@ public function actionDelete_patient_doc()
                         $pull_string .= '<id>' . $_POST['problemid'] . '</id>';
                     }
                     
-                    $pull_string .= '<eid>0</eid>        
+                    $pull_string .= '<eid>0</eid>     
+                                <code_type>' . $_POST['code_type'] . '</code_type>
+                                <referred_by>' . $_POST['referred_by'] . '</referred_by>                                    
                                 <code_text>' . $_POST['code_text'] . '</code_text>
                                 <occurrence>' . $_POST['occurrence'] . '</occurrence>
                                 <outcome>' . $_POST['outcome'] . '</outcome>               

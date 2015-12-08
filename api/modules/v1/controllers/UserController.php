@@ -173,7 +173,10 @@ class UserController extends Controller {
                     break;   
                 case 'user.deleteMedication':
                     $this->deleteMedication($xmlArray['request']);
-                    break;  
+                    break; 
+                case 'user.deleteActiveproblems':
+                    $this->deleteActiveproblems($xmlArray['request']);
+                    break;
                 case 'user.deletePatientdoc':
                     $this->deletePatientdoc($xmlArray['request']);
                     break;                 
@@ -837,7 +840,7 @@ class UserController extends Controller {
                 $patient_id = ($user_exists!=NULL)?$user_exists->pid:0;
                 
                 $query = new Query;
-                $query->select('actvpblm.id,actvpblm.pid as patient_id,actvpblm.code,actvpblm.code_text,actvpblm.begin_date,actvpblm.end_date,actvpblm.occurrence,actvpblm.referred_by,actvpblm.outcome') 
+                $query->select('actvpblm.id,actvpblm.pid as patient_id,actvpblm.code,actvpblm.code_text,actvpblm.code_type,actvpblm.begin_date,actvpblm.end_date,actvpblm.occurrence,actvpblm.referred_by,actvpblm.outcome') 
                     ->from('patient_active_problems actvpblm')                  
                     ->where('actvpblm.pid = ' . $patient_id);
                 $command = $query->createCommand();                

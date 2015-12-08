@@ -1,11 +1,7 @@
 <?php
-/* @var $this yii\web\View */
+
 use yii\helpers\Html;
 use yii\helpers\Url;
-
-/*use yii\jui\AutoComplete;
-use yii\web\JsExpression;*/
-//use yii\bootstrap\ActiveForm;
 use kartik\widgets\ActiveForm;
 use kartik\widgets\FileInput;
 $this->title = 'Add Medical Details';
@@ -16,7 +12,7 @@ $this->title = 'Add Medical Details';
      
     var Environmental = new Array('Dust', 'Pollen', 'Dust Mites','Animal Dander','Insect Sting','Nikel','Mould','Latex');
     var Food = new Array('Dairy', 'Egg', 'Peanut','Other Nuts','Seafood','Shellfish','Soy','Wheat','Melons, bananas, cucumbers (ragweed pollen)','Baker\'s Yeast');
-    //var names = new Array('John', 'David', 'Sarah');
+   
 
     switch (ddl1.value) {
         case 'Environmental':      
@@ -26,11 +22,8 @@ $this->title = 'Add Medical Details';
                allergy_drop_down +='<option value="'+Environmental[i]+'">'+Environmental[i]+'</option>';  //createOption(ddl2, Food[i], Food[i]);
             } 
              allergy_drop_down +='<select>';
-            $("#input_allergy").append(allergy_drop_down);            
-            /*ddl2.options.length = 0;
-            for (i = 0; i < Environmental.length; i++) {
-                createOption(ddl2, Environmental[i], Environmental[i]);
-            }*/
+            $("#input_allergy").append(allergy_drop_down);          
+
             break;
         case 'Food':
             $("#ddl2").remove();
@@ -187,9 +180,9 @@ $this->title = 'Add Medical Details';
                             	<thead>
                                 	<tr>
                                     	<td>S.No</td>
-                                        <td>Search</td>
+                                     <!--   <td>Search</td>-->
                                         <td>Problem</td>
-                                        <td>Occurance</td>
+                                        <td>Occurrence</td>
                                         <td>Outcome</td>
                                         <td>Referred by</td>
                                         <td>Date Diagnosed</td>
@@ -198,12 +191,12 @@ $this->title = 'Add Medical Details';
                                     </tr>
                                 </thead>  
                          <?php $i=1;
-                         if(is_array($active_problems)){
-                            foreach ($active_problems as $value) {                        
+                         if(is_array($active_problems)){                           
+                            foreach ($active_problems as $value) {                                
                           ?>  
                                 <tr id="row_<?php echo $value->id;?>">
                                     <td><?=$i;?></td>
-                                    <td><?=$value->code;?></td>
+                                   <!-- <td><?//=$value->code;?></td>-->
                                     <td><?=$value->code_text;?></td>
                                     <td><?=$value->occurrence;?></td>
                                     <td><?=$value->outcome;?></td>
@@ -477,13 +470,21 @@ $this->title = 'Add Medical Details';
                           <label>Code Type</label>           
                           <input type="text" id="txt_code_type" name="code_type" class="form-control">
                       </div>
+                      
                       <div class="col-xs-6">
-                          <label>Problem</label>           
-                          <input type="text" id="txt_code_text" name="code_text" class="form-control">
-                      </div>              
+                          <label>Referred By</label>           
+                          <input type="text" id="txt_referred_by" name="referred_by" class="form-control">
+                      </div>          
                 
                       <i class="clearfix"></i>
                   </div>
+                  
+                                        
+                <div class="form-group col-xs-12">
+                    <label>Problem</label>           
+                    <input type="text" id="txt_code_text" name="code_text" class="form-control">
+                </div>    
+                  
                   <div class="form-group">
                       <div class="col-xs-6">
                           <label>Outcome</label>           
@@ -495,8 +496,15 @@ $this->title = 'Add Medical Details';
                           </select> 
                       </div>
                       <div class="col-xs-6">
-                          <label>Occurrence</label>           
-                          <input type="text" id="txt_occurrence" name="occurrence" class="form-control">
+                          <label>Occurrence</label>   
+                          <select id="ddl_occurrence" class="form-control" name="occurrence">
+                              <option value="First">First</option>
+                              <option value="Early Recurrence">Early Recurrence(< 2 Mo)</option>
+                              <option value="Late Recurrence">Late Recurrence(2-12 Mo)</option>
+                              <option value="Delayed Recurrence">Delayed Recurrence(> 12 Mo)</option>                              
+                              <option value="Chronic/Recurrent">Chronic/Recurrent</option>
+                              <option value="Acute on Chronic">Acute on Chronic</option>
+                          </select>                                                    
                       </div>
                       <i class="clearfix"></i>
                   </div>
@@ -647,10 +655,11 @@ $this->title = 'Add Medical Details';
     $j(document).on("click", "#add_activeproblems", function () { 
 
         $j("#myModal3 #ap_id").val('');
-        $j("#myModal3 #txt_code_type").val('');        
+        $j("#myModal3 #txt_code_type").val(''); 
+        $j("#myModal3 #txt_referred_by").val('');
         $j("#myModal3 #txt_code_text").val(''); 
         $j("#myModal3 #ddl_outcome").val(''); 
-        $j("#myModal3 #txt_occurrence").val(''); 
+        $j("#myModal3 #ddl_occurrence").val(''); 
         $j("#myModal3 #txt_ap_datepicker_begin").val('');
         $j("#myModal3 #txt_ap_datepicker_end").val('');        
         $j('#submit_activeproblems').text('Add Active Problems');
@@ -662,9 +671,10 @@ $this->title = 'Add Medical Details';
 
         $j("#myModal3 #ap_id").val($j(this).data('id'));        
         $j("#myModal3 #txt_code_type").val($j(this).data('code'));
+        $j("#myModal3 #txt_referred_by").val($j(this).data('referred_by'));
         $j("#myModal3 #txt_code_text").val($j(this).data('code_text')); 
         $j("#myModal3 #ddl_outcome").val($j(this).data('outcome'));
-        $j("#myModal3 #txt_occurrence").val($j(this).data('occurrence'));
+        $j("#myModal3 #ddl_occurrence").val($j(this).data('occurrence'));
         $j("#myModal3 #txt_ap_datepicker_begin").val($j(this).data('begindate'));
         $j("#myModal3 #txt_ap_datepicker_end").val($j(this).data('enddate'));        
         $j('#submit_activeproblems').text('Update Active Problems');
