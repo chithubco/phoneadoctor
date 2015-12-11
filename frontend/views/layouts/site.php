@@ -72,8 +72,9 @@ $session = \Yii::$app->session;
                     
                     <!----- EDIT PROFILE-------->
                     <div class="edit-profile">
-                    <?php
-                    if(file_exists(\Yii::getAlias('@webroot')."/pix/".$session['id'].".jpg")){
+                    <?php                    
+                    //if(file_exists(\Yii::getAlias('@webroot')."/pix/".$session['id'].".jpg")){
+                     if($session['profile_image']!=NULL){
                     ?>
                         <img src="<?php echo \Yii::getAlias('@web') ?>/pix/<?php echo $session['id']?>.jpg" width="69px">
                         <?php

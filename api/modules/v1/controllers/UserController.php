@@ -1085,7 +1085,7 @@ class UserController extends Controller {
             $model      = User::findOne($id);         
             $model->auth_key = rand(1000,9999);
             $model->save();     
-            $userDetails = array('id'=>$id,'username'=>$user_exists->username,'auth_key'=>$model->auth_key);
+            $userDetails = array('id'=>$id,'username'=>$user_exists->username,'auth_key'=>$model->auth_key,'profile_image'=>$patient_exists->image);
             $this->addLogEntry('user.Login', 'Success', 9, 'User logged in sucesssfully, User Id : '.$id );
             $this->generateJsonResponce(array("response_code" => 100, "description" => $userDetails), 'ok', 200);               
         }

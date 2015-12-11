@@ -112,6 +112,7 @@ class SiteController extends Controller
             $session['id'] = $response->body->description->id;
             $session['authkey'] = $response->body->description->auth_key;
             $session['username'] = $response->body->description->username;
+            $session['profile_image'] = $response->body->description->profile_image;
             return true;
         }else{
             $session['error'] =  $response->body->description;
