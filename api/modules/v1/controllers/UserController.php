@@ -336,8 +336,8 @@ class UserController extends Controller {
                         $model_verification->phone_no = $xmlUserDetails['user']['phone'];
                         $model_verification->verification_code = $code;
                         $model_verification->verified = 'NO';                        
-                        $model_patients->setAttributes($model_verification);                        
-                        if($model_patients->getErrors()){
+                        //$model_patients->setAttributes($model_verification);                        
+                        if($model_verification->getErrors()){
                             $this->addLogEntry('user.sendverification', 'Failure', 9, 'Correct the validation errors.');
                             $this->generateJsonResponce(array("response_code" => 113, "description" => 'Correct the validation errors.','errors'=>$model->getErrors()), 'error', 400);
                             exit;
@@ -510,6 +510,7 @@ class UserController extends Controller {
                         $xmlUserDetails['user']['patients']['lname'] = $userLastName;
                         $xmlUserDetails['user']['patients']['pubpid'] = $xmlUserDetails['user']['patients']['mobile_phone'];
                         $model_patients->setAttributes($xmlUserDetails['user']['patients']);
+                        $model_patients->user_id=$userId;
                         $model_patients->validate();
                         if ($model_patients->getErrors()) {
                             $this->addLogEntry('user.create', 'Failure', 9, 'Correct the validation errors.');
@@ -582,11 +583,10 @@ class UserController extends Controller {
             if($accessAuthorised){            
                 if ($user_exists) {
                     
-                    $model = $this->findModel($this->sanitizeXML($xmlUserDetails['user']['userinfo']['id']));
+                    $model = $this->findModel($xmlUserDetails['user']['userinfo']['id']);
                     $userFullName = $this->sanitizeXML($xmlUserDetails['user']['userinfo']['fname']) . $this->sanitizeXML($xmlUserDetails['user']['userinfo']['lname']);
                     $userFirstName = $this->sanitizeXML($xmlUserDetails['user']['userinfo']['fname']);
-                    $userLastName = $this->sanitizeXML($xmlUserDetails['user']['userinfo']['lname']);
-                    $userPhone = $this->sanitizeXML($xmlUserDetails['user']['patients']['mobile_phone']);
+                    $userLastName = $this->sanitizeXML($xmlUserDetails['user']['userinfo']['lname']);                    
                                       
 
                     if (!isset($xmlUserDetails['user']['userinfo']['username']) || trim($xmlUserDetails['user']['userinfo']['username']) == '') {
@@ -615,12 +615,7 @@ class UserController extends Controller {
 
                     $email_exists = Patient::find()->where('email LIKE "' . $email . '"')->all();
                     $email_check_flag = count($email_exists) >= 2 ? true : false;
-                    }
-
-                    //check if phone no. is already in use
-                    $phone_exists = 0;
-                    $phone_exists = Patient::find()->where('mobile_phone LIKE "' . $userPhone . '"')->all();                    
-                    $phone_check_flag = count($phone_exists) == 1 ? true : false;                    
+                    }                   
                     
 
                     if (preg_match('/[^A-Za-z0-9]/', $userName)) {
@@ -635,10 +630,6 @@ class UserController extends Controller {
 
                         $this->addLogEntry('user.update', 'Failure', 9, 'Email [' . $this->sanitizeXML($xmlUserDetails['user']['userinfo']['email']) . '] already in use.');
                         $this->generateJsonResponce(array("response_code" => 113, "description" => 'Email already in use.'), 'error', 400);
-                    } else if (!$phone_check_flag) {
-
-                        $this->addLogEntry('user.update', 'Failure', 9, 'Mobile phone number cannot be edited.');
-                        $this->generateJsonResponce(array("response_code" => 113, "description" => 'Mobile phone number cannot be edited'), 'error', 400);
                     } else {
                         
                if(is_array($xmlUserDetails['user']['userinfo'])){                        
@@ -1026,7 +1017,7 @@ class UserController extends Controller {
             //Check if pin is already set
             if ($user_exists->password != NULL) {
                 $this->addLogEntry('user.create password', 'Failure', 9, 'Pin already set.');
-                $this->generateJsonResponce(array("response_code" => 113, "description" => 'You have already set your pin, please login to change the same.'), 'error', 400);
+                $this->generateJsonResponce(array("response_code" => 100, "description" => 'You have already set your pin, please login to change the same.'), 'error', 400);
             }   
             
             if (!is_numeric($xmlUserDetails['user']['pin']) || strlen($xmlUserDetails['user']['pin']) <> 4) {
@@ -1087,7 +1078,8 @@ class UserController extends Controller {
         $patient_exists = Patient::find()->where('mobile_phone = "'.$user_phone.'"')->one(); 
         
         if(($patient_exists) && ($patient_exists->user_id !=NULL))
-        $user_exists = User::find()->where('id = '.$patient_exists->user_id.' AND password LIKE "'.md5($user_pass).'"')->one();        
+        $user_exists = User::find()->where('id = '.$patient_exists->user_id.' AND password = "'.md5($user_pass).'"')->one();    
+
         if($user_exists){
             $id         = $user_exists->id;            
             $model      = User::findOne($id);         
@@ -1378,7 +1370,7 @@ class UserController extends Controller {
                             $model = PatientAllergies::findOne($xmlUserDetails['user']['alergies']['id']);  
                         else
                             $model = new PatientAllergies;
-                        
+            
                         $xmlUserDetails['user']['alergies']['pid']        = $patient_exists->pid;
                         $model->setAttributes($xmlUserDetails['user']['alergies']);
                         //$model->load($xmlUserDetails['user']['alergies']);
@@ -1803,3 +1795,4 @@ public function generateJsonResponce($response){
    } 
        
 }
+

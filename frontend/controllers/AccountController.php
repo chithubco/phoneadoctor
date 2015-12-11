@@ -15,6 +15,7 @@ class AccountController extends \yii\web\Controller
 {
     
     public $layout = "site";
+    public $folder = "/home/devphoneadoctorc/public_html/portal/sites/default/patients";
 
     public function beforeAction($action) { 
     	if(!check())
@@ -63,68 +64,96 @@ class AccountController extends \yii\web\Controller
             ]);
     }
 
-    public function actionUpdate()
-    {
-        $session = \Yii::$app->session;
-        $resp='';
-        $model = new UploadForm();
+    public function actionUpdate() {
+        
 
-    
-        $response = pull('user/api','
+        $session = \Yii::$app->session;
+        $resp = '';
+        $model = new UploadForm();
+        $success_flag = '';
+        
+        if (isset($_FILES['file']['name']) && $_FILES['file']['name'] != NULL) {
+            $file = \yii\web\UploadedFile::getInstanceByName('file');
+               
+            $extension = substr($_FILES['file']['name'], strrpos($_FILES['file']['name'], '.'));               
+            if (!is_dir($this->folder . "/" . $session['id'])){
+                mkdir($this->folder . "/" . $session['id']);
+            }
+            $img_url = 'http://' . $_SERVER['SERVER_NAME'] . '/portal/sites/default/patients/' . $session['id'] . "/" . $session['id'] . $extension;                    
+            $file->saveAs($this->folder . "/" . $session['id'] . "/" . $session['id'] . $extension);
+               
+         }
+
+        if (\Yii::$app->request->isPost) {
+
+            $pull_string = '<request method="user.update">
+				  <user>
+				  <userinfo>
+				  <id>' . $session['id'] . '</id>    
+                                  <auth_key>' . $session['authkey'] . '</auth_key>  
+				  <fname>' . $_POST['fname'] . '</fname>    
+				  <lname>' . $_POST['lname'] . '</lname>
+				  <password>' . $_POST['password'] . '</password>
+				  </userinfo>
+				  <patients>
+                                  <sex>' . $_POST['sex'] . '</sex>                                  
+                                  <DOB>' . date('Y-m-d', strtotime($_POST['DOB'])) . '</DOB>
+                                  <marital_status>' . $_POST['marital_status'] . '</marital_status>    
+                                  <address>' . $_POST['address'] . '</address>
+				  <city>' . $_POST['city'] . '</city>    
+				  <state>' . $_POST['state'] . '</state>                                      
+                                  <country>' . $_POST['country'] . '</country>
+                                  <zipcode>' . $_POST['zipcode'] . '</zipcode>
+				  <email>' . $_POST['email'] . '</email>				  
+				  <guardians_name>' . $_POST['guardians_name'] . '</guardians_name>	
+                                  <skypeid>' . $_POST['skypeid'] . '</skypeid>';     
+            
+             if(isset($img_url) && $img_url!= NULL){
+                $pull_string .='<image>'. $img_url .'</image>';    
+             }
+             
+             $pull_string .='</patients>
+				 </user>
+                                </request>';
+                
+            
+             $response = pull('user/api', $pull_string);
+              
+            if ($response->body->response_code == 100) {
+                $resp = $response->body->description;
+                $success_flag = 1;
+            }else{
+                $resp = $response->body->description;
+                $success_flag = 2;
+            }
+            $response = pull('user/api', '
+            <request method="user.getuserinfo">
+              <user>
+              <id>' . $session['id'] . '</id>    
+              <auth_key>' . $session['authkey'] . '</auth_key>    
+              </user>
+            </request>
+            ');
+            $data = $response->body;            
+
+        } else {
+            $response = pull('user/api', '
                 <request method="user.getuserinfo">
                   <user>
-                  <id>'.$session['id'].'</id>    
-                  <auth_key>'.$session['authkey'].'</auth_key>    
+                  <id>' . $session['id'] . '</id>    
+                  <auth_key>' . $session['authkey'] . '</auth_key>    
                   </user>
                 </request>
                 ');
-        $data = $response->body;
-
-    
-        if (\Yii::$app->request->isPost) {
-        	
-            $response = pull('user/api','
-            	<request method="user.update">
-				  <user>
-				  <userinfo>
-				  <id>'.$session['id'].'</id>    
-                  <auth_key>'.$session['authkey'].'</auth_key>  
-				  <fname>'.$_POST['fname'].'</fname>    
-				  <lname>'.$_POST['lname'].'</lname>
-				  <password>'.$_POST['pin'].'</password>
-				  </userinfo>
-				  <patients>
-                                  <skypeid>'.$_POST['skypeid'].'</skypeid>
-				  <email></email>
-				  <security_que_value>test</security_que_value>
-				  <DOB>123456</DOB>
-				  <address>'.$_POST['address'].'</address>    
-				  <sex>'.$_POST['sex'].'</sex>
-				  </patients>
-				  </user>
-				</request>
-                ');
-            $model->file = UploadedFile::getInstance($model, 'file');
-
-        /*if ($model->validate()) {                
-            $model->file->saveAs('pix/' .$session['id']. '.jpg');
-        }*/
-            if($response->body->response_code==100){
-            
-            
-            //return $this->redirect(Url::toRoute('/consultation/index'));
-            }
-            $resp = $response->body->description;
-            //$session['phone'] = $_POST['phone'];
-            
-            //return $this->redirect('signup3');
-
+            $data = $response->body;
         }
-        return $this->render('edit',[
-        	"error"=>$resp,
-        	"data"=>$data,
-            'model' => $model
-        	]);
+
+        return $this->render('edit', [
+                    "resp" => $resp,
+                    "success_flag" => $success_flag,
+                    "data" => $data,
+                    'model' => $model
+                ]);
     }
     
 public function actionDelete_allergy()

@@ -202,7 +202,7 @@ class DocumentController extends Controller
             $model->title = $title;
             $model->docType = $xmldocumentDetails['document']['type'];//'UploadDoc';
             $model->date = date('Y-m-d H:i:s');
-            $model->url = 'http://174.142.92.198/portal/sites/default/patients/' . $xmldocumentDetails['user']['id'] . "/uploaddoc/" . $unique_name;
+            $model->url = 'http://'.$_SERVER['SERVER_NAME'].'/portal/sites/default/patients/' . $xmldocumentDetails['user']['id'] . "/uploaddoc/" . $unique_name;
             $model->uid = $xmldocumentDetails['user']['id'];
             $model->hash = sha1($unique_name);
 
