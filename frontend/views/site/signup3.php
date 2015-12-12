@@ -17,7 +17,18 @@ $this->params['breadcrumbs'][] = $this->title;
                 <h2>Sign up</h2>
                 <div class="reg2-cnt step3-cnt">
                     <span class="logo-center"><img src="<?php echo \Yii::getAlias('@web') ?>/images/logo-center.png" alt="logo"></span>
-                    <?php echo $response ?>
+           <?php if($success_flag == 1){?>
+          <div class="alert alert-success">            
+            <strong><?php echo $resp;?></strong>
+            <a href="#" class="close close1" data-dismiss="" aria-label="close"><i class="glyphicon glyphicon-alert"></i></a>
+          </div>
+         <?php }else if($success_flag == 2) {?>
+           <div class="alert alert-danger">            
+            <strong><?php echo $resp;?></strong>
+            <a href="#" class="close close1" data-dismiss="" aria-label="close"><i class="glyphicon glyphicon-alert"></i></a>
+          </div>         
+         <?php } ?>                    
+                    <?php //echo $response ?>
                     <?php $form = ActiveForm::begin(['id' => 'form-signup','options' => [
             'class' => 'reg2-frm'
             ]]); ?>                   

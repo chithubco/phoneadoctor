@@ -304,7 +304,7 @@ public function actionDelete_patient_doc()
         $session = \Yii::$app->session;
         $resp = '';
         $model = new PatientMedications;
-
+        $success_flag = '';
 
         if (\Yii::$app->request->isPost) {//echo "<pre>";print_r($_FILES);exit;
             
@@ -324,10 +324,6 @@ public function actionDelete_patient_doc()
                   <size>' . $_FILES['doc']['size'] . '</size>
                   </document>
                 </request>');
-                
-                /*$patient_medications ='';
-                 $active_probs = '';
-                $patient_allergies = $response->body->description;*/
                 
             } else {
                 //Text Data
@@ -399,70 +395,64 @@ public function actionDelete_patient_doc()
                 $response = pull('user/api', $pull_string);
             }
 
-            //$model->file = UploadedFile::getInstance($model, 'file');
-
-            /* if ($model->validate()) {                
-              $model->file->saveAs('pix/' .$session['id']. '.jpg');
-              } */
             if ($response->body->response_code == 100) {
-
-                return $this->redirect(Url::toRoute('/account/medical'));
+                $resp = $response->body->description;
+                $success_flag = 1;
+            }else{
+                $resp = $response->body->description;
+                $success_flag = 2;
             }
-            $resp = $response->body->description;
-            $data = $_POST;
+            
+            $response1 = $this->getMedicalHistory('user.getPatientAllergies',$session['id'],$session['authkey']);
+            $patient_allergies = $response1->body->description;
+            
+            $response2 = $this->getMedicalHistory('user.getPatientMedications',$session['id'],$session['authkey']);
+            $patient_medications = $response2->body->description;
+            
+            $response3 = $this->getMedicalHistory('user.getPatientActiveProblems',$session['id'],$session['authkey']);
+            $active_probs = $response3->body->description;
+            
+            $response4 = $this->getMedicalHistory('user.getPatientDocs',$session['id'],$session['authkey']); 
+            $patient_docs = $response4->body->description; 
             
         } else {
-            $data = '';
-            $response = pull('user/api', '
-                <request method="user.getPatientAllergies">
-                  <user>
-                  <id>' . $session['id'] . '</id>    
-                  <auth_key>' . $session['authkey'] . '</auth_key>    
-                  </user>
-                </request>
-                ');
-            $patient_allergies = $response->body->description;
-
-            $response = pull('user/api', '
-                <request method="user.getPatientMedications">
-                  <user>
-                  <id>' . $session['id'] . '</id>    
-                  <auth_key>' . $session['authkey'] . '</auth_key>    
-                  </user>
-                </request>
-                ');
-            $patient_medications = $response->body->description;
-
-            $response = pull('user/api', '
-                <request method="user.getPatientActiveProblems">
-                  <user>
-                  <id>' . $session['id'] . '</id>    
-                  <auth_key>' . $session['authkey'] . '</auth_key>    
-                  </user>
-                </request>
-                ');
-            $active_probs = $response->body->description;
+         
+            $response1 = $this->getMedicalHistory('user.getPatientAllergies',$session['id'],$session['authkey']);
+            $patient_allergies = $response1->body->description;
             
-            $response = pull('user/api', '
-                <request method="user.getPatientDocs">
-                  <user>
-                  <id>' . $session['id'] . '</id>    
-                  <auth_key>' . $session['authkey'] . '</auth_key>    
-                  </user>
-                </request>
-                ');
-            $patient_docs = $response->body->description;            
+            $response2 = $this->getMedicalHistory('user.getPatientMedications',$session['id'],$session['authkey']);
+            $patient_medications = $response2->body->description;
+            
+            $response3 = $this->getMedicalHistory('user.getPatientActiveProblems',$session['id'],$session['authkey']);
+            $active_probs = $response3->body->description;
+            
+            $response4 = $this->getMedicalHistory('user.getPatientDocs',$session['id'],$session['authkey']); 
+            $patient_docs = $response4->body->description;            
         }
         //echo "<pre>";print_r($patient_docs);exit;
         return $this->render('medical', [
-                    "error" => $resp,
-                    "data" => $data,
+                    "resp" => $resp,
+                    "success_flag" => $success_flag,
+           
                     "patient_allergies" => $patient_allergies,
                     "patient_medications" => $patient_medications,
                     "active_problems" => $active_probs,
                     "patient_docs"=>$patient_docs,
                     'model' => $model
                 ]);
+    }
+    
+    public function getMedicalHistory($category,$userId,$authkey){
+        
+          $response = pull('user/api', '
+                <request method="'.$category.'">
+                  <user>
+                  <id>' . $userId . '</id>    
+                  <auth_key>' . $authkey . '</auth_key>    
+                  </user>
+                </request>
+                ');
+        return $response;
     }
 
     public function actionDetails()

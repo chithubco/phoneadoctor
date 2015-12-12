@@ -518,18 +518,6 @@ class UserController extends Controller {
                             exit;
                         }
                         $model_patients->save(false);
-                        if($model_patients->email!=''){
-                            \Yii::$app->mailer->compose([
-                                    'html' => 'welcome-html',
-                                    'text' => 'welcome-text',
-                                ])
-                             ->setFrom('no-reply@phoneadoctor.com.ng')
-                             ->setTo($model_patients->email)
-                             ->setSubject("Welcome to PhoneADoctor")
-                             ->setTextBody('Welcome to Phone A Doctor')
-                             ->setHtmlBody('<b>Welcome to Phone A Doctor</b>')
-                             ->send();
-                        }
                     }
                     if ($security_flag == 1) {
                         // Record security que value
@@ -986,7 +974,7 @@ class UserController extends Controller {
      * Purpose    : user user signup step 4
      * Returns    : Result success or failed
      */      
-    public function createPassword($xmlUserDetails){
+    public function createPassword($xmlUserDetails){      
        $email='';
        if (!isset($xmlUserDetails['user']['id']) || trim($xmlUserDetails['user']['id']) == '') {            
             $this->addLogEntry('user.create password', 'Failure', 9, 'User ID missing.');
@@ -1041,9 +1029,12 @@ class UserController extends Controller {
                 $mail_content   = Cms::find()->where('name LIKE "patient_signup"')->one();
                 $mail_title     = $mail_content->title;
                 $mail_tmp_body  = $mail_content->content;
-                $mail_body      = str_replace(array('{DATE}', '{PHONE}', '{PASSWORD}', '{USER}'),
+                /*$mail_body      = str_replace(array('{DATE}', '{PHONE}', '{PASSWORD}', '{USER}'),
                                               array(date('m-d-Y'), $patient_exists->mobile_phone, $this->sanitizeXML($xmlUserDetails['user']['pin']), $patient_exists->fname." ".$patient_exists->lname),
-                                              $mail_tmp_body);                                           
+                                              $mail_tmp_body); */   
+                $mail_body      = str_replace(array('{USER}'),
+                                              array($patient_exists->fname." ".$patient_exists->lname),
+                                              $mail_tmp_body); 
                 
                 $this->sendSystemEmail($mail_body, $mail_title, $email);                    
                 }
@@ -1382,6 +1373,9 @@ class UserController extends Controller {
                         }
 
                         $model->save();
+                        $this->addLogEntry('user.medicals', 'Success', 3, 'Patient Allergies successfully added/updated. Username :- ' . $user_exists->username, $user_exists->id);
+                        $this->generateJsonResponce(array("response_code" => 100, "description" => 'Patient allergiess added/updated successfully.'), 'ok', 200);
+                        exit;                        
                     }
 
                     if (is_array($xmlUserDetails['user']['medications'])) {
@@ -1401,6 +1395,8 @@ class UserController extends Controller {
                             exit;
                         }
                         $model2->save();
+                        $this->addLogEntry('user.medicals', 'Success', 3, 'Patient Medications successfully added/updated. Username :- ' . $user_exists->username, $user_exists->id);
+                        $this->generateJsonResponce(array("response_code" => 100, "description" => 'Patient medications added/updated successfully.'), 'ok', 200);                        
                     }
                     if (is_array($xmlUserDetails['user']['active_problems'])) {
                         
@@ -1420,11 +1416,11 @@ class UserController extends Controller {
                             exit;
                         }
                         $model3->save();
+                        $this->addLogEntry('user.medicals', 'Success', 3, 'Patient Active Problems successfully added/update. Username :- ' . $user_exists->username, $user_exists->id);
+                        $this->generateJsonResponce(array("response_code" => 100, "description" => 'Patient active problems added/updated successfully.'), 'ok', 200);                         
                     }                    
 
-                    $this->addLogEntry('user.medicals', 'Success', 3, 'User medicals successfully added. Username :- ' . $user_exists->username, $user_exists->id);
-                    $this->generateJsonResponce(array("response_code" => 100, "description" => 'User medicals successfully added.'), 'ok', 200);
-                    exit;
+
                 } else {
                     $this->addLogEntry('user.medicals', 'Failure', 9, 'Add user medicals failed for user :' . $xmlUserDetails['user']['userinfo']['id']);
                     $this->generateJsonResponce(array("response_code" => 113, "description" => 'User Id is invalid.'), 'error', 400);

@@ -12,7 +12,18 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="row">
         <div class="reg-pg2">
             <h2>Recover pin</h2>
-            <?php echo $error ?>
+            <?php //echo $error ?>
+           <?php if($success_flag == 1){?>
+          <div class="alert alert-success">            
+            <strong><?php echo $resp;?></strong>
+            <a href="#" class="close close1" data-dismiss="" aria-label="close"><i class="glyphicon glyphicon-alert"></i></a>
+          </div>
+         <?php }else if($success_flag == 2) {?>
+           <div class="alert alert-danger">            
+            <strong><?php echo $resp;?></strong>
+            <a href="#" class="close close1" data-dismiss="" aria-label="close"><i class="glyphicon glyphicon-alert"></i></a>
+          </div>         
+         <?php } ?>
             <div class="reg2-cnt">
                 <h4>Use Email as Recovery</h4>
                 <?php $form = ActiveForm::begin(['id' => 'form-login','options' => [

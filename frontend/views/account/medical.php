@@ -72,7 +72,25 @@ $this->title = 'Add Medical Details';
             <button type="button" class="btn btn-primary btn-xs" data-toggle="offcanvas"><i class="glyphicon glyphicon-chevron-left"></i></button>
           </p> 
           
-          <h2>Update , Edit or Delete your Medical history</h2>              
+          <h2>Update , Edit or Delete your Medical history</h2> 
+          
+        <?php if($success_flag == 1){?>
+          <div class="alert alert-success">            
+            <strong><?php echo $resp;?></strong>
+            <a href="#" class="close close1" data-dismiss="" aria-label="close"><i class="glyphicon glyphicon-alert"></i></a>
+          </div>
+         <?php }else if($success_flag == 2) {?>
+           <div class="alert alert-danger">            
+            <strong><?php echo $resp;?></strong>
+            <a href="#" class="close close1" data-dismiss="" aria-label="close"><i class="glyphicon glyphicon-alert"></i></a>
+          </div>         
+         <?php } ?>
+          
+          <div id="del_message" class="alert alert-danger" style="display: none">            
+            
+            <a href="#" class="close close1" data-dismiss="" aria-label="close"><i class="glyphicon glyphicon-alert"></i></a>
+          </div>           
+          
           <div class="updt-del">
              <ul class="nav nav-tabs">
               <li class="active"><a data-toggle="tab" href="#step1">Allergies</a></li>
@@ -693,6 +711,8 @@ $this->title = 'Add Medical Details';
                     success: function (response) {
                        if(response==1){
                            $j('table#tbl_allergies tr#row_'+Id).remove();
+                           $j('#del_message').show();
+                           $j('#del_message').html('Patient allergy Deleted')
                        }else{
                            alert(response);
                        }                       
@@ -717,6 +737,8 @@ $this->title = 'Add Medical Details';
                     success: function (response) {
                        if(response==1){
                            $j('table#tbl_medication tr#row_'+Id).remove();
+                           $j('#del_message').show();
+                           $j('#del_message').html('Patient medication Deleted')                           
                        }else{
                            alert(response);
                        }                       
@@ -741,6 +763,8 @@ $this->title = 'Add Medical Details';
                     success: function (response) {
                        if(response==1){
                            $j('table#tbl_active_problems tr#row_'+Id).remove();
+                           $j('#del_message').show();
+                           $j('#del_message').html('Patient active problem Deleted')                           
                        }else{
                            alert(response);
                        }                       
@@ -765,6 +789,8 @@ $this->title = 'Add Medical Details';
                     success: function (response) {
                        if(response==1){
                            $j('#li_'+Id).remove();
+                           $j('#del_message').show();
+                           $j('#del_message').html('Patient document deleted')                             
                        }else{
                            alert(response);
                        }                       

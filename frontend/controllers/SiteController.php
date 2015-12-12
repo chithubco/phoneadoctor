@@ -66,7 +66,7 @@ class SiteController extends Controller
      */
     public function actionLogin()
     {
-        
+        $success_flag = '';
         if (!\Yii::$app->user->isGuest) {
             //return $this->goHome();
         }
@@ -74,16 +74,16 @@ class SiteController extends Controller
         if($_POST){
             if($this->login($_POST['code'].$_POST['phone'],$_POST['pin']))
                 return $this->redirect(Url::toRoute('/consultation/index'));
-        
-        //$resp = $response->body->description;
+            else
+                $success_flag = 2;            
         }
             //var_dump($response->body);
-        $session = Yii::$app->session;
+        $session = Yii::$app->session; 
         $error = $session['error'];
         $session['error'] = NULL;
         return $this->render('login', [
-         //   'model' => $model,
-            'response'=>$error
+            'success_flag' => $success_flag,
+            'resp'=>$error
         ]);
     
     }
@@ -199,13 +199,14 @@ class SiteController extends Controller
 
     public function actionRecover()
     {
+         $success_flag = $resp = '';
         $q = pull('security-question/api','
                <request method="question.getAllSecurityQues">
                 ');
         $question = NULL;
         //var_dump($_POST);
         
-        if($_POST['email-button']=='clicked'){
+        if(isset($_POST['email-button']) && $_POST['email-button']=='clicked'){
       
           $response = pull('user/api','
             <request method="user.recoverPin">
@@ -219,8 +220,10 @@ class SiteController extends Controller
             if($response->body->response_code==100){
             
             return $this->redirect('login');
+            }else{               
+                $success_flag = 2;
             }
-        }elseif($_POST['phone-button']=='clicked'){
+        }elseif(isset ($_POST['phone-button']) && $_POST['phone-button']=='clicked'){
           
           $response = pull('user/api','
             <request method="user.recoverPin">
@@ -236,6 +239,8 @@ class SiteController extends Controller
             if($response->body->response_code==100){
             
             return $this->redirect('login');
+            }else{               
+                $success_flag = 2;
             }
         }
         if($q->body->response_code==100){
@@ -243,7 +248,8 @@ class SiteController extends Controller
         }
         return $this->render('recover', [
             'question'=>$question,
-            'error'=>$resp,
+            'resp'=>$resp,
+            "success_flag" => $success_flag,
             
         ]);
     }
@@ -254,7 +260,8 @@ class SiteController extends Controller
      * @return mixed
      */
     public function actionSignup()
-    {       
+    {  
+        $success_flag = '';
         $session = Yii::$app->session;
         if($session['username'])
             return $this->redirect(Url::toRoute('/consultation/index'));
@@ -275,9 +282,10 @@ class SiteController extends Controller
             $session = Yii::$app->session;
             $session->set('phone',$_POST['code'].$_POST['phone']);
             //$_SESSION['phone'] = $_POST['phone'];
-            if($response->body->response_code==100){
-            
-            return $this->redirect('signup2');
+            if($response->body->response_code==100){            
+                return $this->redirect('signup2');
+            }else{                
+                $success_flag = 2;
             }
             $resp = $response->body->description;
 
@@ -285,12 +293,14 @@ class SiteController extends Controller
 
         return $this->render('signup', [
             'model' => $model,
-            'response'=>$resp
+            'resp'=>$resp,
+            "success_flag" => $success_flag
         ]);
     }
 
     public function actionSignup2()
-    {
+    {     
+        $success_flag = '';
         $session = Yii::$app->session;
         if($session['username'])
             return $this->redirect(Url::toRoute('/consultation/index'));
@@ -308,12 +318,12 @@ class SiteController extends Controller
                 </request>
                 ');
 
-            if($response->body->response_code==100){
-            
+            if($response->body->response_code==100){           
 
-            // check if a session is already open
-            
-            return $this->redirect('signup3');
+                // check if a session is already open            
+                return $this->redirect('signup3');
+            }else{               
+                $success_flag = 2;
             }
             $resp = $response->body->description;
             //$session['phone'] = $_POST['phone'];
@@ -325,12 +335,14 @@ class SiteController extends Controller
         return $this->render('signup2', [
             'model' => $model,
             'phone'=>$session['phone'],
-            'response'=>$resp
+            'resp'=>$resp,
+            "success_flag" => $success_flag
         ]);
     }
 
     public function actionSignup3()
     {
+        $success_flag = '';
         $session = Yii::$app->session;
         if($session['username'])
             return $this->redirect(Url::toRoute('/consultation/index'));
@@ -375,6 +387,8 @@ class SiteController extends Controller
             $session->set('authkey',$response->body->authkey);
             
             return $this->redirect('signup4');
+            }else{               
+                $success_flag = 2;
             }
             $resp = $response->body->description;
             //$session['phone'] = $_POST['phone'];
@@ -387,18 +401,21 @@ class SiteController extends Controller
             'model' => $model,
             'phone'=>$session['phone'],
             'question'=>$question,
-            'response'=>$resp
+            "success_flag" => $success_flag,
+            'resp'=>$resp
         ]);
     }
 
     public function actionSignup4()
-    {
+    { 
+        $success_flag = '';
+        $session = Yii::$app->session;
         if($session['username'])
             return $this->redirect(Url::toRoute('/consultation/index'));
         $model = new SignupForm();
         $session = Yii::$app->session;
         $resp='';
-        if($_POST['pin']){
+        if(isset($_POST['pin']) && $_POST['pin']){
             
             $response = pull('user/api','
                 <request method="user.createPassword">
@@ -417,6 +434,8 @@ class SiteController extends Controller
             if($this->login($session['phone'],$_POST['pin']))
                 return $this->redirect(Url::toRoute('/consultation/index'));
 
+            }else{               
+                $success_flag = 2;
             }
             $resp = $response->body->description;
             //$session['phone'] = $_POST['phone'];
@@ -428,7 +447,8 @@ class SiteController extends Controller
         return $this->render('signup4', [
             'model' => $model,
             'phone'=>$session['phone'],
-            'response'=>$resp
+            "success_flag" => $success_flag,
+            'resp'=>$resp
         ]);
     }
 
