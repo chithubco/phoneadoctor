@@ -9,8 +9,9 @@ use yii\base\Model;
  */
 class LoginForm extends Model
 {
-    public $username;
-    public $password;
+    public $phone;
+    public $pin;
+    public $terms;
     public $rememberMe = true;
 
     private $_user;
@@ -23,11 +24,16 @@ class LoginForm extends Model
     {
         return [
             // username and password are both required
-            [['username', 'password'], 'required'],
+            [['phone', 'pin'], 'required'],
+            ['terms', 'required'],
+            ['terms','in','range'=>[1], 'strict'=>false, 'message' => 'Please accept the terms and conditions.'],
+            //['terms', 'boolean'],
+            //['email', 'unique', 'targetClass' => '\common\models\User'],
+
             // rememberMe must be a boolean value
-            ['rememberMe', 'boolean'],
+            //['terms', 'boolean'],
             // password is validated by validatePassword()
-            ['password', 'validatePassword'],
+            //['password', 'validatePassword'],
         ];
     }
 
@@ -62,6 +68,12 @@ class LoginForm extends Model
         } else {
             return false;
         }
+    }
+    public function attributeLabels()
+    {
+        return [
+            'terms' => '',
+        ];
     }
 
     /**

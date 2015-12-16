@@ -415,7 +415,7 @@ public function createConsultation($xmlconsultationDetails) {
                 //$query = new Query;
                 $query = CalendarEvents::find()
                 ->joinWith(['users']);
-                $query->select('calendar_events.consult_code,calendar_events.notes,calendar_events.start,users.title,users.fname,users.lname') 
+                $query->select('calendar_events.id,calendar_events.consult_code,calendar_events.notes,calendar_events.start,calendar_events.end,users.title,users.fname,users.lname') 
 
                     //->from('consultations') 
                     ->joinWith(['users'])                    

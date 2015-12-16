@@ -64,25 +64,36 @@ class SiteController extends Controller
      *
      * @return mixed
      */
-    public function actionLogin()
+ public function actionLogin()
     {
-        $success_flag = '';
+        
         if (!\Yii::$app->user->isGuest) {
             //return $this->goHome();
         }
+        $success_flag = '';
         $resp = '';
+        $model = new LoginForm;
         if($_POST){
+          if ($model->load(Yii::$app->request->post())) {
+            $model->phone = $_POST['code'].$_POST['phone'];
+            $model->pin = $_POST['pin'];
+            if( $model->validate()){
             if($this->login($_POST['code'].$_POST['phone'],$_POST['pin']))
                 return $this->redirect(Url::toRoute('/consultation/index'));
-            else
-                $success_flag = 2;            
+              else
+                $success_flag = 2;
+            }
+            }
+        
+        //$resp = $response->body->description;
         }
             //var_dump($response->body);
-        $session = Yii::$app->session; 
+        $session = Yii::$app->session;
         $error = $session['error'];
         $session['error'] = NULL;
         return $this->render('login', [
             'success_flag' => $success_flag,
+            'model' => $model,
             'resp'=>$error
         ]);
     
@@ -150,7 +161,7 @@ class SiteController extends Controller
             $session['id'] = NULL;
             $session['authkey'] = NULL;
             $session['username'] = NULL;
-
+		 $session['consult'] = NULL;
            
            
 

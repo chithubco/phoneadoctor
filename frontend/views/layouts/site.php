@@ -76,7 +76,7 @@ $session = \Yii::$app->session;
                     //if(file_exists(\Yii::getAlias('@webroot')."/pix/".$session['id'].".jpg")){
                      if($session['profile_image']!=NULL){
                     ?>
-                        <img src="<?php echo \Yii::getAlias('@web') ?>/pix/<?php echo $session['id']?>.jpg" width="69px">
+                        <img src="<?php echo $session['profile_image'];?>" width="69px">
                         <?php
                     }else{
                         ?>

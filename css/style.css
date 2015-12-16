@@ -179,15 +179,18 @@ header{padding-top:108px;}
 .updt-del .nav li.active a{color:#e42127; background:#f9fafa;}
 .updt-del .tab-content ul{padding:0; clear:both;}
 .updt-del .tab-content li{ list-style:none; margin:7px 0; padding:20px 15px 15px 25px; }
+.updt-del .tab-content li.contbox2 { padding: 0px; margin: 0px;}
+
+
 .updt-del .tab-content li p{font-family: 'Roboto', sans-serif; font-size:12px; color:#393939; font-weight:normal;}
 .updt-del .tab-content li a{text-decoration:none;}
-.updt-del .tab-content li a.edit{font-family: 'Roboto', sans-serif; font-size:11px; color:#393939; font-weight:normal;}
-.updt-del .tab-content li a.delete{font-family: 'Roboto', sans-serif; font-size:11px; color:#e42127; font-weight:normal; margin:0 20px;}
+.updt-del .tab-content li a.edit{font-family: 'Roboto', sans-serif; font-size:11px; color:#393939; font-weight:bold;}
+.updt-del .tab-content li a.delete{font-family: 'Roboto', sans-serif; font-size:11px; color:#e42127; font-weight:normal; margin:0 -1px;}
 .updt-del .tab-content .add{font-family: 'Roboto', sans-serif; font-size:11px; background:#115dd6; font-weight:normal; padding:5px 25px; color:#fff; border:0; margin:10px 0; float:right;}
 .updt-del .tab-content .add:hover{box-shadow:0px 0px 2px 1px #0548b3;}
 .updt-del .tab-content .upd-btn{margin:25px 0 0 0;}
 
-.updt-del thead{font-weight:600;}
+.updt-del thead{font-weight:500; font-size: 12px; font-family: 'Roboto', sans-serif; }
 .updt-del .tab-content .upld-frm ul{padding:0; margin:10px 0 0 0;}
 .updt-del .tab-content .upld-frm ul li{margin:0; padding:15px 20px; list-style:none; display:inline-block; position:relative;}
 .updt-del .tab-content .upld-frm ul li i.close{position:absolute; top:0px; right:7px; z-index:3;}
@@ -283,6 +286,7 @@ header{padding-top:108px;}
 .edit-info .btn{background:#6e9de6; font-family: 'Roboto', sans-serif; font-size:14px; color:#fff; font-weight:normal; border:1px solid #6e9de6; margin:10px 0 0 0; border-radius:0; padding:5px 25px;}
 .edit-info .form-group label{width:100%;}
 .edit-info .form-group .dob{width:100%;}
+.edit{ font-weight: bold;}
 
 /*-------------pop up--------------*/
 .edit-box .modal-content{max-width:380px; border:1px solid #ebecef; background:#f6f7f8; padding:30px; position:absolute; top:50%; left:50%; margin-top:-50px; border-radius:5px; margin-left:-190px; width:100%;}
@@ -437,3 +441,34 @@ footer .ftr p{text-align:center; font-family: 'Roboto', sans-serif; font-size:10
 
 }
 
+.first-tr{ text-transform:uppercase;}
+.modal-footer{ clear:both;}
+.btn1{ margin-top:7px;}
+.a{ list-style-type:upper-alpha;}
+.a li ul{ list-style-type:upper-roman;}
+.a > li { padding:4px 0px;}
+.a > li > ul> li{ padding:4px 0px;}
+
+
+
+/*==========================contBox6 Deepak=======================================*/
+.contBox6 {  }
+.contBox6 ul.cont1 { list-style: none; margin: 0px; padding: 0px;  }
+.contBox6 ul.cont1 li { float: left; font-size: 14px; font-family: "Roboto",sans-serif; color: #000;  }
+.contBox6 ul.cont1 li:first-child {  float: left; width: 300px; font-size: 16px; font-family: "Roboto",sans-serif; color: #000; margin: 0px; padding: 0px; padding-bottom: 10px; }
+.contBox6 ul.cont1 li a { text-decoration: none; cursor: pointer; font-weight: bold;}
+.contbox7 { width: 700px; margin: 0px; padding: 0px; }
+.contbox7 ul { list-style: none;  margin: 0px; padding: 0px;  }
+.contbox7 li { margin-left: 20px; padding-top: 8px; float: left; color: #fff; font-size: 16px; font-family: "Roboto",sans-serif;  border-radius: 5px; background: #aaa7a7;  padding: 8px 0px 8px 0px; }
+.contbox7 li:first-child { background: #aaa7a7; }
+.contbox7 li a { text-decoration: none; cursor: pointer; color: #000; font-size: 16px; font-family: "Roboto",sans-serif;}
+
+
+/*.form-control4{border:0; border:1px solid #bdc7c8; box-shadow:none; border-radius:0; padding-left:10px;font-family: 'Roboto', sans-serif; width: 50px;} */
+ul.prescription { list-style: none; margin: 0px; padding: 0px;  width: 150px; }
+ul.prescription li { padding-bottom: 15px; color: #000; font-family: 'Roboto', sans-serif; font-size: 13px; }
+
+
+
+
+.cont8 { font-size: 14px; text-align: left; color:#000; line-height: 18px; font-family: 'Roboto', sans-serif; width: 150px; padding: 7px auto;}

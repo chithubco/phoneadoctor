@@ -9,6 +9,7 @@ class ConsultationController extends \yii\web\Controller
 {
     
     public $layout = "site";
+    public $close_time = "16:55:00";
 
     public function beforeAction($action) { 
     	if(!check())
@@ -17,32 +18,88 @@ class ConsultationController extends \yii\web\Controller
     	return true;
     }
     public function actionIndex()
-    {
+    { 
         if($_POST){
             $this->actionCreate();
+            exit;
         }
-        return $this->render('index');
+        if(date('N', strtotime($date)) >= 6){
+            return $this->redirect('create');
+        }
+        if(time()>strtotime(date("Y-m-d")." ".$this->close_time)){
+            return $this->redirect('create');
+        }
+        $session = \Yii::$app->session;
+        $q = pull('consultation/api','
+               <request method="consultation.getslots">
+          <consultation>
+                  <user_id>'.$session['id'].'</user_id>    
+                  <auth_key>'.$session['authkey'].'</auth_key>    
+          </consultation>
+        </request>
+                ');
+        $slots = NULL;
+        //var_dump($q->body);
+        if($q->body->response_code==100){
+          $slots = $q->body->data;
+        }
+        return $this->render('index',[
+            'slots'=>$slots,
+            ]);
     }
 
     public function actionCreate()
     {
+        if(date('N', strtotime($date)) >= 6){
+            return $this->render('weekend');
+        }
+        if(time()>strtotime(date("Y-m-d")." ".$this->close_time)){
+            return $this->render('closed');
+        }
+
         $session = \Yii::$app->session;
         $resp='';
         $details=$session['consult'];
         if($details && (strtotime($details->end) > time()))
             return $this->redirect('details');
+
+        $q = pull('consultation/api','
+               <request method="consultation.getslots">
+          <consultation>
+                  <user_id>'.$session['id'].'</user_id>    
+                  <auth_key>'.$session['authkey'].'</auth_key>    
+          </consultation>
+        </request>
+                ');
+        $slots = NULL;
+        //var_dump($q->body);
+        if($q->body->response_code==100){
+          $slots = $q->body->data;
+          if($slots=='' || $slots==NULL || empty($slots)){
+            return $this->render('booked');
+            }   
+        }
+
+
+
         if($_POST){
-            
+            if($_POST['agree']!=1){
+            return $this->render('create', [
+            'error'=>"Please agree to the terms to continue"
+        ]);
+          }
             $response = pull('consultation/api','
             	<request method="consultation.create">
 				  <consultation>
 				  <note>'.$_POST['question'].'</note>  
+                  <status>'.$_POST['status'].'</status>  
+                  <slot>'.strtotime($_POST['slot']).'</slot>  
                   <user_id>'.$session['id'].'</user_id>    
                   <auth_key>'.$session['authkey'].'</auth_key>       
 				  </consultation>
 				</request>
                 ');
-            
+            //var_dump($response->body);
             if($response->body->response_code==100){
             $session->set('consult',$response->body->data);
             
@@ -55,7 +112,8 @@ class ConsultationController extends \yii\web\Controller
 
         }
         return $this->render('create',[
-        	"error"=>$resp
+        	"error"=>$resp,
+            'slots'=>$slots,
         	]);
     }
 
