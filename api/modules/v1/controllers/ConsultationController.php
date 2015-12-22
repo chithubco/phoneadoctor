@@ -413,14 +413,20 @@ public function createConsultation($xmlconsultationDetails) {
             if($accessAuthorised){ 
                 $user = Patient::find()->where("user_id = '".$xmlUserDetails['user']['id']."'")->one();
                 //$query = new Query;
-                $query = CalendarEvents::find()
+               /* $query = CalendarEvents::find()
                 ->joinWith(['users']);
                 $query->select('calendar_events.id,calendar_events.consult_code,calendar_events.notes,calendar_events.start,calendar_events.end,users.title,users.fname,users.lname') 
 
                     //->from('consultations') 
                     ->joinWith(['users'])                    
                     ->where("patient_id = '". $user->pid."'")
-                    ->orderby("start desc");
+                    ->orderby("start desc");*/
+                $query = new Query;
+                $query->select('e.eid as id,e.service_date as date,e.brief_description,e.sms_text,e.prescription,u.title,u.fname,u.lname')                        
+                    ->from('encounters e')
+                    ->join('LEFT JOIN', 'users u','u.id = e.open_uid')                    
+                    ->where('e.pid = ' . $user->pid);
+                
                 $command = $query->createCommand(); 
                 $results = $command->queryAll();                
                 $history_data = ($results!=NULL)?$results:"No consultation records found";                
@@ -433,8 +439,7 @@ public function createConsultation($xmlconsultationDetails) {
                 $this->generateJsonResponce(array("response_code" => 113, "description" => 'Your auth key is invalid.'), 'error', 400);
             }
             
-        } 
-    
+        }    
         
     }   
         

@@ -23,7 +23,7 @@ class ConsultationController extends \yii\web\Controller
             $this->actionCreate();
             exit;
         }
-        if(date('N', strtotime($date)) >= 6){
+        if(date('N', time()) >= 6){
             return $this->redirect('create');
         }
         if(time()>strtotime(date("Y-m-d")." ".$this->close_time)){
@@ -145,7 +145,73 @@ class ConsultationController extends \yii\web\Controller
             ]);
     }
 
-    public function actionDetails()
+    public function actionGetprescription() {
+        $session = \Yii::$app->session;
+        $resp = '';
+
+        if (isset($_POST) && $_POST['id'] != NULL) {
+
+            $query = new Query;
+            $query->select('STR')
+                    ->from('patient_medications')
+                    ->where('eid =' . $_POST['id']);
+
+            $prescriptions = '';
+            $command = $query->createCommand();
+            $results = $command->queryAll();
+
+
+            if ($results != NULL && is_array($results)) {
+                $i = 1;
+                foreach ($results as $value) {
+                    $prescriptions .= "<li>" . $i . ". " . $value['STR'] . "</li>";
+                    $i++;
+                }
+            } else {
+                $prescriptions = "<li>No prescriptions found.</li>";
+            }
+        }
+        echo $prescriptions;
+        exit;
+
+        return $this->render('history', []);
+                
+    }
+    
+    public function actionGetpatientnotes(){
+        $session = \Yii::$app->session;
+        $resp = '';
+
+        if (isset($_POST) && $_POST['id'] != NULL) {
+
+            $query = new Query;
+            $query->select('body')
+                    ->from('patient_notes')
+                    ->where('eid =' . $_POST['id']);
+
+            $descriptions = '';
+            $command = $query->createCommand();
+            $results = $command->queryAll();
+
+
+            if ($results != NULL && is_array($results)) {
+                $i = 1;
+                foreach ($results as $value) {
+                    $descriptions .= "<li>" . $i . ". " . $value['body'] . "</li>";
+                    $i++;
+                }
+            } else {
+                $descriptions = "<li>No descriptions found.</li>";
+            }
+        }
+        echo $descriptions;
+        exit;
+
+        return $this->render('history', []);
+        
+    }
+
+        public function actionDetails()
     {
         $session = \Yii::$app->session;
         $details=$session['consult'];

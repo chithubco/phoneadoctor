@@ -1,6 +1,7 @@
 <?php
 /* @var $this yii\web\View */
 use yii\helpers\Html;
+use yii\helpers\Url;
 use yii\bootstrap\ActiveForm;
 $this->title = 'Consultation Details';
 ?>
@@ -36,11 +37,11 @@ $this->title = 'Consultation Details';
                           ?>  
                     <tr id="row_<?php echo $value->id; ?>">
                       <td><?=$i;?></td>   
-                      <td><?=date('d-m-Y', strtotime($value->start));?></td>                      
-                      <td><?=$value->notes;?></td>
-                      <td>dummy</td>
-                      <td>Yes</td>
-                      <td><a href="#" class="edit view_more" data-toggle="modal" data-target="#myModal2" data-id="<?=$value->id;?>" data-consult_code="<?=$value->consult_code;?>" data-doctor="<?=$value->title.$value->fname." ".$value->lname;?>" data-complaint="<?=$value->notes;?>" data-c_date="<?=date('d-m-Y', strtotime($value->start))." - ".date('d-m-Y', strtotime($value->end));?>">View More </a>
+                      <td><?=date('d-m-Y H:i:s', strtotime($value->date));?></td>                      
+                      <td><?=$value->brief_description;?></td>
+                      <td><?=$value->sms_text;?></td>
+                      <td><?=($value->prescription!=NULL)?'Yes':'No';?></td>
+                      <td><a href="#" class="edit view_more" data-toggle="modal" data-target="#myModal2" data-id="<?=$value->id;?>" data-doctor="<?=$value->title.$value->fname." ".$value->lname;?>" data-complaint="<?=$value->brief_description;?>" data-c_date="<?=date('d-m-Y H:i:s', strtotime($value->date));?>">View More </a>
                         <!-- <a href="#" class="edit" data-toggle="modal" data-target="#myModal2"><i class="fa fa-edit"></i> </a> <a href="#" class="delete"><i class="fa fa-trash"></i> </a>--></td>
                     </tr>
                      <?php $i++; } } else { ?>   
@@ -98,32 +99,23 @@ $this->title = 'Consultation Details';
                 <tr class="inr-head">
                   <td><a href="#">Description</a></td>
                   <td><a href="#">Prescription</a></td>
-                  <td><a href="#">Consultation</a></td>
-                  <td><a href="#">Any hospital</a></td>
+                  <!--<td><a href="#">Consultation</a></td>
+                  <td><a href="#">Any hospital</a></td>-->
                 </tr>
                 <tr>
-                  <td>
-                      <p class="cont8">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
-                      
-                    </td>
-                  <td><ul class="prescription">
-                      <li>1. dummy text</li>
-                      <li>2. dummy text</li>
-                      <li>3. dummy text</li>
-                      <li>4. dummy text</li>
-                    </ul></td>
-                  <td>
-				  	<p class="cont8"> Simply dummy text. </p>
-				  </td>
-                  <td>
-				  	<p class="cont8"> Simply dummy text.</p>
-				  </td>
+                  <td><p class="cont8"><div id="des"></div></p></td>                                       
+                    
+                  <td><ul id="prescription" class="prescription">
+                    </ul>
+                  </td>
+                  <!--<td><p class="cont8"> Simply dummy text. </p>  </td>
+                  <td><p class="cont8"> Simply dummy text.</p></td>-->
                 </tr>
               </table>
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn1 btn-default" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn1 btn-primary" data-dismiss="modal">Close</button>
           </div>
           <i class="clearfix"></i>
         </form>
@@ -137,9 +129,30 @@ $this->title = 'Consultation Details';
     var $j = jQuery.noConflict();  
     //View More
     $j(document).on("click", ".view_more", function () { 
+
+          //var Id = $j(this).data('id');     
+            $j.ajax({
+                    type: "POST", 		
+                    url: '<?php echo Url::toRoute('/consultation/getprescription') ?>', 
+                    async: false,
+                    data: {id : $j(this).data('id')},                 
+                    success: function (response) {
+                           $j('#prescription').html(response) 
+                    }                  
+                }); 
+                
+            $j.ajax({
+                    type: "POST", 		
+                    url: '<?php echo Url::toRoute('/consultation/getpatientnotes') ?>', 
+                    async: false,
+                    data: {id : $j(this).data('id')},                 
+                    success: function (response) {
+                           $j('#des').html(response) 
+                    }                  
+                });                 
         
         $('#date').html($j(this).data('c_date'));
-        $('#consultation_id').html($j(this).data('consult_code'));
+        $('#consultation_id').html($j(this).data('id'));
         $('#doctor_name').html($j(this).data('doctor'));        
         $('#complaint').html($j(this).data('complaint'));
     
